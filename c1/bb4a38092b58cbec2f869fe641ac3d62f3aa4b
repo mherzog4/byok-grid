@@ -1,0 +1,133 @@
+deploy/helm/byok-grid/templates/configmap.yaml
+  s_28ae7db8033464::t_3b1a3aba4950c9 10-16
+apps/web/src/next-config.test.ts
+  s_28ae7db8033464::t_2433a4a3410e47 35-49
+docs/API_SECURITY.md
+  s_28ae7db8033464::t_2ebfe3da6afea5 66-67
+  s_28ae7db8033464::t_23c53755a8e24a 68-73
+  s_28ae7db8033464::t_a78bcd477c7dd2 50-65,74-79
+apps/web/src/lib/auth-response-timing.test.ts
+  s_28ae7db8033464::t_23c53755a8e24a 1-23
+apps/web/src/lib/email-policy.test.ts
+  s_28ae7db8033464::t_09174e23fef869 79-81,91-97
+  s_28ae7db8033464::t_f3557ad37333f4 1-78,82-90,98-99
+scripts/verify-helm-chart.sh
+  s_28ae7db8033464::t_50cdcaac5d458e 43,73-78,115-130
+  s_28ae7db8033464::t_bc264c3af064c2 131
+apps/web/src/app/reset-password/reset-password-form.tsx
+  s_28ae7db8033464::t_2433a4a3410e47 1-6,8-61,63-73,75-89
+  s_28ae7db8033464::t_ecd877738b1fa7 7,62,74
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_8a2543d5f0dde3 22,31-33
+  s_28ae7db8033464::t_66617f483a2159 28-29,121-124
+  s_28ae7db8033464::t_2ebfe3da6afea5 30
+apps/web/src/lib/auth-response-timing.ts
+  s_28ae7db8033464::t_23c53755a8e24a 1-17
+apps/web/src/lib/auth.ts
+  s_28ae7db8033464::t_8894f42fdbc0a3 2-3,22-26,31-32
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_31c20c47daffeb 113-154,188-189,206-207
+  s_28ae7db8033464::t_0e160d89fcd31b 155-164
+apps/web/src/app/forgot-password/page.tsx
+  s_28ae7db8033464::t_2433a4a3410e47 1-25
+apps/web/src/lib/request-body.test.ts
+  s_28ae7db8033464::t_cdf024b7152f08 160-162
+package.json
+  s_28ae7db8033464::t_0e160d89fcd31b 30
+apps/web/src/lib/runtime-config.test.ts
+  s_28ae7db8033464::t_cf9095ca363d3e 56-83
+apps/web/src/lib/auth-factory.ts
+  s_28ae7db8033464::t_9ba966633128ca 59,75,126-137
+  s_28ae7db8033464::t_ecd877738b1fa7 51
+  s_28ae7db8033464::t_8894f42fdbc0a3 9-14,21-22,29-30,35-38,53-58,60-65,67-74,76-82
+  s_28ae7db8033464::t_dceeb5731759b6 138
+README.md
+  s_28ae7db8033464::t_c64dffc41aea94 12-15
+apps/web/src/app/sign-in/auth-form.tsx
+  s_28ae7db8033464::t_2433a4a3410e47 4,6,14,18,24,30,33-34,44,49-63,142,151-155
+  s_28ae7db8033464::t_ecd877738b1fa7 133
+deploy/helm/byok-grid/values.schema.json
+  s_28ae7db8033464::t_3b1a3aba4950c9 16,24-70,72
+  s_28ae7db8033464::t_9b290f866d76cc 71,73-74,112-113
+apps/web/next.config.ts
+  s_28ae7db8033464::t_2433a4a3410e47 39-48
+apps/web/src/lib/email-delivery.test.ts
+  s_28ae7db8033464::t_5ae0a75350fc87 17-19,65-67
+  s_28ae7db8033464::t_5178ff85ee464d 2,53
+  s_28ae7db8033464::t_2adce0a89e7264 1,3-16,20-52,54-64,68-95
+.env.example
+  s_28ae7db8033464::t_3b1a3aba4950c9 74-84
+apps/web/src/app/reset-password/page.tsx
+  s_28ae7db8033464::t_2433a4a3410e47 1-39
+  s_28ae7db8033464::t_1abe223c28e9a8 40-41
+apps/web/src/app/forgot-password/forgot-password-form.tsx
+  s_28ae7db8033464::t_2433a4a3410e47 1-68
+scripts/drill-signup-policy.mjs
+  s_28ae7db8033464::t_74a87445b62a22 29,67-68,166-206,208-211,216-221,225-230,232,237-256,272-307,328,376,379,392-396,400,410-418,427-446,482-565,568-574
+  s_28ae7db8033464::t_cdf024b7152f08 17,207,212-215,231,233-236,419-426
+  s_28ae7db8033464::t_7c82ca8799113e 222-224,257-271,566-567
+  s_28ae7db8033464::t_3e4a1f4f65948a 575
+apps/web/src/lib/runtime-config.ts
+  s_28ae7db8033464::t_cf9095ca363d3e 3-6,63-66
+  s_28ae7db8033464::t_712ecad7b92a4e 67-69
+  s_28ae7db8033464::t_d46b78062359f8 70-72
+apps/web/src/lib/auth-factory.integration.test.ts
+  s_28ae7db8033464::t_c082ff89426461 175
+  s_28ae7db8033464::t_9ba966633128ca 9,131,134,235-255
+  s_28ae7db8033464::t_8894f42fdbc0a3 10-11,19,42-43,65-66,124-130,132-133,135-174,176-234
+  s_28ae7db8033464::t_679432747fbebe 256-259
+deploy/helm/byok-grid/templates/web-deployment.yaml
+  s_28ae7db8033464::t_3b1a3aba4950c9 76-87
+apps/web/src/lib/email-policy.ts
+  s_28ae7db8033464::t_09174e23fef869 1,44-49,58-62,77-79,113-119,123-124,126-128,131,194-196
+  s_28ae7db8033464::t_f3557ad37333f4 2-43,50-57,63-76,80-112,120-122,125,129-130,132-193,197-216
+deploy/helm/byok-grid/templates/secret.yaml
+  s_28ae7db8033464::t_3b1a3aba4950c9 14-15
+apps/web/src/app/globals.css
+  s_28ae7db8033464::t_2433a4a3410e47 411-447
+deploy/helm/byok-grid/values.yaml
+  s_28ae7db8033464::t_3b1a3aba4950c9 13-21,38-39,49-50
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_db62a36c0407c9 108,116-125
+  s_28ae7db8033464::t_7f856dfb74ca6f 82
+apps/web/src/app/sign-in/page.tsx
+  s_28ae7db8033464::t_2433a4a3410e47 1,31-35
+docker-compose.yml
+  s_28ae7db8033464::t_3b1a3aba4950c9 81-89
+deploy/helm/byok-grid/ci-values.yaml
+  s_28ae7db8033464::t_3b1a3aba4950c9 4-12,34-35
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_776bcc59e021a5 60-65,95-101
+  s_28ae7db8033464::t_47e5a56c1f433a 54-59,102
+apps/web/src/lib/email-delivery.ts
+  s_28ae7db8033464::t_5178ff85ee464d 3,22,43,57,116-118
+  s_28ae7db8033464::t_2adce0a89e7264 1-2,4-21,23-42,44-56,58-115,119-133
+docs/adr/0040-provider-neutral-authentication-email.md
+  s_28ae7db8033464::t_2ebfe3da6afea5 38,72-76
+  s_28ae7db8033464::t_23c53755a8e24a 39-42
+  s_28ae7db8033464::t_db62a36c0407c9 1-37,43-71
+apps/web/package.json
+  s_28ae7db8033464::t_865426f4ea55aa 24,30
+apps/web/src/email-verify-cli.ts
+  s_28ae7db8033464::t_0e160d89fcd31b 1-22
+apps/web/src/app/api/auth/[...all]/route.ts
+  s_28ae7db8033464::t_23c53755a8e24a 2,8,15,20-29
+package-lock.json
+  s_28ae7db8033464::t_2679d21943c10b 55,61,3406-3415,8471-8479
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "c1bb4a38092b58cbec2f869fe641ac3d62f3aa4b",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
