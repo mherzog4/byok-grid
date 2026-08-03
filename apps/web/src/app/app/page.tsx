@@ -38,8 +38,15 @@ export default async function AppPage({
 }: {
   searchParams: Promise<{ table?: string; workspace?: string }>;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const requestHeaders = await headers();
+  const session = await auth.api.getSession({ headers: requestHeaders });
   if (!session) redirect('/sign-in');
+  const activeSessions = await auth.api.listSessions({
+    headers: requestHeaders,
+  });
+  const otherSessionCount = activeSessions.filter(
+    (active) => active.token !== session.session.token
+  ).length;
 
   const ensured = await ensureSqlitePersonalWorkspace(sqliteDb, {
     id: session.user.id,
@@ -139,7 +146,7 @@ export default async function AppPage({
         </div>
         <div className="account-actions">
           <span>{session.user.email}</span>
-          <SignOutButton />
+          <SignOutButton otherSessionCount={otherSessionCount} />
         </div>
       </header>
 

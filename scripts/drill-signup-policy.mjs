@@ -86,13 +86,61 @@ async function verifyAllowlistedSignup() {
 
     const accepted = await signUp(runtime, allowedEmail.toUpperCase());
     assertStatus(accepted, 200, 'allowlisted signup');
-    if (
-      !accepted.headers
-        .get('set-cookie')
-        ?.includes('better-auth.session_token=')
-    ) {
-      throw new Error('Allowlisted signup did not create a session cookie.');
+    const firstCookie = sessionCookie(accepted, 'allowlisted signup');
+
+    const secondLogin = await signIn(runtime, allowedEmail);
+    assertStatus(secondLogin, 200, 'second allowlisted sign-in');
+    const secondCookie = sessionCookie(
+      secondLogin,
+      'second allowlisted sign-in'
+    );
+
+    const blockedSessionsResponse = await fetch(
+      `${runtime.localUrl}/api/auth/list-sessions`,
+      { headers: { cookie: secondCookie } }
+    );
+    assertStatus(blockedSessionsResponse, 404, 'external session listing');
+
+    const accountPage = await fetch(`${runtime.localUrl}/app`, {
+      headers: { cookie: secondCookie },
+    });
+    assertStatus(accountPage, 200, 'authenticated account page');
+    const accountHtml = await accountPage.text();
+    if (!accountHtml.includes('Sign out 1 other session')) {
+      throw new Error(
+        'The account UI did not expose other-session revocation.'
+      );
     }
+    for (const cookie of [firstCookie, secondCookie]) {
+      if (accountHtml.includes(cookieValue(cookie))) {
+        throw new Error(
+          'A session credential leaked into rendered account HTML.'
+        );
+      }
+    }
+
+    const revocation = await fetch(
+      `${runtime.localUrl}/api/auth/revoke-other-sessions`,
+      {
+        headers: { cookie: secondCookie, origin: runtime.publicUrl },
+        method: 'POST',
+      }
+    );
+    assertStatus(revocation, 200, 'other-session revocation');
+    if ((await revocation.json()).status !== true) {
+      throw new Error('Other-session revocation returned the wrong contract.');
+    }
+
+    const revokedPage = await fetch(`${runtime.localUrl}/app`, {
+      headers: { cookie: firstCookie },
+      redirect: 'manual',
+    });
+    assertRedirectToSignIn(revokedPage, 'revoked session');
+
+    const currentPage = await fetch(`${runtime.localUrl}/app`, {
+      headers: { cookie: secondCookie },
+    });
+    assertStatus(currentPage, 200, 'current session after revocation');
 
     const page = await fetch(`${runtime.localUrl}/sign-in`);
     assertStatus(page, 200, 'allowlist sign-in page');
@@ -105,6 +153,9 @@ async function verifyAllowlistedSignup() {
   }
   console.log(
     JSON.stringify({ marker: 'BYOK_GRID_SIGNUP_ALLOWLIST_VERIFIED' })
+  );
+  console.log(
+    JSON.stringify({ marker: 'BYOK_GRID_SESSION_POLICY_DRILL_PASSED' })
   );
 }
 
@@ -191,6 +242,20 @@ async function signUp(runtime, email) {
   });
 }
 
+async function signIn(runtime, email) {
+  return fetch(`${runtime.localUrl}/api/auth/sign-in/email`, {
+    body: JSON.stringify({
+      email,
+      password: 'correct-horse-battery-staple-drill',
+    }),
+    headers: {
+      'content-type': 'application/json',
+      origin: runtime.publicUrl,
+    },
+    method: 'POST',
+  });
+}
+
 async function waitUntilHealthy(localUrl, child, output) {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     if (child.exitCode !== null) {
@@ -249,6 +314,35 @@ function assertStatus(response, expected, operation) {
   if (response.status !== expected) {
     throw new Error(
       `${operation} returned ${response.status}; expected ${expected}.`
+    );
+  }
+}
+
+function sessionCookie(response, operation) {
+  const setCookie = response.headers
+    .getSetCookie()
+    .find((value) => value.includes('better-auth.session_token='));
+  if (!setCookie) {
+    throw new Error(`${operation} did not create a session cookie.`);
+  }
+  if (!/(?:^|;\s*)Max-Age=604800(?:;|$)/iu.test(setCookie)) {
+    throw new Error(`${operation} did not use the bounded seven-day cookie.`);
+  }
+  return setCookie.split(';', 1)[0];
+}
+
+function cookieValue(cookie) {
+  return cookie.slice(cookie.indexOf('=') + 1);
+}
+
+function assertRedirectToSignIn(response, operation) {
+  const location = response.headers.get('location');
+  if (
+    ![302, 303, 307, 308].includes(response.status) ||
+    location !== '/sign-in'
+  ) {
+    throw new Error(
+      `${operation} returned ${response.status} with location ${location}; expected a sign-in redirect.`
     );
   }
 }

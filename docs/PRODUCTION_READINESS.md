@@ -20,6 +20,11 @@ working tree:
   modes, loopback-only open signup, startup validation, Better Auth hook-level
   enforcement, UI reflection, temporary SQLite integration coverage, and a
   two-process compiled-standalone HTTP drill;
+- bounded database-backed sessions with a hard seven-day public default,
+  configurable 15-minute-to-30-day expiry, explicit sliding refresh,
+  cache-free immediate revocation, token-safe other-session controls, SQLite
+  integration coverage, and compiled-standalone HTTP evidence that revokes the
+  older session while preserving the current one;
 - bounded incremental reads across Better Auth POST requests and every product
   Route Handler, with declared and observed 64-KiB/five-MiB enforcement,
   compressed-body rejection, transport-specific responses, and source contracts

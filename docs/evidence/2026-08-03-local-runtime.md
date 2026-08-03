@@ -92,7 +92,11 @@ second used a public HTTPS canonical origin with signup disabled. It returned
 server-rendered HTML. The third used the same public-origin posture with a
 secret-backed allowlist. It returned the stable `SIGNUP_NOT_ALLOWED` code for a
 different address, accepted a case-varied approved address, and issued a Better
-Auth session cookie. The valid processes reached readiness before testing and
+Auth session cookie. It then created a second session, verified that both
+expiries were inside the hard seven-day bound, and rendered the other-session
+control without placing either raw token in account HTML. Revocation invalidated
+the first cookie at the protected `/app` boundary while the current cookie
+remained authorized. The valid processes reached readiness before testing and
 were terminated before their temporary databases were removed. Evidence
 emitted by the command:
 
@@ -100,13 +104,16 @@ emitted by the command:
 {"marker":"BYOK_GRID_PUBLIC_OPEN_SIGNUP_REJECTED"}
 {"marker":"BYOK_GRID_SIGNUP_DISABLED_VERIFIED"}
 {"marker":"BYOK_GRID_SIGNUP_ALLOWLIST_VERIFIED"}
+{"marker":"BYOK_GRID_SESSION_POLICY_DRILL_PASSED"}
 {"marker":"BYOK_GRID_SIGNUP_POLICY_DRILL_PASSED"}
 ```
 
 Separate file-backed SQLite integration tests additionally proved that rejected
 requests created no users and an approved signup created exactly one user,
-personal workspace, and membership. This is controlled provisioning evidence,
-not verified-email or password-recovery evidence; public open signup remains
+personal workspace, and membership. They also proved two active session rows,
+bounded expiry, other-session revocation, and current-session preservation.
+This is controlled provisioning and bounded-session evidence, not
+verified-email or password-recovery evidence; public open signup remains
 rejected outside loopback.
 
 ## SQLite recovery

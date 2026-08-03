@@ -31,6 +31,26 @@ not make the application buffer its supplied payload. Authentication endpoints
 must read credentials to create or verify a session, which is why their
 separate ceiling is substantially smaller.
 
+## Session lifecycle
+
+Public origins default to a hard seven-day database-backed session. Sliding
+refresh is disabled unless an operator explicitly enables it; loopback
+evaluation keeps sliding refresh enabled for contributor convenience. Runtime
+configuration accepts an expiry from 15 minutes through 30 days and a refresh
+age of at least one minute that must remain shorter than the expiry. Invalid or
+internally inconsistent values make readiness fail.
+
+Better Auth's cookie cache is disabled so database revocation takes effect on
+the next authenticated request. The account page compares session tokens only
+inside server code and sends the browser an integer count of other active
+sessions. A user can revoke those sessions without invalidating the current
+one. The Next.js boundary returns `404` for external requests to Better Auth's
+raw-token-bearing session-list endpoint; internal server calls do not traverse
+that route. Other-session tokens must not be logged, rendered, or exposed
+through product API responses. Password-reset delivery and verified-email
+enforcement remain separate release gates; bounded sessions do not replace
+account recovery.
+
 The five-MiB generic limit is intentionally larger than a typical form. A
 published workflow may contain up to 100 nodes, 200 edges, and bounded mapping
 configuration, while a single editable cell may contain up to 256 KiB. Lowering

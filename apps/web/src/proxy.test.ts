@@ -54,6 +54,25 @@ describe('Next.js application proxy', () => {
     expectScriptNoncePolicy(response.headers);
   });
 
+  it('keeps raw session enumeration server-only', async () => {
+    vi.stubEnv('BETTER_AUTH_URL', 'https://grid.example.com');
+    for (const path of [
+      '/api/auth/list-sessions?ignored=true',
+      '/api/auth/list-sessions/',
+    ]) {
+      const response = proxy(
+        new NextRequest(`https://internal-web:3000${path}`, {
+          headers: { cookie: 'better-auth.session_token=credential' },
+        })
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.headers.get('cache-control')).toBe('no-store');
+      expectScriptNoncePolicy(response.headers);
+      await expect(response.json()).resolves.toEqual({ error: 'Not found.' });
+    }
+  });
+
   it('applies a fresh nonce policy to page responses', () => {
     vi.stubEnv('BETTER_AUTH_URL', 'https://grid.example.com');
     const first = proxy(new NextRequest('https://internal-web:3000/app'));

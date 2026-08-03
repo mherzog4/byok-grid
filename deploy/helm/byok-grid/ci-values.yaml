@@ -1,6 +1,10 @@
 app:
   publicUrl: https://grid.test.example
   signupMode: allowlist
+  session:
+    expiresInSeconds: 43200
+    refreshEnabled: false
+    updateAgeSeconds: 3600
 web:
   image:
     digest: sha256:1111111111111111111111111111111111111111111111111111111111111111

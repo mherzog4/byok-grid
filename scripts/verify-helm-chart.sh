@@ -40,6 +40,9 @@ grep -q 'path: /api/live' "$default_render"
 grep -q 'helm.sh/hook: pre-install,pre-upgrade' "$default_render"
 grep -q 'key: sqlite-database-url' "$default_render"
 grep -q 'BYOK_GRID_SIGNUP_MODE: "disabled"' "$default_render"
+grep -q 'BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: "604800"' "$default_render"
+grep -q 'BYOK_GRID_SESSION_REFRESH_ENABLED: "false"' "$default_render"
+grep -q 'BYOK_GRID_SESSION_UPDATE_AGE_SECONDS: "86400"' "$default_render"
 grep -q 'key: signup-allowed-emails' "$default_render"
 test "$(grep -c 'name: BYOK_GRID_MASTER_KEY' "$default_render")" -eq 2
 grep -q "HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED: 'true'" "$default_render"
@@ -66,6 +69,8 @@ grep -q 'cidr: 198.51.100.0/24' "$egress_render"
 grep -q 'cidr: 203.0.113.0/24' "$egress_render"
 grep -q 'value: "10000000"' "$full_render"
 grep -q 'BYOK_GRID_SIGNUP_MODE: "allowlist"' "$full_render"
+grep -q 'BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: "43200"' "$full_render"
+grep -q 'BYOK_GRID_SESSION_UPDATE_AGE_SECONDS: "3600"' "$full_render"
 grep -q 'signup-allowed-emails: "release-owner@example.test"' "$full_render"
 grep -q 'name: SQLITE_DATABASE_URL' "$full_render"
 grep -q 'app.kubernetes.io/component: analytics-projector' "$full_render"
@@ -97,6 +102,12 @@ fi
 if helm template invalid-public-signup "$chart_dir" \
   --set app.signupMode=open >/dev/null 2>&1; then
   echo 'expected public open signup to fail chart validation' >&2
+  exit 1
+fi
+
+if helm template invalid-session-expiry "$chart_dir" \
+  --set app.session.expiresInSeconds=2592001 >/dev/null 2>&1; then
+  echo 'expected an excessive session lifetime to fail chart validation' >&2
   exit 1
 fi
 

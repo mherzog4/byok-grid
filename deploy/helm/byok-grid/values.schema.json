@@ -13,14 +13,36 @@
   "properties": {
     "app": {
       "type": "object",
-      "required": ["publicUrl", "signupMode"],
+      "required": ["publicUrl", "signupMode", "session"],
       "properties": {
         "publicUrl": {
           "type": "string",
           "format": "uri",
           "pattern": "^https://"
         },
-        "signupMode": { "enum": ["disabled", "allowlist"] }
+        "signupMode": { "enum": ["disabled", "allowlist"] },
+        "session": {
+          "type": "object",
+          "required": [
+            "expiresInSeconds",
+            "refreshEnabled",
+            "updateAgeSeconds"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "expiresInSeconds": {
+              "type": "integer",
+              "minimum": 900,
+              "maximum": 2592000
+            },
+            "refreshEnabled": { "type": "boolean" },
+            "updateAgeSeconds": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 2591999
+            }
+          }
+        }
       }
     },
     "secrets": {

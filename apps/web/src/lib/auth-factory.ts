@@ -6,17 +6,20 @@ import * as schema from '@byok-grid/db/sqlite/schema';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { APIError } from 'better-auth/api';
+import type { SessionPolicy } from './session-policy';
 import { signupPolicyAllowsEmail, type SignupPolicy } from './signup-policy';
 
 export function createByokGridAuth({
   baseURL,
   database,
   secret,
+  sessionPolicy,
   signupPolicy,
 }: {
   baseURL: string | undefined;
   database: SqliteDatabase;
   secret: string | undefined;
+  sessionPolicy: SessionPolicy;
   signupPolicy: SignupPolicy;
 }) {
   return betterAuth({
@@ -36,6 +39,12 @@ export function createByokGridAuth({
     rateLimit: {
       enabled: true,
       storage: 'database',
+    },
+    session: {
+      cookieCache: { enabled: false },
+      disableSessionRefresh: !sessionPolicy.refreshEnabled,
+      expiresIn: sessionPolicy.expiresInSeconds,
+      updateAge: sessionPolicy.updateAgeSeconds,
     },
     secret,
     advanced: {

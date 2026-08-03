@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createByokGridAuth } from './auth-factory';
+import { resolveSessionPolicy } from './session-policy';
 import { resolveSignupPolicy } from './signup-policy';
 
 const baseURL = 'https://grid.example.com';
@@ -36,6 +37,7 @@ describe('Better Auth signup policy integration', () => {
       baseURL,
       database: database.db,
       secret,
+      sessionPolicy: resolveSessionPolicy({ BETTER_AUTH_URL: baseURL }),
       signupPolicy: resolveSignupPolicy({
         BETTER_AUTH_URL: baseURL,
         BYOK_GRID_SIGNUP_MODE: 'disabled',
@@ -56,6 +58,7 @@ describe('Better Auth signup policy integration', () => {
       baseURL,
       database: database.db,
       secret,
+      sessionPolicy: resolveSessionPolicy({ BETTER_AUTH_URL: baseURL }),
       signupPolicy: resolveSignupPolicy({
         BETTER_AUTH_URL: baseURL,
         BYOK_GRID_SIGNUP_ALLOWED_EMAILS: 'owner@example.com',
@@ -83,8 +86,44 @@ describe('Better Auth signup policy integration', () => {
     expect(await countRows(database, 'users')).toBe(1);
     expect(await countRows(database, 'workspaces')).toBe(1);
     expect(await countRows(database, 'workspace_members')).toBe(1);
+
+    const firstCookie = cookieHeader(accepted);
+    const secondLogin = await auth.api.signInEmail({
+      asResponse: true,
+      body: { email: 'owner@example.com', password },
+    });
+    expect(secondLogin.status).toBe(200);
+    const secondCookie = cookieHeader(secondLogin);
+    const secondHeaders = new Headers({ cookie: secondCookie });
+
+    const sessions = await auth.api.listSessions({ headers: secondHeaders });
+    expect(sessions).toHaveLength(2);
+    for (const session of sessions) {
+      const remaining = new Date(session.expiresAt).getTime() - Date.now();
+      expect(remaining).toBeGreaterThan(6.9 * 24 * 60 * 60 * 1000);
+      expect(remaining).toBeLessThanOrEqual(7 * 24 * 60 * 60 * 1000);
+    }
+
+    await expect(
+      auth.api.revokeOtherSessions({ headers: secondHeaders })
+    ).resolves.toEqual({ status: true });
+    await expect(
+      auth.api.getSession({ headers: new Headers({ cookie: firstCookie }) })
+    ).resolves.toBeNull();
+    await expect(
+      auth.api.getSession({ headers: secondHeaders })
+    ).resolves.toMatchObject({ user: { email: 'owner@example.com' } });
   });
 });
+
+function cookieHeader(response: Response): string {
+  const cookie = response.headers
+    .getSetCookie()
+    .map((value) => value.split(';', 1)[0])
+    .join('; ');
+  if (!cookie) throw new Error('Better Auth did not return a session cookie.');
+  return cookie;
+}
 
 async function countRows(
   database: SqliteDatabaseHandle,

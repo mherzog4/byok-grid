@@ -35,6 +35,24 @@ describe('web runtime configuration', () => {
     ).toThrow('open is allowed only for loopback');
   });
 
+  it('validates bounded session lifetime configuration', () => {
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: '43200',
+        BYOK_GRID_SESSION_REFRESH_ENABLED: 'false',
+        BYOK_GRID_SESSION_UPDATE_AGE_SECONDS: '3600',
+      })
+    ).not.toThrow();
+
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: 'forever',
+      })
+    ).toThrow('must be a whole number');
+  });
+
   it('allows HTTP only for loopback evaluation', () => {
     expect(() =>
       assertWebRuntimeConfiguration({

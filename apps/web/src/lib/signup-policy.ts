@@ -1,3 +1,5 @@
+import { isLoopbackUrl } from './runtime-origin';
+
 export const SIGNUP_MODES = ['disabled', 'allowlist', 'open'] as const;
 
 export type SignupMode = (typeof SIGNUP_MODES)[number];
@@ -91,21 +93,4 @@ function normalizeEmail(value: string): string {
 
 function isEmailShape(value: string): boolean {
   return /^[^\s,@]+@[^\s,@]+\.[^\s,@]+$/u.test(value);
-}
-
-function isLoopbackUrl(value: string | undefined): boolean {
-  if (!value) return false;
-  try {
-    const hostname = new URL(value).hostname
-      .toLowerCase()
-      .replace(/^\[|\]$/g, '');
-    return (
-      hostname === 'localhost' ||
-      hostname.endsWith('.localhost') ||
-      hostname === '127.0.0.1' ||
-      hostname === '::1'
-    );
-  } catch {
-    return false;
-  }
 }

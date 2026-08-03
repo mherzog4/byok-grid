@@ -10,6 +10,12 @@ app:
   # Public deployments fail closed. Use allowlist with the corresponding
   # Secret value for controlled account provisioning.
   signupMode: disabled
+  session:
+    # Public releases use a hard expiry unless an operator explicitly enables
+    # sliding refresh after reviewing the stolen-cookie lifetime tradeoff.
+    expiresInSeconds: 604800
+    refreshEnabled: false
+    updateAgeSeconds: 86400
 
 secrets:
   # Production operators should provision this Secret from their secret manager.

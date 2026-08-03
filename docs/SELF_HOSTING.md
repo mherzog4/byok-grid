@@ -115,6 +115,30 @@ inbox and does not provide password-reset delivery. Do not enable public open
 signup until a reviewed transactional-email implementation and Better Auth
 verified-email enforcement are configured.
 
+## Session lifecycle
+
+Public origins default to a hard seven-day session. Loopback evaluation uses
+sliding refresh for contributor convenience. Configure the policy explicitly
+in a managed deployment:
+
+```text
+BYOK_GRID_SESSION_EXPIRES_IN_SECONDS=604800
+BYOK_GRID_SESSION_REFRESH_ENABLED=false
+BYOK_GRID_SESSION_UPDATE_AGE_SECONDS=86400
+```
+
+Expiry must be between 900 and 2,592,000 seconds. Update age must be between 60
+seconds and the configured expiry. Enabling refresh extends an active session
+after the update age; leaving it disabled preserves the original hard expiry.
+Invalid values fail runtime validation and readiness. The account UI lets a
+user sign out every other active session while preserving the current one, and
+database revocation is checked without a cookie cache.
+
+The Helm equivalents are `app.session.expiresInSeconds`,
+`app.session.refreshEnabled`, and `app.session.updateAgeSeconds`. Treat longer
+lifetimes and public sliding refresh as explicit risk acceptance for a stolen
+cookie. This policy does not provide password recovery or verified email.
+
 ## Production boundary
 
 A production operator must supply infrastructure outside the local Compose
@@ -130,6 +154,7 @@ defaults:
 - HTTPS termination with the canonical public URL configured consistently;
 - disabled or secret-backed allowlisted account provisioning, with approved
   addresses removed after use;
+- an explicitly reviewed bounded session lifetime and refresh policy;
 - preservation of the application's request-scoped nonce CSP, HSTS,
   no-referrer, anti-framing, MIME-sniffing, browser-capability, and cache-control
   response headers plus the browser's `Origin`, `Referer`, and `Sec-Fetch-*`

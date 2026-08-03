@@ -428,6 +428,12 @@ input:focus {
   color: var(--muted);
   font-size: 12px;
   margin-left: auto;
+  position: relative;
+}
+
+.account-error {
+  color: #ff9b9b;
+  max-width: 220px;
 }
 
 .workspace-switcher {

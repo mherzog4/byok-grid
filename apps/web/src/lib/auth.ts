@@ -1,5 +1,6 @@
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import { createByokGridAuth } from './auth-factory';
+import { resolveSessionPolicy } from './session-policy';
 import { sqliteDb } from './sqlite-database';
 import { resolveSignupPolicy } from './signup-policy';
 
@@ -12,6 +13,10 @@ export const signupPolicy = resolveSignupPolicy({
   ...process.env,
   BETTER_AUTH_URL: authBaseUrl,
 });
+export const sessionPolicy = resolveSessionPolicy({
+  ...process.env,
+  BETTER_AUTH_URL: authBaseUrl,
+});
 
 export const auth = createByokGridAuth({
   baseURL: authBaseUrl,
@@ -21,5 +26,6 @@ export const auth = createByokGridAuth({
     (isProductionBuild
       ? 'build-only-placeholder-never-used-at-runtime'
       : undefined),
+  sessionPolicy,
   signupPolicy,
 });

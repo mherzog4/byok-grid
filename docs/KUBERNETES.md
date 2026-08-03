@@ -83,7 +83,12 @@ existing Secret name. The chart supplies the public URL to Better Auth at
 runtime; the same attested web image digest can therefore be reused across
 origins. `app.signupMode` accepts `disabled` or `allowlist`; the latter requires
 the external Secret's `signup-allowed-emails` key to contain at least one
-comma-separated address.
+comma-separated address. The chart defaults to a hard seven-day session through
+`app.session.expiresInSeconds=604800` and
+`app.session.refreshEnabled=false`; `app.session.updateAgeSeconds` controls the
+refresh threshold if an operator explicitly enables sliding refresh. The schema
+permits expiries from 15 minutes through 30 days, while application readiness
+also requires the update age to remain shorter than the expiry.
 
 Validate before changing the cluster:
 

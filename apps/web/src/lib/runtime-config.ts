@@ -1,5 +1,10 @@
 import { sqliteDatabaseConfigSchema } from '@byok-grid/db';
 import { parseMasterKey } from '@byok-grid/security';
+import { isLoopbackHostname } from './runtime-origin';
+import {
+  resolveSessionPolicy,
+  SessionPolicyConfigurationError,
+} from './session-policy';
 import {
   resolveSignupPolicy,
   SignupPolicyConfigurationError,
@@ -45,6 +50,16 @@ export function assertWebRuntimeConfiguration(
     resolveSignupPolicy(environment);
   } catch (error) {
     if (error instanceof SignupPolicyConfigurationError) {
+      issues.push(...error.issues);
+    } else {
+      throw error;
+    }
+  }
+
+  try {
+    resolveSessionPolicy(environment);
+  } catch (error) {
+    if (error instanceof SessionPolicyConfigurationError) {
       issues.push(...error.issues);
     } else {
       throw error;
@@ -111,14 +126,4 @@ function validateAuthUrl(value: string, issues: string[]): void {
   if (parsed.pathname !== '/') {
     issues.push('BETTER_AUTH_URL must be an origin without a path.');
   }
-}
-
-function isLoopbackHostname(hostname: string): boolean {
-  const normalized = hostname.toLowerCase().replace(/^\[|\]$/g, '');
-  return (
-    normalized === 'localhost' ||
-    normalized.endsWith('.localhost') ||
-    normalized === '127.0.0.1' ||
-    normalized === '::1'
-  );
 }

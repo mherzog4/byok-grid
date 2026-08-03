@@ -7,6 +7,9 @@ metadata:
 data:
   BETTER_AUTH_URL: {{ .Values.app.publicUrl | quote }}
   BYOK_GRID_SIGNUP_MODE: {{ .Values.app.signupMode | quote }}
+  BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: {{ .Values.app.session.expiresInSeconds | quote }}
+  BYOK_GRID_SESSION_REFRESH_ENABLED: {{ .Values.app.session.refreshEnabled | quote }}
+  BYOK_GRID_SESSION_UPDATE_AGE_SECONDS: {{ .Values.app.session.updateAgeSeconds | quote }}
   BYOK_GRID_MASTER_KEY_ID: {{ .Values.worker.masterKeyId | default "v1" | quote }}
   HATCHET_CLIENT_API_URL: {{ .Values.worker.hatchet.apiUrl | quote }}
   HATCHET_CLIENT_HOST_PORT: {{ .Values.worker.hatchet.hostPort | quote }}

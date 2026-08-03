@@ -9,8 +9,9 @@ workflows with credentials supplied by each workspace.
 This is a release-candidate hardening build, not yet a stable production
 release. It currently includes:
 
-- email/password authentication, database-backed sessions, and fail-closed
-  public account provisioning with disabled or email-allowlisted signup;
+- email/password authentication, bounded database-backed sessions with
+  current-session-preserving revocation, and fail-closed public account
+  provisioning with disabled or email-allowlisted signup;
 - a React Flow node editor with typed ports, structurally safe incomplete
   drafts, strict publish validation, immutable graph versions, deterministic
   compiled plans, and revision-conflict protection;
