@@ -1,0 +1,123 @@
+Dockerfile
+  s_28ae7db8033464::t_77b26a283a91c5 144-145,164
+apps/worker/src/config.ts
+  s_28ae7db8033464::t_a15f0da75ce2dd 35-38
+apps/worker/src/execute-cell-run.ts
+  s_28ae7db8033464::t_1595dd44b24dd3 33,38,40,433,436,529,532
+docs/adr/0044-overlapped-master-key-rotation.md
+  s_28ae7db8033464::t_fd412e90c8e3c9 1-57
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_37b56fa5c76fbf 81-86,231-233,272-274
+packages/db/src/sqlite/master-key-rotation-cli.ts
+  s_28ae7db8033464::t_77b26a283a91c5 1-89
+deploy/helm/byok-grid/templates/secret.yaml
+  s_28ae7db8033464::t_d239e3165b017f 17
+apps/worker/src/master-keys.ts
+  s_28ae7db8033464::t_a15f0da75ce2dd 1-8
+deploy/helm/byok-grid/values.yaml
+  s_28ae7db8033464::t_d239e3165b017f 45,57
+packages/db/src/sqlite/credentials.ts
+  s_28ae7db8033464::t_5468dcdda10d8e 9-11,34-37,66-71,80-82,95,97-100,110
+  s_28ae7db8033464::t_e8f4e882c769f8 111,115,118
+apps/web/src/app/api/workspaces/[workspaceId]/credentials/route.ts
+  s_28ae7db8033464::t_a15f0da75ce2dd 14,92
+packages/db/src/sqlite/master-key-rotation.ts
+  s_28ae7db8033464::t_046afb214c0899 6,80-83,85-92
+  s_28ae7db8033464::t_168e371b92e658 28-31,33-43,45-57,60-61
+  s_28ae7db8033464::t_5468dcdda10d8e 1-5,7-27,32,44,58-59,62-79,93-151
+  s_28ae7db8033464::t_6275df00284185 84
+docs/BACKUP_RESTORE.md
+  s_28ae7db8033464::t_e93e80c57a2fd4 74-78
+scripts/verify-helm-chart.sh
+  s_28ae7db8033464::t_d239e3165b017f 50-51,86
+README.md
+  s_28ae7db8033464::t_04fbee82a69b04 39-40,310-312
+packages/db/src/sqlite/credentials.integration.test.ts
+  s_28ae7db8033464::t_5468dcdda10d8e 4,24-27,223-311,313-314
+  s_28ae7db8033464::t_bd72a750ebf5ca 8,13,34-37,189,365-432
+  s_28ae7db8033464::t_046afb214c0899 312,315-364
+  s_28ae7db8033464::t_ab940cdbf3ed92 210,433
+apps/workflow-worker/src/master-keys.ts
+  s_28ae7db8033464::t_a15f0da75ce2dd 1-8
+packages/db/package.json
+  s_28ae7db8033464::t_77b26a283a91c5 20-21
+packages/security/src/index.ts
+  s_28ae7db8033464::t_2fe2445f692950 6-7,25-29,31-34,47-124,137-150,171-195,197-198
+  s_28ae7db8033464::t_c2630fb477b70c 196,199
+packages/db/src/index.ts
+  s_28ae7db8033464::t_5468dcdda10d8e 42
+docs/adr/0002-credential-boundary.md
+  s_28ae7db8033464::t_fd412e90c8e3c9 26-27
+deploy/helm/byok-grid/values.schema.json
+  s_28ae7db8033464::t_d239e3165b017f 133
+apps/workflow-worker/src/config.ts
+  s_28ae7db8033464::t_a15f0da75ce2dd 5,48,105-109,114
+packages/db/src/sqlite/index.ts
+  s_28ae7db8033464::t_5468dcdda10d8e 20
+deploy/helm/byok-grid/templates/web-deployment.yaml
+  s_28ae7db8033464::t_d239e3165b017f 93-98
+deploy/helm/byok-grid/templates/worker-deployment.yaml
+  s_28ae7db8033464::t_d239e3165b017f 72-77
+.env.example
+  s_28ae7db8033464::t_d239e3165b017f 12
+apps/web/src/lib/master-key.ts
+  s_28ae7db8033464::t_a15f0da75ce2dd 1,3,5-6,15-20
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_e93e80c57a2fd4 67-70
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_e6ebe86073086a 139-164
+apps/web/src/lib/runtime-config.test.ts
+  s_28ae7db8033464::t_066ef7a5099e30 177
+  s_28ae7db8033464::t_046afb214c0899 156-176,178-181
+deploy/helm/byok-grid/ci-values.yaml
+  s_28ae7db8033464::t_bc11046477b66f 40
+apps/web/src/lib/runtime-config.ts
+  s_28ae7db8033464::t_a15f0da75ce2dd 2,120-124
+  s_28ae7db8033464::t_066ef7a5099e30 127
+scripts/container/maintenance-entrypoint.sh
+  s_28ae7db8033464::t_77b26a283a91c5 1-17
+docs/MASTER_KEY_ROTATION.md
+  s_28ae7db8033464::t_ee2c40a6982510 1-103
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_e93e80c57a2fd4 63-66,71-74
+  s_28ae7db8033464::t_902f0cc6631884 54-62
+SECURITY.md
+  s_28ae7db8033464::t_588f161390ea95 135-143
+packages/security/src/index.test.ts
+  s_28ae7db8033464::t_996472cec65d2a 122-128
+  s_28ae7db8033464::t_2fe2445f692950 10-11,13,74-121,129-151
+apps/workflow-worker/src/execute-cell-run.ts
+  s_28ae7db8033464::t_cfd1883ce99192 34,40,326,329,425,428
+docker-compose.yml
+  s_28ae7db8033464::t_d239e3165b017f 63-65,99,128
+package.json
+  s_28ae7db8033464::t_77b26a283a91c5 21-22
+apps/worker/src/execute-source-run.ts
+  s_28ae7db8033464::t_7e831390dc7dee 31,36,237,240
+apps/worker/src/execute-webhook-delivery.ts
+  s_28ae7db8033464::t_99ad9c5d1fe48d 26,31,194,197
+apps/worker/src/execute-writeback-delivery.ts
+  s_28ae7db8033464::t_30d1bfcd908289 25,30,187,190
+apps/workflow-worker/src/execute-source-run.ts
+  s_28ae7db8033464::t_fe538ae8c51c0b 34,38,225,228
+apps/workflow-worker/src/execute-webhook-delivery.ts
+  s_28ae7db8033464::t_e4be5d0075f7dd 26,31,194,197
+apps/workflow-worker/src/execute-writeback-delivery.ts
+  s_28ae7db8033464::t_b66b8a96ba8f99 27,31,145,148
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "f16b764ef3a6d5f559fcc95351ffa60eb1af7694",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
