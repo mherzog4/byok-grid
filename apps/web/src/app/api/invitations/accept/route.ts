@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { acceptSqliteWorkspaceInvitation } from '@byok-grid/db';
 import { collaborationErrorResponse } from '@/lib/collaboration-api';
 import { getApiUser } from '@/lib/grid-api';
@@ -12,9 +13,9 @@ export async function POST(request: Request) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
 
-  const parsed = acceptInvitationSchema.safeParse(
-    await request.json().catch(() => null)
-  );
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
+  const parsed = acceptInvitationSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       { error: 'The invitation token is invalid.' },

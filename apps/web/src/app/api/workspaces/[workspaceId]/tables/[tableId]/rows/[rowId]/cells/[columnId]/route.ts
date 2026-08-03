@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { writeSqliteGridCell } from '@byok-grid/db';
 import { editableCellValueSchema } from '@byok-grid/domain';
 import { getApiUser, gridErrorResponse } from '@/lib/grid-api';
@@ -22,7 +23,8 @@ export async function PUT(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
 
-  const body = await request.json().catch(() => null);
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
   const parsed = writeCellSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(

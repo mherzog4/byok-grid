@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { updateSqliteWebhookDestination } from '@byok-grid/db';
 import { webhookDestinationUpdateSchema } from '@byok-grid/domain';
 import { getApiUser } from '@/lib/grid-api';
@@ -15,9 +16,9 @@ interface RouteContext {
 export async function PATCH(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
-  const parsed = webhookDestinationUpdateSchema.safeParse(
-    await request.json().catch(() => null)
-  );
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
+  const parsed = webhookDestinationUpdateSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       { error: 'The webhook destination update is invalid.' },

@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import {
   createSqliteWorkspaceInvitation,
   listSqliteWorkspaceCollaboration,
@@ -33,9 +34,9 @@ export async function POST(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
 
-  const parsed = workspaceInvitationRequestSchema.safeParse(
-    await request.json().catch(() => null)
-  );
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
+  const parsed = workspaceInvitationRequestSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       { error: 'Enter a valid email address and invitation role.' },

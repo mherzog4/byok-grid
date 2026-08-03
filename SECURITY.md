@@ -36,6 +36,15 @@ Hatchet image and fixed local database passwords, so it is an evaluation path,
 not a production manifest. Follow `docs/SELF_HOSTING.md` before exposing a
 deployment.
 
+Better Auth POST requests are incrementally bounded at 64 KiB, and every product
+JSON mutation uses an incremental five-MiB reader rather than unbounded App
+Router `request.json()` buffering. Push ingestion independently enforces five
+MiB and CSV import streams at most 50 MiB. Keep route-aware limits at the public
+proxy as a first layer; a single five-MiB global setting would break supported
+CSV imports. Reject compressed request bodies and configure edge request-rate,
+concurrent-request, slow-body, header, and connection limits. See
+`docs/API_SECURITY.md` for the exact transport contract and negative tests.
+
 npm installs run with strict lifecycle-script review. The root `allowScripts`
 policy permits only esbuild's platform-binary validation and unrs-resolver's
 native-package preparation; Hatchet's informational version warning and

@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import {
   getSqliteGridSnapshot,
   renameSqliteWorkspaceTable,
@@ -46,9 +47,9 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
 
   try {
-    const parsed = updateTableRequestSchema.safeParse(
-      await request.json().catch(() => null)
-    );
+    const body = await readApiJsonBody(request);
+    if (body instanceof Response) return body;
+    const parsed = updateTableRequestSchema.safeParse(body);
     if (!parsed.success) {
       return Response.json(
         { error: parsed.error.issues[0]?.message ?? 'Invalid table.' },

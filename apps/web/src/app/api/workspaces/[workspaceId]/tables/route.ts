@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { createSqliteWorkspaceTable } from '@byok-grid/db';
 import { createTableRequestSchema } from '@byok-grid/domain';
 import { getApiUser, gridErrorResponse } from '@/lib/grid-api';
@@ -12,9 +13,9 @@ export async function POST(request: Request, context: RouteContext) {
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
 
   try {
-    const parsed = createTableRequestSchema.safeParse(
-      await request.json().catch(() => null)
-    );
+    const body = await readApiJsonBody(request);
+    if (body instanceof Response) return body;
+    const parsed = createTableRequestSchema.safeParse(body);
     if (!parsed.success) {
       return Response.json(
         { error: parsed.error.issues[0]?.message ?? 'Invalid table.' },

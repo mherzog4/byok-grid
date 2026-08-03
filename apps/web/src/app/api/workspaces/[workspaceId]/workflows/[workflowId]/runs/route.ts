@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { createSqliteWorkflowRun, listSqliteWorkflowRuns } from '@byok-grid/db';
 import { getApiUser } from '@/lib/grid-api';
 import { sqliteDb } from '@/lib/sqlite-database';
@@ -34,7 +35,9 @@ export async function POST(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
   try {
-    const body = runRequestSchema.parse(await request.json().catch(() => ({})));
+    const rawBody = await readApiJsonBody(request);
+    if (rawBody instanceof Response) return rawBody;
+    const body = runRequestSchema.parse(rawBody ?? {});
     const { workflowId, workspaceId } = await context.params;
     return Response.json(
       await createSqliteWorkflowRun(sqliteDb, {

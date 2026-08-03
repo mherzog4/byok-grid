@@ -22,18 +22,24 @@ npm run drill:workflow-drain
 
 The command built the disposable production web test stage, created a synthetic
 500-row workflow at the 100-node graph limit, and waited until the API exposed
-a persisted running step. It then sent Compose `SIGTERM` with a 90-second
-timeout. Evidence emitted by the command:
+a persisted running step. Before creating ordinary data, the same E2E sent a
+signup larger than the 64-KiB authentication boundary and an authenticated table
+mutation larger than the five-MiB product JSON boundary to the rebuilt
+standalone web container; both required their exact `413` transport responses.
+It then sent Compose `SIGTERM` with a 90-second timeout. Evidence emitted by the
+command:
 
 ```text
 {"marker":"BYOK_GRID_DRAIN_DRILL_IN_FLIGHT","rowCount":500,...}
-{"drainMs":2161,"marker":"BYOK_GRID_DRAIN_SIGNAL_COMPLETE"}
+{"drainMs":1413,"marker":"BYOK_GRID_DRAIN_SIGNAL_COMPLETE"}
 {"marker":"BYOK_GRID_DRAIN_DRILL_PASSED","rows":500,"steps":100}
 ```
 
-The E2E assertion proved the run and all 100 steps succeeded. The drill also
-proved worker exit code 0, no OOM kill, Hatchet pending-task drain confirmation,
-no REST pause failure, and successful worker health after automatic restart.
+The E2E assertions proved the oversized requests did not enter Better Auth or
+domain mutation logic, then proved an ordinary signup, mutation, run, and all
+100 steps succeeded. The drill also proved worker exit code 0, no OOM kill,
+Hatchet pending-task drain confirmation, no REST pause failure, and successful
+worker health after automatic restart.
 The current drill additionally requires the private application metrics
 endpoint before signaling and after recovery, including workflow status, queue
 age, and dispatch backlog series.

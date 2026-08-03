@@ -1,5 +1,9 @@
 import { createClient, type Client } from '@libsql/client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import {
+  MAXIMUM_API_JSON_BODY_BYTES,
+  MAXIMUM_AUTH_REQUEST_BODY_BYTES,
+} from './lib/request-body';
 
 const runE2e = process.env.RUN_SQLITE_WEB_E2E === '1';
 const verifyWorkerExecution = process.env.VERIFY_WORKFLOW_EXECUTION === '1';
@@ -40,6 +44,22 @@ describe.skipIf(!runE2e || !databaseUrl)(
     });
 
     it('authors SQLite grid data, publishes a graph, and queues its run', async () => {
+      const oversizedSignup = await fetch(`${appUrl}/api/auth/sign-up/email`, {
+        body: JSON.stringify({
+          email,
+          name: 'x'.repeat(MAXIMUM_AUTH_REQUEST_BODY_BYTES),
+          password: 'correct-horse-battery-staple-workflow-e2e',
+        }),
+        headers: { 'content-type': 'application/json', origin: requestOrigin },
+        method: 'POST',
+      });
+      expect(oversizedSignup.status, await oversizedSignup.clone().text()).toBe(
+        413
+      );
+      await expect(oversizedSignup.json()).resolves.toEqual({
+        error: 'The request body exceeds 64 KiB.',
+      });
+
       const signup = await fetch(`${appUrl}/api/auth/sign-up/email`, {
         body: JSON.stringify({
           email,
@@ -81,6 +101,24 @@ describe.skipIf(!runE2e || !databaseUrl)(
       expect(appHtml).toContain('Add row');
 
       const tableCollectionUrl = `${appUrl}/api/workspaces/${workspaceId}/tables`;
+      const oversizedTableResponse = await fetch(tableCollectionUrl, {
+        body: JSON.stringify({
+          firstColumnName: 'Company',
+          firstColumnValueType: 'text',
+          name: 'x'.repeat(MAXIMUM_API_JSON_BODY_BYTES),
+        }),
+        headers: {
+          'content-type': 'application/json',
+          cookie,
+          origin: requestOrigin,
+        },
+        method: 'POST',
+      });
+      expect(oversizedTableResponse.status).toBe(413);
+      expect(await oversizedTableResponse.json()).toEqual({
+        error: 'The request body exceeds 5 MiB.',
+      });
+
       const createdTableResponse = await fetch(tableCollectionUrl, {
         body: JSON.stringify({
           firstColumnName: 'Company',

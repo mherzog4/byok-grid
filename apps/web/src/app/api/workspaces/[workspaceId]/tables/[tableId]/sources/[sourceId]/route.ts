@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { setSqliteSourceStatus } from '@byok-grid/db';
 import { getApiUser } from '@/lib/grid-api';
 import { sourceErrorResponse } from '@/lib/source-api';
@@ -15,9 +16,9 @@ interface RouteContext {
 export async function PATCH(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
-  const parsed = updateSourceSchema.safeParse(
-    await request.json().catch(() => null)
-  );
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
+  const parsed = updateSourceSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       { error: 'The source status is invalid.' },

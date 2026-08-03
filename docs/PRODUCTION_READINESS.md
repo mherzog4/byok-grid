@@ -16,6 +16,10 @@ working tree:
 - production Next.js build and compiled standalone application E2E covering
   signup, personal workspace provisioning, authenticated grid operations,
   workflow publication, and durable run creation;
+- bounded incremental reads across Better Auth POST requests and every product
+  Route Handler, with declared and observed 64-KiB/five-MiB enforcement,
+  compressed-body rejection, transport-specific responses, and source contracts
+  that reject future direct `request.json()` use or an unwrapped auth handler;
 - Rust connector-runner formatting, linting, and tests;
 - current-schema migration plus an N-1-to-current SQLite upgrade preserving
   tenant data, migration history, foreign keys, and integrity;

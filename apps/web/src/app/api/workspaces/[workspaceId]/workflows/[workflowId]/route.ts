@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { getSqliteWorkflow, updateSqliteWorkflowDraft } from '@byok-grid/db';
 import { workflowDraftUpdateRequestSchema } from '@byok-grid/domain';
 import { getApiUser } from '@/lib/grid-api';
@@ -29,9 +30,9 @@ export async function PATCH(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
   try {
-    const body = workflowDraftUpdateRequestSchema.parse(
-      await request.json().catch(() => null)
-    );
+    const rawBody = await readApiJsonBody(request);
+    if (rawBody instanceof Response) return rawBody;
+    const body = workflowDraftUpdateRequestSchema.parse(rawBody);
     const { workflowId, workspaceId } = await context.params;
     return Response.json(
       await updateSqliteWorkflowDraft(sqliteDb, {

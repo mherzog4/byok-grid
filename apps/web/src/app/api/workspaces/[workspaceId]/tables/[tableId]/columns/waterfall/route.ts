@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { createSqliteHttpWaterfallColumn } from '@byok-grid/db';
 import { enrichmentErrorResponse } from '@/lib/enrichment-api';
 import { getApiUser } from '@/lib/grid-api';
@@ -31,7 +32,8 @@ export async function POST(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
 
-  const body = await request.json().catch(() => null);
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
   const parsed = createColumnSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(

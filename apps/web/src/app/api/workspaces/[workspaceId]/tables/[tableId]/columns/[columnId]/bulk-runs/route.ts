@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import {
   createSqliteBulkRunBatch,
   previewSqliteBulkRun,
@@ -69,7 +70,9 @@ export async function POST(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
 
-  const parsed = createInputSchema.safeParse(await request.json());
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
+  const parsed = createInputSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       { error: 'The bulk-run confirmation is invalid.' },

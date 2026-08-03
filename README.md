@@ -91,6 +91,9 @@ release. It currently includes:
   execution provenance, and creator-or-manager cancellation that discards late
   provider results;
 - DNS-pinned worker egress that rejects private and reserved networks;
+- bounded streaming request reads for Better Auth, every product JSON mutation,
+  push-ingestion batch, and CSV import, with declared and observed byte
+  enforcement;
 - a Node.js workflow worker that resolves credentials just in time, records run
   provenance, and dispatches identifier-only
   outbox events through Hatchet while keeping definitions, row batches, step
@@ -291,6 +294,8 @@ GitHub attestations.
 See [the observability guide](docs/OBSERVABILITY.md) for private worker
 telemetry, the low-cardinality application metric contract, and replica-safe
 alert aggregation.
+See [the API transport security guide](docs/API_SECURITY.md) for application
+body ceilings, edge alignment, compressed-body policy, and regression tests.
 The current pass/fail evidence and the remaining stable-release blockers are in
 [the production-readiness ledger](docs/PRODUCTION_READINESS.md).
 See [the recoverable schema lifecycle ADR](docs/adr/0019-recoverable-schema-lifecycle.md)

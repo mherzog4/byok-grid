@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { queueSqliteWritebackDelivery } from '@byok-grid/db';
 import { writebackDeliveryRequestSchema } from '@byok-grid/domain';
 import { getApiUser } from '@/lib/grid-api';
@@ -15,9 +16,9 @@ interface RouteContext {
 export async function POST(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
-  const parsed = writebackDeliveryRequestSchema.safeParse(
-    await request.json().catch(() => null)
-  );
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
+  const parsed = writebackDeliveryRequestSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       { error: 'The writeback delivery request is invalid.' },

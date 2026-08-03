@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import {
   createSqliteHttpJsonSource,
   createSqliteHubSpotContactsSource,
@@ -35,7 +36,8 @@ export async function GET(request: Request, context: RouteContext) {
 export async function POST(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
-  const raw = await request.json().catch(() => null);
+  const raw = await readApiJsonBody(request);
+  if (raw instanceof Response) return raw;
   const hubSpotRequest =
     raw !== null &&
     typeof raw === 'object' &&

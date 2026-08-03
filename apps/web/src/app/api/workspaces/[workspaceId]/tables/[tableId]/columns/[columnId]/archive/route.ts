@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import {
   archiveSqliteWorkspaceColumn,
   previewSqliteColumnArchive,
@@ -39,9 +40,9 @@ export async function DELETE(request: Request, context: RouteContext) {
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
 
   try {
-    const parsed = schemaArchiveRequestSchema.safeParse(
-      await request.json().catch(() => null)
-    );
+    const body = await readApiJsonBody(request);
+    if (body instanceof Response) return body;
+    const parsed = schemaArchiveRequestSchema.safeParse(body);
     if (!parsed.success) {
       return Response.json(
         { error: parsed.error.issues[0]?.message ?? 'Invalid confirmation.' },

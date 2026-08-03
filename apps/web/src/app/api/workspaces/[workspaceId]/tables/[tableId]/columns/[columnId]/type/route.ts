@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import {
   convertSqliteWorkspaceColumnType,
   previewSqliteColumnTypeConversion,
@@ -51,9 +52,9 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
 
   try {
-    const parsed = columnTypeConversionRequestSchema.safeParse(
-      await request.json().catch(() => null)
-    );
+    const body = await readApiJsonBody(request);
+    if (body instanceof Response) return body;
+    const parsed = columnTypeConversionRequestSchema.safeParse(body);
     if (!parsed.success) {
       return Response.json(
         {

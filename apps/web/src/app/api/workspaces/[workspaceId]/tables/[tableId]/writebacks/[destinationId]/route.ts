@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { updateSqliteWritebackDestination } from '@byok-grid/db';
 import { writebackDestinationUpdateSchema } from '@byok-grid/domain';
 import { getApiUser } from '@/lib/grid-api';
@@ -15,9 +16,9 @@ interface RouteContext {
 export async function PATCH(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
-  const parsed = writebackDestinationUpdateSchema.safeParse(
-    await request.json().catch(() => null)
-  );
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
+  const parsed = writebackDestinationUpdateSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       { error: 'The writeback destination update is invalid.' },

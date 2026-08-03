@@ -106,11 +106,20 @@ defaults:
 - HTTPS termination with the canonical public URL configured consistently;
 - private-network egress denial, DNS controls, and provider allowlisting around
   the worker as defense in depth;
+- route-aware request-size, slow-body, connection, concurrency, and request-rate
+  enforcement at the TLS proxy, aligned with the application's independent
+  streaming limits;
 - centralized logs that redact cookies, invitation URLs, provider payloads,
   credentials, and workflow inputs; and
 - SQLite online-backup (or `VACUUM INTO`), encryption-key, and restore
   procedures tested before accepting
   customer data.
+
+The [API transport security guide](API_SECURITY.md) defines the 64-KiB Better
+Auth boundary, five-MiB JSON and ingestion boundaries, 50-MiB CSV boundary,
+compressed-body policy, and edge tests. Do not rely exclusively on proxy limits:
+the application bounds observed bytes so chunked requests and alternate internal
+paths cannot bypass the memory boundary.
 
 Use the repository's verified online-backup and new-file restore workflow in
 [the backup and restore guide](BACKUP_RESTORE.md). A copied SQLite file or an

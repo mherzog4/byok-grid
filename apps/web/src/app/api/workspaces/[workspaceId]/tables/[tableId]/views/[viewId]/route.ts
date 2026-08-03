@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import {
   deleteSqliteSavedGridView,
   updateSqliteSavedGridView,
@@ -14,9 +15,9 @@ export async function PATCH(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
   try {
-    const parsed = savedGridViewRequestSchema.safeParse(
-      await request.json().catch(() => null)
-    );
+    const body = await readApiJsonBody(request);
+    if (body instanceof Response) return body;
+    const parsed = savedGridViewRequestSchema.safeParse(body);
     if (!parsed.success) {
       return Response.json(
         { error: parsed.error.issues[0]?.message ?? 'Invalid saved view.' },

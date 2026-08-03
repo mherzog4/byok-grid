@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import {
   previewSqliteWorkspacePurge,
   purgeSqliteWorkspace,
@@ -33,9 +34,9 @@ export async function DELETE(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
 
-  const parsed = workspacePurgeRequestSchema.safeParse(
-    await request.json().catch(() => null)
-  );
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
+  const parsed = workspacePurgeRequestSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       {

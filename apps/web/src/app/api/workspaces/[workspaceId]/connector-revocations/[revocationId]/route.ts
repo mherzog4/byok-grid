@@ -1,3 +1,4 @@
+import { readApiJsonBody } from '@/lib/request-body';
 import { liftSqliteWorkspaceConnectorRevocation } from '@byok-grid/db';
 import { liftConnectorRevocationRequestSchema } from '@byok-grid/domain';
 import { connectorRevocationErrorResponse } from '@/lib/connector-revocation-api';
@@ -11,9 +12,9 @@ interface RouteContext {
 export async function PATCH(request: Request, context: RouteContext) {
   const user = await getApiUser(request);
   if (!user) return Response.json({ error: 'Unauthorized.' }, { status: 401 });
-  const parsed = liftConnectorRevocationRequestSchema.safeParse(
-    await request.json().catch(() => null)
-  );
+  const body = await readApiJsonBody(request);
+  if (body instanceof Response) return body;
+  const parsed = liftConnectorRevocationRequestSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       { error: parsed.error.issues[0]?.message ?? 'Invalid confirmation.' },
