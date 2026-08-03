@@ -1,0 +1,57 @@
+docs/VERIFY_DEPLOYMENT.md
+  s_28ae7db8033464::t_3854d58459291d 47-52
+  s_28ae7db8033464::t_17ca84d5364f2c 32-34
+  s_28ae7db8033464::t_5abdae98eabb36 1-31,35-46
+docs/RELEASING.md
+  s_28ae7db8033464::t_5abdae98eabb36 66-68
+docs/VERIFY_RELEASE.md
+  s_28ae7db8033464::t_5abdae98eabb36 50-54
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_a99b7ec64a14a4 252-259,282
+apps/web/src/app/api/live/route.test.ts
+  s_28ae7db8033464::t_ece4958ac3dd25 1-12
+apps/web/src/app/api/health/route.ts
+  s_28ae7db8033464::t_ece4958ac3dd25 12-19,27
+apps/web/src/app/api/health/route.test.ts
+  s_28ae7db8033464::t_a99b7ec64a14a4 1-49
+README.md
+  s_28ae7db8033464::t_5abdae98eabb36 378-381
+apps/web/src/app/api/live/route.ts
+  s_28ae7db8033464::t_ece4958ac3dd25 6-9
+package.json
+  s_28ae7db8033464::t_5abdae98eabb36 48
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_5abdae98eabb36 266-270
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_5abdae98eabb36 121-122,164-165
+  s_28ae7db8033464::t_3854d58459291d 123-124
+scripts/drill-signup-policy.mjs
+  s_28ae7db8033464::t_3854d58459291d 8,69,162-175
+  s_28ae7db8033464::t_33344db6a5f0d3 176-177
+scripts/verify-public-deployment.test.mjs
+  s_28ae7db8033464::t_17ca84d5364f2c 61,76
+  s_28ae7db8033464::t_5162959c1b4e3f 1-53,55-60,62-75,77-87,92-102,104-106,108-126,161-171,173-196,198-220,222-240,245
+  s_28ae7db8033464::t_96ad52276967e2 54,107,129-132,150,197,221,241-244
+  s_28ae7db8033464::t_ebf8c7ebbce59c 88-91,103,127-128,133-149,151-160,172
+scripts/verify-public-deployment.mjs
+  s_28ae7db8033464::t_ebf8c7ebbce59c 110,155,161-173,221,242,283-288
+  s_28ae7db8033464::t_17ca84d5364f2c 34,80-84,96,248-250,252,255-259,261,271-275
+  s_28ae7db8033464::t_876245aae8a98e 1-33,35-79,85-95,97-109,111-154,156-160,174-220,222-241,243-247,251,253-254,260,262-270,276-282,289-349
+  s_28ae7db8033464::t_478e71bfe1e654 350-351
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "6a882f0a0c6acc04612fa24e867cf40c3f759dc0",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
