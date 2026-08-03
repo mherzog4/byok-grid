@@ -122,6 +122,11 @@ working tree:
   redirect rejection, unique request correlation, ingress-preserved security
   headers, and distinct response-bound CSP script nonces, reused by the
   compiled-standalone drill without treating loopback as ingress evidence;
+- a fail-closed, isolated-database remote libSQL drill that requires
+  authentication and current migrations, rejects application data, kills a
+  committed writer, observes the challenge from a second process, and compares
+  source/restore schema, migration, and table-count fingerprints before exact
+  cleanup;
 - full-digest pins for release bases, CI services, and Compose third-party
   images, with registry evidence that each referenced manifest supports both
   `linux/amd64` and `linux/arm64`.
@@ -157,7 +162,8 @@ dated evidence linked from a release issue or runbook record:
   this environment-specific gate;
 - test the chosen remote libSQL provider with at least two application replicas,
   a simulated replica/process loss, provider backup creation, and restore into
-  an isolated database before cutover;
+  an isolated database before cutover; retain the drill's prepared and
+  restore-verified markers with the provider operation evidence;
 - deploy the reference Helm release behind real TLS with an external secret
   manager, default-deny network policy, provider-specific egress, centralized
   logs, metrics, alert routing, and an operator-owned rollback decision path;

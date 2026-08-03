@@ -378,6 +378,9 @@ npm run benchmark:grid
 After a digest-pinned candidate is installed behind its real HTTPS ingress, run
 the read-only checks in
 [`docs/VERIFY_DEPLOYMENT.md`](docs/VERIFY_DEPLOYMENT.md).
+Multi-host candidates must also complete the isolated provider process-loss and
+restore procedure in
+[`docs/REMOTE_LIBSQL_DRILL.md`](docs/REMOTE_LIBSQL_DRILL.md).
 
 SQLite integration tests run in the default suite against isolated temporary
 databases. Historical PostgreSQL compatibility tests remain opt-in and require

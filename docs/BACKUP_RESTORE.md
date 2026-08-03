@@ -81,7 +81,9 @@ Use this production recovery sequence:
 - Run a restore drill after schema changes and at least quarterly. Record the
   backup digest, release version, duration, and operator approval.
 - Test remote libSQL provider exports by restoring into an isolated database;
-  provider snapshot existence alone is insufficient evidence.
+  provider snapshot existence alone is insufficient evidence. Follow the
+  authenticated process-loss and restore procedure in
+  [the remote libSQL drill](REMOTE_LIBSQL_DRILL.md).
 
 The CLI intentionally does not delete, rotate, upload, or overwrite backups.
 Those retention and storage actions remain explicit operator policy.

@@ -272,6 +272,12 @@ Use the repository's verified online-backup and new-file restore workflow in
 [the backup and restore guide](BACKUP_RESTORE.md). A copied SQLite file or an
 untested provider snapshot is not sufficient recovery evidence.
 
+For multi-host remote mode, run the isolated preproduction
+[`remote libSQL process-loss and restore drill`](REMOTE_LIBSQL_DRILL.md) against
+the chosen provider before cutover. The drill refuses local URLs, missing
+authentication, existing application rows, and a restore URL that aliases the
+source.
+
 Run SQLite migrations as a one-shot release job with `SQLITE_DATABASE_URL` and,
 for remote libSQL, `SQLITE_AUTH_TOKEN`. The web container needs those values,
 `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BYOK_GRID_MASTER_KEY`,
