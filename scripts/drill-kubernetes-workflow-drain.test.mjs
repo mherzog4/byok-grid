@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, it } from 'node:test';
@@ -21,18 +27,37 @@ const environment = {
   BYOK_GRID_DRILL_EMAIL: 'release-drill@example.com',
   BYOK_GRID_DRILL_KUBECTL_CONTEXT: 'preproduction-cluster',
   BYOK_GRID_DRILL_NAMESPACE: 'byok-grid-drill',
-  BYOK_GRID_DRILL_WORKER_DEPLOYMENT: 'byok-grid-workflow-worker',
+  BYOK_GRID_DRILL_WORKER_DEPLOYMENT: 'byok-grid-worker',
   BYOK_GRID_KUBERNETES_DRAIN_CONFIRM: 'isolated-preproduction-environment',
 };
 
 describe('authenticated Kubernetes workflow drain drill', () => {
+  it('targets the chart-owned worker deployment and container names', () => {
+    const template = readFileSync(
+      new URL(
+        '../deploy/helm/byok-grid/templates/worker-deployment.yaml',
+        import.meta.url
+      ),
+      'utf8'
+    );
+    assert.match(
+      template,
+      /name: \{\{ include "byok-grid\.fullname" \. \}\}-worker/u
+    );
+    assert.match(template, /containers:\s+- name: worker/u);
+    assert.equal(
+      environment.BYOK_GRID_DRILL_WORKER_DEPLOYMENT,
+      'byok-grid-worker'
+    );
+  });
+
   it('requires exact confirmation and canonical remote endpoints', () => {
     assert.deepEqual(parseDrainEnvironment(environment), {
       appOrigin: 'https://preproduction.example.com',
       context: 'preproduction-cluster',
       databaseAuthToken: 'secret-auth-token',
       databaseUrl: 'libsql://preproduction-db.example.com',
-      deployment: 'byok-grid-workflow-worker',
+      deployment: 'byok-grid-worker',
       email: 'release-drill@example.com',
       namespace: 'byok-grid-drill',
       timeoutMs: 120_000,
@@ -164,7 +189,7 @@ setTimeout(() => process.exit(0), 250);
       const evidence = JSON.parse(result.stdout.trim());
       assert.deepEqual(evidence, {
         context: 'preproduction-cluster',
-        deployment: 'byok-grid-workflow-worker',
+        deployment: 'byok-grid-worker',
         drainMs: evidence.drainMs,
         elapsedMs: evidence.elapsedMs,
         marker: 'BYOK_GRID_KUBERNETES_WORKER_DRAIN_VERIFIED',
@@ -200,7 +225,7 @@ setTimeout(() => process.exit(0), 250);
     const deployment = deploymentFixture();
     assert.deepEqual(inspectWorkerDeployment(deployment), {
       selector:
-        'app.kubernetes.io/component=workflow-worker,app.kubernetes.io/name=byok-grid',
+        'app.kubernetes.io/component=worker,app.kubernetes.io/name=byok-grid',
       terminationGracePeriodSeconds: 90,
     });
     assert.throws(
@@ -302,12 +327,12 @@ function deploymentFixture() {
       selector: {
         matchLabels: {
           'app.kubernetes.io/name': 'byok-grid',
-          'app.kubernetes.io/component': 'workflow-worker',
+          'app.kubernetes.io/component': 'worker',
         },
       },
       template: {
         spec: {
-          containers: [{ name: 'workflow-worker' }],
+          containers: [{ name: 'worker' }],
           terminationGracePeriodSeconds: 90,
         },
       },
@@ -332,7 +357,7 @@ function podListFixture(overrides = {}) {
           containerStatuses: [
             {
               lastState: {},
-              name: 'workflow-worker',
+              name: 'worker',
               ready: true,
               restartCount: 3,
               state: { running: { startedAt: '2026-08-03T00:00:00Z' } },

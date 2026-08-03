@@ -132,6 +132,11 @@ working tree:
   500-row workflow, and verifies clean previous termination, one restart,
   renewed Hatchet health, drain logs, durable completion, and returned-idle
   application metrics without emitting credentials or transport errors;
+- an environment-bound production capacity harness with mandatory dataset,
+  replica, concurrency, count, p95, and worker-retry limits; it measures grid,
+  FTS, optimistic-write, workflow-enqueue, and durable-completion paths through
+  HTTPS and remote libSQL, rejects mutable images or worker churn, and proves
+  exact isolated-fixture cleanup;
 - full-digest pins for release bases, CI services, and Compose third-party
   images, with registry evidence that each referenced manifest supports both
   `linux/amd64` and `linux/arm64`.
@@ -190,7 +195,9 @@ dated evidence linked from a release issue or runbook record:
   strongest available GHCR tag immutability controls;
 - measure web/API latency and SQLite/libSQL contention at the intended tenant,
   row, mutation, and workflow concurrency envelope; record a capacity limit and
-  alert threshold rather than treating a synthetic benchmark as a guarantee;
+  alert threshold using
+  [`PRODUCTION_CAPACITY_DRILL.md`](PRODUCTION_CAPACITY_DRILL.md) rather than
+  treating a synthetic benchmark as a guarantee;
 - exercise optional Airbyte ingestion and ClickHouse projection end to end in
   the supported environment before listing either adapter in that environment's
   supported production matrix;

@@ -22,6 +22,7 @@
     "db:migrate": "tsx src/migrate.ts",
     "db:restore": "tsx src/sqlite/backup-cli.ts restore",
     "drill:remote-libsql": "node --import tsx src/sqlite/remote-production-drill-cli.ts",
+    "drill:production-capacity": "node --import tsx src/sqlite/production-capacity-drill-cli.ts",
     "lint": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"

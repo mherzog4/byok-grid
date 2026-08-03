@@ -62,7 +62,7 @@ try {
   const previousLogs = await kubectlOutput(config, [
     'logs',
     restartedPod.name,
-    '--container=workflow-worker',
+    '--container=worker',
     '--previous',
   ]);
   validateDrainLogs(previousLogs);
@@ -173,7 +173,7 @@ async function signalWorker(config, podName) {
   await kubectl(config, [
     'exec',
     podName,
-    '--container=workflow-worker',
+    '--container=worker',
     '--',
     'node',
     '--eval',
@@ -206,7 +206,7 @@ async function verifyWorkerHealth(config, podName) {
   const result = await kubectlOutput(config, [
     'exec',
     podName,
-    '--container=workflow-worker',
+    '--container=worker',
     '--',
     'node',
     '--eval',
@@ -227,7 +227,7 @@ async function verifyWorkerIdle(config, podName) {
   const result = await kubectlOutput(config, [
     'exec',
     podName,
-    '--container=workflow-worker',
+    '--container=worker',
     '--',
     'node',
     '--eval',

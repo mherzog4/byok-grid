@@ -97,8 +97,8 @@ export function inspectWorkerDeployment(value) {
   }
 
   const containers = array(podSpec.containers, 'deployment containers');
-  if (!containers.some((candidate) => candidate?.name === 'workflow-worker')) {
-    throw new Error('The worker deployment has no workflow-worker container.');
+  if (!containers.some((candidate) => candidate?.name === 'worker')) {
+    throw new Error('The worker deployment has no worker container.');
   }
 
   return {
@@ -329,15 +329,13 @@ function conditionIsTrue(conditions, type) {
 
 function findWorkerContainer(containerStatuses) {
   const statuses = array(containerStatuses, 'container statuses');
-  const matches = statuses.filter(
-    (candidate) => candidate?.name === 'workflow-worker'
-  );
+  const matches = statuses.filter((candidate) => candidate?.name === 'worker');
   if (matches.length !== 1) {
     throw new Error(
-      'The workflow-worker pod must expose exactly one workflow-worker container status.'
+      'The workflow-worker pod must expose exactly one worker container status.'
     );
   }
-  return object(matches[0], 'workflow-worker container status');
+  return object(matches[0], 'worker container status');
 }
 
 function labelSelectorPart(value) {

@@ -60,7 +60,9 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    `docs/REMOTE_LIBSQL_DRILL.md` after a provider backup is restored into an
    isolated database. Retain the authenticated Kubernetes worker marker from
    `docs/KUBERNETES_WORKER_DRAIN_DRILL.md` after signalling an in-flight run in
-   the isolated reference deployment.
+   the isolated reference deployment. For stable promotion, retain the passing
+   declared-envelope record and supporting provider/ingress metrics from
+   `docs/PRODUCTION_CAPACITY_DRILL.md`.
 4. Create and push a signed annotated tag such as `v0.1.0-rc.1`.
 5. Let `.github/workflows/release.yml` verify source, build images, publish
    attestations, and create the GitHub Release. Do not manually replace failed

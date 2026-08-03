@@ -96,6 +96,12 @@ objectives of the supported deployment. The following expressions demonstrate
 safe cross-replica aggregation; their numeric thresholds are examples, not
 production promises.
 
+Use [`PRODUCTION_CAPACITY_DRILL.md`](PRODUCTION_CAPACITY_DRILL.md) to produce the
+candidate's declared-envelope evidence, then place alerts below the observed
+saturation boundary. The drill's worker retry delta is process-local evidence;
+retain provider and ingress telemetry for the same window before setting the
+deployment-wide limit.
+
 ```promql
 max(byok_grid_workflow_queue_oldest_age_seconds) > 120
 ```

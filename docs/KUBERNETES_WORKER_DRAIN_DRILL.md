@@ -57,7 +57,7 @@ BYOK_GRID_DRILL_DATABASE_AUTH_TOKEN=<least-privilege-isolated-database-token>
 BYOK_GRID_DRILL_EMAIL=release-drill@example.com
 BYOK_GRID_DRILL_KUBECTL_CONTEXT=<exact-preproduction-context>
 BYOK_GRID_DRILL_NAMESPACE=<isolated-namespace>
-BYOK_GRID_DRILL_WORKER_DEPLOYMENT=<helm-release>-workflow-worker
+BYOK_GRID_DRILL_WORKER_DEPLOYMENT=<helm-release>-worker
 ```
 
 The workflow fixture has a fixed 120-second deadline, while the worker must
@@ -73,7 +73,7 @@ The command performs this sequence:
    application metrics;
 2. creates a 500-row, 100-step workflow through the canonical HTTPS origin;
 3. waits until Hatchet exposes a running step;
-4. sends `SIGTERM` to PID 1 in the `workflow-worker` container;
+4. sends `SIGTERM` to PID 1 in the chart's `worker` container;
 5. requires the same pod UID to restart exactly once with previous exit code
    zero and reason `Completed` inside both the deployment grace period and the
    release gate's 90-second ceiling;
