@@ -5,11 +5,20 @@ import {
   createContentSecurityPolicyNonce,
 } from './lib/content-security-policy';
 import { enforceApiMutationOrigin } from './lib/request-origin';
+import {
+  createRequestId,
+  INTERNAL_REQUEST_ID_HEADER,
+  PUBLIC_REQUEST_ID_HEADER,
+} from './lib/request-correlation';
 
 export function proxy(request: NextRequest): Response {
+  const requestId = createRequestId();
   const nonce = createContentSecurityPolicyNonce();
   const contentSecurityPolicy = createContentSecurityPolicy(nonce);
   const requestHeaders = new Headers(request.headers);
+  requestHeaders.delete(INTERNAL_REQUEST_ID_HEADER);
+  requestHeaders.delete(PUBLIC_REQUEST_ID_HEADER);
+  requestHeaders.set(INTERNAL_REQUEST_ID_HEADER, requestId);
   requestHeaders.set('content-security-policy', contentSecurityPolicy);
   requestHeaders.set('x-nonce', nonce);
 
@@ -26,6 +35,7 @@ export function proxy(request: NextRequest): Response {
         { headers: { 'cache-control': 'no-store' }, status: 404 }
       );
       rejection.headers.set('content-security-policy', contentSecurityPolicy);
+      rejection.headers.set(PUBLIC_REQUEST_ID_HEADER, requestId);
       return rejection;
     }
 
@@ -35,6 +45,7 @@ export function proxy(request: NextRequest): Response {
     );
     if (rejection) {
       rejection.headers.set('content-security-policy', contentSecurityPolicy);
+      rejection.headers.set(PUBLIC_REQUEST_ID_HEADER, requestId);
       return rejection;
     }
   }
@@ -43,6 +54,7 @@ export function proxy(request: NextRequest): Response {
     request: { headers: requestHeaders },
   });
   response.headers.set('content-security-policy', contentSecurityPolicy);
+  response.headers.set(PUBLIC_REQUEST_ID_HEADER, requestId);
   return response;
 }
 

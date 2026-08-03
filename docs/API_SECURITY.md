@@ -115,6 +115,26 @@ the web runtime invalid. The TLS proxy must preserve `Origin`, `Referer`, and
 
 ## Response headers
 
+Every application response includes a server-generated UUIDv4 in
+`X-Request-ID`. The Next.js boundary removes caller-supplied `X-Request-ID` and
+`X-BYOK-Grid-Request-ID` values, forwards the generated ID internally, and
+returns it publicly. The ID is an opaque diagnostic join key, not an identity,
+authorization, tenant, or idempotency value.
+
+Unexpected API exceptions return a generic `500` body with the request ID and
+emit one structured JSON event containing only `event`, `area`, `errorName`,
+and `requestId`. Exception messages, stacks, request paths and queries,
+payloads, user or workspace identifiers, and credentials are excluded. Expected
+validation, access, conflict, and rate-limit failures retain their specific 4xx
+contracts and receive the global response header from the Proxy.
+
+A TLS proxy must preserve the application's response `X-Request-ID`. It must
+not copy an arbitrary inbound value into the private internal header or treat a
+request ID as proof that a request is trusted. Centralized HTTP access logs may
+record the response ID alongside bounded method, status, duration, and route
+template fields, but should not add raw queries, bodies, cookies, or
+authorization headers.
+
 Every application response carries a request-scoped CSP nonce. The script
 policy requires that nonce, enables `strict-dynamic`, and permits neither
 `unsafe-inline` nor `unsafe-eval` in production. Every server-rendered script
@@ -158,7 +178,9 @@ byte ceiling alone does not stop slow uploads or request floods.
 The web test suite recursively inspects every App Router API file. It fails if
 a route calls `request.json()` directly or fails to return the bounded reader's
 transport response before schema parsing. A separate source contract protects
-the Better Auth POST wrapper. Unit tests prove declared-length rejection,
+the Better Auth POST wrapper. The correlation source contract also rejects
+route-local unexpected logging, direct route 500 responses, and error helpers
+that omit the trusted request. Unit tests prove declared-length rejection,
 chunked-body cancellation, replay fidelity, UTF-8 byte accounting, malformed
 input handling, compressed-body rejection, and both production ceilings. The
 origin suite proves safe-method behavior, same-origin Origin/Referer handling,

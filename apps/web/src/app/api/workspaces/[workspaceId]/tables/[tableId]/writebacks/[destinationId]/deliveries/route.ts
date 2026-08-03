@@ -39,6 +39,6 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 202 }
     );
   } catch (error) {
-    return writebackErrorResponse(error);
+    return writebackErrorResponse(error, request);
   }
 }

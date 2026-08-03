@@ -7,13 +7,14 @@ import {
   SqliteGridValidationError,
 } from '@byok-grid/db';
 import { auth } from './auth';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
 export async function getApiUser(request: Request) {
   const session = await auth.api.getSession({ headers: request.headers });
   return session?.user ?? null;
 }
 
-export function gridErrorResponse(error: unknown): Response {
+export function gridErrorResponse(error: unknown, request: Request): Response {
   if (
     error instanceof GridAccessError ||
     error instanceof SqliteGridAccessError
@@ -39,8 +40,5 @@ export function gridErrorResponse(error: unknown): Response {
   ) {
     return Response.json({ error: error.message }, { status: 422 });
   }
-  console.error('Unexpected grid API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('grid', error, request);
 }

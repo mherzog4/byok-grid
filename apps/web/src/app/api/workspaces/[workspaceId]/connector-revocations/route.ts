@@ -24,7 +24,7 @@ export async function GET(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return connectorRevocationErrorResponse(error);
+    return connectorRevocationErrorResponse(error, request);
   }
 }
 
@@ -51,6 +51,6 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 201 }
     );
   } catch (error) {
-    return connectorRevocationErrorResponse(error);
+    return connectorRevocationErrorResponse(error, request);
   }
 }

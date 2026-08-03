@@ -22,6 +22,6 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 202 }
     );
   } catch (error) {
-    return sourceErrorResponse(error);
+    return sourceErrorResponse(error, request);
   }
 }

@@ -7,6 +7,7 @@ import {
   SqliteIngestionValidationError,
 } from '@byok-grid/db';
 import { MAXIMUM_INGESTION_BODY_BYTES } from '@byok-grid/domain';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
 export class IngestionBodyTooLargeError extends Error {}
 
@@ -62,7 +63,10 @@ export async function readBoundedJsonBody(request: Request): Promise<{
   }
 }
 
-export function ingestionErrorResponse(error: unknown): Response {
+export function ingestionErrorResponse(
+  error: unknown,
+  request: Request
+): Response {
   if (error instanceof IngestionBodyTooLargeError) {
     return Response.json({ error: error.message }, { status: 413 });
   }
@@ -84,8 +88,5 @@ export function ingestionErrorResponse(error: unknown): Response {
   ) {
     return Response.json({ error: error.message }, { status: 422 });
   }
-  console.error('Unexpected ingestion API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('ingestion', error, request);
 }

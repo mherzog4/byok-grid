@@ -6,8 +6,12 @@ import {
   SqliteWritebackConflictError,
   SqliteWritebackValidationError,
 } from '@byok-grid/db';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
-export function writebackErrorResponse(error: unknown): Response {
+export function writebackErrorResponse(
+  error: unknown,
+  request: Request
+): Response {
   if (
     error instanceof WritebackAccessError ||
     error instanceof SqliteWritebackAccessError
@@ -26,8 +30,5 @@ export function writebackErrorResponse(error: unknown): Response {
   ) {
     return Response.json({ error: error.message }, { status: 422 });
   }
-  console.error('Unexpected writeback API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('writeback', error, request);
 }

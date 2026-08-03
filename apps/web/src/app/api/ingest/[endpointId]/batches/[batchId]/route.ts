@@ -37,6 +37,6 @@ export async function GET(request: Request, context: RouteContext) {
       { headers: { 'cache-control': 'no-store' } }
     );
   } catch (error) {
-    return ingestionErrorResponse(error);
+    return ingestionErrorResponse(error, request);
   }
 }

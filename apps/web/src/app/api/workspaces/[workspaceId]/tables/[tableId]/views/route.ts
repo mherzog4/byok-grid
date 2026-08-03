@@ -24,7 +24,7 @@ export async function GET(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return gridErrorResponse(error);
+    return gridErrorResponse(error, request);
   }
 }
 
@@ -52,6 +52,6 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 201 }
     );
   } catch (error) {
-    return gridErrorResponse(error);
+    return gridErrorResponse(error, request);
   }
 }

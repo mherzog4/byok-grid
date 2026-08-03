@@ -37,6 +37,6 @@ export async function PATCH(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return webhookErrorResponse(error);
+    return webhookErrorResponse(error, request);
   }
 }

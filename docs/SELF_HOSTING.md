@@ -235,6 +235,10 @@ defaults:
   response headers plus the browser's `Origin`, `Referer`, and `Sec-Fetch-*`
   request headers; the proxy must not rewrite or merge CSP values or cache
   nonce-bearing HTML for reuse across requests;
+- preservation of the application-generated response `X-Request-ID` in ingress
+  access logs and client responses, without copying caller-supplied correlation
+  values into the private `X-BYOK-Grid-Request-ID` header or logging request
+  bodies, raw queries, cookies, authorization headers, or credentials;
 - private-network egress denial, DNS controls, and provider allowlisting around
   the worker as defense in depth;
 - route-aware request-size, slow-body, connection, concurrency, and request-rate

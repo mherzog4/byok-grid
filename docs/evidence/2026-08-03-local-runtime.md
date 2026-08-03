@@ -91,7 +91,10 @@ authentication proxy range both exit before readiness, while the diagnostic
 named the setting without echoing its value. The second used a public HTTPS
 canonical origin with signup disabled. It returned
 `400` for account creation and omitted the Create account control from
-server-rendered HTML. It also sent four failed sign-ins with four forged
+server-rendered HTML. Successful page responses, the disabled-signup response,
+and a cross-origin proxy rejection each returned a canonical, unique,
+server-generated `X-Request-ID`; forged public and private correlation values
+were replaced. It also sent four failed sign-ins with four forged
 single-value `X-Forwarded-For` addresses; the first three reached authentication
 and the fourth returned `429`, proving the production default ignored the
 spoofed rotation and retained one shared bucket. The third used the same
@@ -109,6 +112,7 @@ emitted by the command:
 ```text
 {"marker":"BYOK_GRID_PUBLIC_OPEN_SIGNUP_REJECTED"}
 {"marker":"BYOK_GRID_UNSAFE_PROXY_TRUST_REJECTED"}
+{"marker":"BYOK_GRID_REQUEST_CORRELATION_DRILL_PASSED"}
 {"marker":"BYOK_GRID_AUTH_RATE_LIMIT_DRILL_PASSED"}
 {"marker":"BYOK_GRID_SIGNUP_DISABLED_VERIFIED"}
 {"marker":"BYOK_GRID_SIGNUP_ALLOWLIST_VERIFIED"}

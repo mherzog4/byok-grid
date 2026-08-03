@@ -61,6 +61,15 @@ nonce-bearing HTML for reuse across requests or rewrite, merge, or strip its CSP
 Domain owners may add HSTS subdomain coverage or preload only after reviewing
 every affected hostname.
 
+The application replaces inbound correlation headers with a fresh UUIDv4 and
+returns it as `X-Request-ID`. Unexpected API failures expose only a generic
+message and that ID; their structured log contains a fixed area and event name,
+a bounded exception class name, and the same ID. Do not add exception messages,
+stacks, URLs, queries, bodies, cookies, authorization headers, credentials, or
+tenant identifiers to these events. Preserve the response ID through ingress
+and centralized logging, but never use it for authentication, authorization,
+tenancy, or idempotency.
+
 Public account provisioning fails closed. A non-loopback deployment defaults to
 `BYOK_GRID_SIGNUP_MODE=disabled`; it may use `allowlist` with a comma-separated
 `BYOK_GRID_SIGNUP_ALLOWED_EMAILS` secret. Fully open signup is accepted only on

@@ -70,15 +70,65 @@ async function verifyDisabledSignup() {
       `disabled-${crypto.randomUUID()}@example.test`
     );
     assertStatus(signup, 400, 'disabled signup');
+    const signupRequestId = assertRequestId(signup, 'disabled signup');
 
-    const page = await fetch(`${runtime.localUrl}/sign-in`);
+    const attackerPublicId = 'attacker-public-request-id';
+    const attackerInternalId = 'attacker-internal-request-id';
+    const page = await fetch(`${runtime.localUrl}/sign-in`, {
+      headers: {
+        'x-byok-grid-request-id': attackerInternalId,
+        'x-request-id': attackerPublicId,
+      },
+    });
     assertStatus(page, 200, 'disabled sign-in page');
+    const pageRequestId = assertRequestId(page, 'disabled sign-in page');
+    if (
+      pageRequestId === signupRequestId ||
+      pageRequestId === attackerPublicId ||
+      pageRequestId === attackerInternalId
+    ) {
+      throw new Error('Request correlation did not issue a fresh server ID.');
+    }
     const html = await page.text();
     if (html.includes('Create account')) {
       throw new Error('Disabled signup remained visible in the sign-in UI.');
     }
     const recoveryPage = await fetch(`${runtime.localUrl}/forgot-password`);
     assertStatus(recoveryPage, 404, 'disabled recovery page');
+
+    const crossOriginMutation = await fetch(
+      `${runtime.localUrl}/api/auth/sign-up/email`,
+      {
+        body: JSON.stringify({
+          email: `cross-origin-${crypto.randomUUID()}@example.test`,
+          name: 'Cross-origin Drill',
+          password: 'correct-horse-battery-staple-drill',
+        }),
+        headers: {
+          'content-type': 'application/json',
+          origin: 'https://attacker.example',
+          'x-request-id': attackerPublicId,
+        },
+        method: 'POST',
+      }
+    );
+    assertStatus(crossOriginMutation, 403, 'cross-origin signup');
+    const rejectionRequestId = assertRequestId(
+      crossOriginMutation,
+      'cross-origin signup'
+    );
+    if (
+      rejectionRequestId === attackerPublicId ||
+      rejectionRequestId === signupRequestId ||
+      rejectionRequestId === pageRequestId
+    ) {
+      throw new Error(
+        'A rejected request retained or reused a correlation identifier.'
+      );
+    }
+    console.log(
+      JSON.stringify({ marker: 'BYOK_GRID_REQUEST_CORRELATION_DRILL_PASSED' })
+    );
 
     const spoofedAttempts = [];
     for (let attempt = 0; attempt < 4; attempt += 1) {
@@ -635,6 +685,18 @@ function assertStatus(response, expected, operation) {
       `${operation} returned ${response.status}; expected ${expected}.`
     );
   }
+}
+
+function assertRequestId(response, operation) {
+  const requestId = response.headers.get('x-request-id');
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(
+      requestId ?? ''
+    )
+  ) {
+    throw new Error(`${operation} did not return a canonical request ID.`);
+  }
+  return requestId;
 }
 
 function sessionCookie(response, operation) {

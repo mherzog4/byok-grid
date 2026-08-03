@@ -40,7 +40,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       { headers: { 'cache-control': 'no-store' } }
     );
   } catch (error) {
-    return collaborationErrorResponse(error);
+    return collaborationErrorResponse(error, request);
   }
 }
 
@@ -59,6 +59,6 @@ export async function DELETE(request: Request, context: RouteContext) {
       { headers: { 'cache-control': 'no-store' } }
     );
   } catch (error) {
-    return collaborationErrorResponse(error);
+    return collaborationErrorResponse(error, request);
   }
 }

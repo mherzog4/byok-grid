@@ -6,8 +6,12 @@ import {
   SqliteWebhookConflictError,
   SqliteWebhookValidationError,
 } from '@byok-grid/db';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
-export function webhookErrorResponse(error: unknown): Response {
+export function webhookErrorResponse(
+  error: unknown,
+  request: Request
+): Response {
   if (
     error instanceof WebhookAccessError ||
     error instanceof SqliteWebhookAccessError
@@ -26,8 +30,5 @@ export function webhookErrorResponse(error: unknown): Response {
   ) {
     return Response.json({ error: error.message }, { status: 422 });
   }
-  console.error('Unexpected webhook API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('webhook', error, request);
 }

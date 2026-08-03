@@ -26,7 +26,7 @@ export async function GET(request: Request, context: RouteContext) {
       { headers: { 'cache-control': 'no-store' } }
     );
   } catch (error) {
-    return workspacePurgeErrorResponse(error);
+    return workspacePurgeErrorResponse(error, request);
   }
 }
 
@@ -61,6 +61,6 @@ export async function DELETE(request: Request, context: RouteContext) {
       }
     );
   } catch (error) {
-    return workspacePurgeErrorResponse(error);
+    return workspacePurgeErrorResponse(error, request);
   }
 }

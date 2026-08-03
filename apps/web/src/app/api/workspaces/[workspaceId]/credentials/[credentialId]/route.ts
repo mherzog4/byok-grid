@@ -21,6 +21,6 @@ export async function DELETE(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return credentialErrorResponse(error);
+    return credentialErrorResponse(error, request);
   }
 }

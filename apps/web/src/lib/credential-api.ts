@@ -4,8 +4,12 @@ import {
   SqliteCredentialAccessError,
   SqliteCredentialValidationError,
 } from '@byok-grid/db';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
-export function credentialErrorResponse(error: unknown): Response {
+export function credentialErrorResponse(
+  error: unknown,
+  request: Request
+): Response {
   if (
     error instanceof CredentialAccessError ||
     error instanceof SqliteCredentialAccessError
@@ -18,8 +22,5 @@ export function credentialErrorResponse(error: unknown): Response {
   ) {
     return Response.json({ error: error.message }, { status: 422 });
   }
-  console.error('Unexpected credential API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('credential', error, request);
 }

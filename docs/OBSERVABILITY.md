@@ -9,6 +9,30 @@ Neither endpoint implements application authorization. Do not route either
 through public ingress. Restrict access to readiness probes and the monitoring
 identity with a NetworkPolicy or equivalent infrastructure control.
 
+## Request and error correlation
+
+The web boundary generates a fresh UUIDv4 for every application request and
+returns it as `X-Request-ID`, replacing both public and private caller-supplied
+correlation headers. Unexpected API failures return that ID in the generic 500
+body and emit one JSON record with this fixed shape:
+
+```json
+{
+  "area": "workflow",
+  "errorName": "Error",
+  "event": "api.unexpected_error",
+  "requestId": "00000000-0000-4000-8000-000000000000"
+}
+```
+
+The example UUID illustrates the schema; runtime IDs are random. Collect the
+JSON record as structured fields and retain the response ID in ingress access
+logs so an operator can join a support report to one application event. Do not
+enrich the event with exception messages, stacks, raw paths or queries, request
+bodies, cookies, authorization headers, provider credentials, or user and
+workspace identifiers. Request IDs are operational metadata and must never be
+used for authorization or idempotency.
+
 ## Application metric contract
 
 The application endpoint exports only deployment-wide counts and ages. It does

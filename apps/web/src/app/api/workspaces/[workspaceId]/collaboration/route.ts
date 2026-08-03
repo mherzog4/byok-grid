@@ -26,7 +26,7 @@ export async function GET(request: Request, context: RouteContext) {
       { headers: { 'cache-control': 'no-store' } }
     );
   } catch (error) {
-    return collaborationErrorResponse(error);
+    return collaborationErrorResponse(error, request);
   }
 }
 
@@ -58,6 +58,6 @@ export async function POST(request: Request, context: RouteContext) {
       }
     );
   } catch (error) {
-    return collaborationErrorResponse(error);
+    return collaborationErrorResponse(error, request);
   }
 }

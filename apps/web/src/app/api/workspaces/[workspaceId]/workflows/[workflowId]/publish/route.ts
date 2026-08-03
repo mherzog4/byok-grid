@@ -30,6 +30,6 @@ export async function POST(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return workflowErrorResponse(error);
+    return workflowErrorResponse(error, request);
   }
 }

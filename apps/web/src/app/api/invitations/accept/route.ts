@@ -33,6 +33,6 @@ export async function POST(request: Request) {
       { headers: { 'cache-control': 'no-store' } }
     );
   } catch (error) {
-    return collaborationErrorResponse(error);
+    return collaborationErrorResponse(error, request);
   }
 }

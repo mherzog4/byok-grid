@@ -22,7 +22,7 @@ export async function GET(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return workflowErrorResponse(error);
+    return workflowErrorResponse(error, request);
   }
 }
 
@@ -43,6 +43,6 @@ export async function PATCH(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return workflowErrorResponse(error);
+    return workflowErrorResponse(error, request);
   }
 }

@@ -47,6 +47,6 @@ export async function PUT(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return gridErrorResponse(error);
+    return gridErrorResponse(error, request);
   }
 }

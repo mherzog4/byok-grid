@@ -6,8 +6,12 @@ import {
   SqliteConnectorRevocationConflictError,
   SqliteConnectorRevocationValidationError,
 } from '@byok-grid/db';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
-export function connectorRevocationErrorResponse(error: unknown): Response {
+export function connectorRevocationErrorResponse(
+  error: unknown,
+  request: Request
+): Response {
   if (
     error instanceof ConnectorRevocationAccessError ||
     error instanceof SqliteConnectorRevocationAccessError
@@ -26,8 +30,5 @@ export function connectorRevocationErrorResponse(error: unknown): Response {
   ) {
     return Response.json({ error: error.message }, { status: 422 });
   }
-  console.error('Unexpected connector revocation API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('connector-revocation', error, request);
 }

@@ -6,8 +6,12 @@ import {
   SqliteCollaborationConflictError,
   SqliteCollaborationValidationError,
 } from '@byok-grid/db';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
-export function collaborationErrorResponse(error: unknown): Response {
+export function collaborationErrorResponse(
+  error: unknown,
+  request: Request
+): Response {
   if (
     error instanceof CollaborationAccessError ||
     error instanceof SqliteCollaborationAccessError
@@ -26,8 +30,5 @@ export function collaborationErrorResponse(error: unknown): Response {
   ) {
     return Response.json({ error: error.message }, { status: 422 });
   }
-  console.error('Unexpected collaboration API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('collaboration', error, request);
 }

@@ -62,7 +62,7 @@ export async function GET(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return enrichmentErrorResponse(error);
+    return enrichmentErrorResponse(error, request);
   }
 }
 
@@ -97,6 +97,6 @@ export async function POST(request: Request, context: RouteContext) {
     if (error instanceof SqliteBulkRunConflictError) {
       return Response.json({ error: error.message }, { status: 409 });
     }
-    return enrichmentErrorResponse(error);
+    return enrichmentErrorResponse(error, request);
   }
 }

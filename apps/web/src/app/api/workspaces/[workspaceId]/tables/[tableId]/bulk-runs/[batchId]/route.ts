@@ -30,7 +30,7 @@ export async function GET(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return enrichmentErrorResponse(error);
+    return enrichmentErrorResponse(error, request);
   }
 }
 
@@ -52,6 +52,6 @@ export async function DELETE(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return enrichmentErrorResponse(error);
+    return enrichmentErrorResponse(error, request);
   }
 }

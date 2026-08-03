@@ -33,6 +33,6 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 201 }
     );
   } catch (error) {
-    return gridErrorResponse(error);
+    return gridErrorResponse(error, request);
   }
 }

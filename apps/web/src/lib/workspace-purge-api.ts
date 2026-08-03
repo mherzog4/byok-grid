@@ -6,8 +6,12 @@ import {
   SqliteWorkspacePurgeConflictError,
   SqliteWorkspacePurgeValidationError,
 } from '@byok-grid/db';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
-export function workspacePurgeErrorResponse(error: unknown): Response {
+export function workspacePurgeErrorResponse(
+  error: unknown,
+  request: Request
+): Response {
   if (
     error instanceof WorkspacePurgeAccessError ||
     error instanceof SqliteWorkspacePurgeAccessError
@@ -26,8 +30,5 @@ export function workspacePurgeErrorResponse(error: unknown): Response {
   ) {
     return Response.json({ error: error.message }, { status: 422 });
   }
-  console.error('Unexpected workspace purge API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('workspace-purge', error, request);
 }

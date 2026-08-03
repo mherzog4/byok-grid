@@ -29,7 +29,7 @@ export async function GET(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return sourceErrorResponse(error);
+    return sourceErrorResponse(error, request);
   }
 }
 
@@ -75,6 +75,6 @@ export async function POST(request: Request, context: RouteContext) {
         });
     return Response.json(source, { status: 201 });
   } catch (error) {
-    return sourceErrorResponse(error);
+    return sourceErrorResponse(error, request);
   }
 }

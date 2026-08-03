@@ -22,6 +22,6 @@ export async function DELETE(request: Request, context: RouteContext) {
       { headers: { 'cache-control': 'no-store' } }
     );
   } catch (error) {
-    return collaborationErrorResponse(error);
+    return collaborationErrorResponse(error, request);
   }
 }

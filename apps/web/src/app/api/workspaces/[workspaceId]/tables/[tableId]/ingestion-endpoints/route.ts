@@ -25,7 +25,7 @@ export async function GET(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return ingestionErrorResponse(error);
+    return ingestionErrorResponse(error, request);
   }
 }
 
@@ -53,6 +53,6 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 201 }
     );
   } catch (error) {
-    return ingestionErrorResponse(error);
+    return ingestionErrorResponse(error, request);
   }
 }

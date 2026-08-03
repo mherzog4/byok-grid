@@ -54,6 +54,6 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 201 }
     );
   } catch (error) {
-    return enrichmentErrorResponse(error);
+    return enrichmentErrorResponse(error, request);
   }
 }

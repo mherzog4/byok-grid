@@ -9,8 +9,12 @@ import {
   SqliteEnrichmentValidationError,
   SqliteBulkRunConflictError,
 } from '@byok-grid/db';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
-export function enrichmentErrorResponse(error: unknown): Response {
+export function enrichmentErrorResponse(
+  error: unknown,
+  request: Request
+): Response {
   if (
     error instanceof BulkRunConflictError ||
     error instanceof SqliteBulkRunConflictError ||
@@ -36,8 +40,5 @@ export function enrichmentErrorResponse(error: unknown): Response {
   ) {
     return Response.json({ error: error.message }, { status: 422 });
   }
-  console.error('Unexpected enrichment API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('enrichment', error, request);
 }

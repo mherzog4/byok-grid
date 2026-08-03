@@ -11,6 +11,7 @@ import {
 } from '@byok-grid/domain';
 import { sqliteDb } from '@/lib/sqlite-database';
 import { getApiUser } from '@/lib/grid-api';
+import { unexpectedApiErrorResponse } from '@/lib/request-correlation';
 import { z } from 'zod';
 
 const createColumnSchema = z.union([
@@ -63,9 +64,6 @@ export async function POST(request: Request, context: RouteContext) {
     if (error instanceof SqliteFormulaValidationError) {
       return Response.json({ error: error.message }, { status: 422 });
     }
-    console.error('Unexpected formula API error', {
-      errorName: error instanceof Error ? error.name : 'UnknownError',
-    });
-    return Response.json({ error: 'The request failed.' }, { status: 500 });
+    return unexpectedApiErrorResponse('formula', error, request);
   }
 }

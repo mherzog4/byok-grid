@@ -6,8 +6,12 @@ import {
   SqliteWorkflowRunValidationError,
 } from '@byok-grid/db';
 import { z } from 'zod';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
-export function workflowErrorResponse(error: unknown): Response {
+export function workflowErrorResponse(
+  error: unknown,
+  request: Request
+): Response {
   if (
     error instanceof SqliteWorkflowAccessError ||
     error instanceof SqliteWorkflowRunAccessError
@@ -34,8 +38,5 @@ export function workflowErrorResponse(error: unknown): Response {
       { status: 422 }
     );
   }
-  console.error('Unexpected workflow API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('workflow', error, request);
 }

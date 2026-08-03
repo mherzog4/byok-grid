@@ -52,7 +52,7 @@ export async function GET(request: Request, context: RouteContext) {
       { headers: { 'cache-control': 'no-store' } }
     );
   } catch (error) {
-    return ingestionErrorResponse(error);
+    return ingestionErrorResponse(error, request);
   }
 }
 
@@ -123,6 +123,6 @@ export async function POST(request: Request, context: RouteContext) {
       status: 202,
     });
   } catch (error) {
-    return ingestionErrorResponse(error);
+    return ingestionErrorResponse(error, request);
   }
 }

@@ -52,6 +52,10 @@ working tree:
   matching, nonce uniqueness across responses, HSTS, no-referrer, anti-framing,
   MIME-sniffing, browser-capability, and invitation no-store header contracts
   without framework identification;
+- server-generated request correlation that replaces caller-supplied public and
+  private IDs, reaches proxy-level rejections and compiled application
+  responses, and joins generic 500 responses to one bounded structured log
+  event without messages, stacks, URLs, payloads, credentials, or tenant data;
 - Rust connector-runner formatting, linting, and tests;
 - current-schema migration plus an N-1-to-current SQLite upgrade preserving
   tenant data, migration history, foreign keys, and integrity;

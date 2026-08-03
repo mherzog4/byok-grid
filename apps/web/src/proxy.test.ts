@@ -1,6 +1,10 @@
 import { NextRequest } from 'next/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { config, proxy } from './proxy';
+import {
+  INTERNAL_REQUEST_ID_HEADER,
+  PUBLIC_REQUEST_ID_HEADER,
+} from './lib/request-correlation';
 
 describe('Next.js application proxy', () => {
   afterEach(() => vi.unstubAllEnvs());
@@ -22,6 +26,7 @@ describe('Next.js application proxy', () => {
 
     expect(response.status).toBe(403);
     expectScriptNoncePolicy(response.headers);
+    expectRequestId(response.headers);
     await expect(response.json()).resolves.toEqual({
       error: 'Cross-origin API mutations are not allowed.',
     });
@@ -52,6 +57,10 @@ describe('Next.js application proxy', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('x-middleware-next')).toBe('1');
     expectScriptNoncePolicy(response.headers);
+    const requestId = expectRequestId(response.headers);
+    expect(
+      response.headers.get(`x-middleware-request-${INTERNAL_REQUEST_ID_HEADER}`)
+    ).toBe(requestId);
   });
 
   it('keeps raw session enumeration server-only', async () => {
@@ -69,8 +78,30 @@ describe('Next.js application proxy', () => {
       expect(response.status).toBe(404);
       expect(response.headers.get('cache-control')).toBe('no-store');
       expectScriptNoncePolicy(response.headers);
+      expectRequestId(response.headers);
       await expect(response.json()).resolves.toEqual({ error: 'Not found.' });
     }
+  });
+
+  it('replaces client-supplied correlation identifiers', () => {
+    vi.stubEnv('BETTER_AUTH_URL', 'https://grid.example.com');
+    const response = proxy(
+      new NextRequest('https://internal-web:3000/app', {
+        headers: {
+          [INTERNAL_REQUEST_ID_HEADER]: 'attacker-internal-id',
+          [PUBLIC_REQUEST_ID_HEADER]: 'attacker-public-id',
+        },
+      })
+    );
+
+    const requestId = expectRequestId(response.headers);
+    expect(requestId).not.toContain('attacker');
+    expect(
+      response.headers.get(`x-middleware-request-${INTERNAL_REQUEST_ID_HEADER}`)
+    ).toBe(requestId);
+    expect(
+      response.headers.get(`x-middleware-request-${PUBLIC_REQUEST_ID_HEADER}`)
+    ).toBeNull();
   });
 
   it('applies a fresh nonce policy to page responses', () => {
@@ -95,4 +126,12 @@ function expectScriptNoncePolicy(headers: Headers): string {
   const nonce = scriptDirective?.match(/'nonce-([^']+)'/u)?.[1];
   expect(nonce).toBeTruthy();
   return nonce!;
+}
+
+function expectRequestId(headers: Headers): string {
+  const requestId = headers.get(PUBLIC_REQUEST_ID_HEADER);
+  expect(requestId).toMatch(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u
+  );
+  return requestId!;
 }

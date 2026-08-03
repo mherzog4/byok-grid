@@ -9,6 +9,7 @@ import {
   stageSqliteCsvImportRows,
 } from '@byok-grid/db';
 import { getApiUser } from '@/lib/grid-api';
+import { unexpectedApiErrorResponse } from '@/lib/request-correlation';
 import { sqliteDb } from '@/lib/sqlite-database';
 import { parse } from 'csv-parse';
 import { Readable, Transform, type TransformCallback } from 'node:stream';
@@ -37,7 +38,7 @@ export async function GET(request: Request, context: RouteContext) {
       })
     );
   } catch (error) {
-    return importErrorResponse(error);
+    return importErrorResponse(error, request);
   }
 }
 
@@ -63,7 +64,7 @@ export async function POST(request: Request, context: RouteContext) {
       workspaceId,
     });
   } catch (error) {
-    return importErrorResponse(error);
+    return importErrorResponse(error, request);
   }
 
   const filename =
@@ -171,7 +172,7 @@ export async function POST(request: Request, context: RouteContext) {
         workspaceId,
       });
     }
-    return importErrorResponse(error);
+    return importErrorResponse(error, request);
   }
 }
 
@@ -198,7 +199,7 @@ class UploadByteLimit extends Transform {
   }
 }
 
-function importErrorResponse(error: unknown): Response {
+function importErrorResponse(error: unknown, request: Request): Response {
   if (error instanceof SqliteCsvImportAccessError) {
     return Response.json({ error: 'Not found.' }, { status: 404 });
   }
@@ -218,8 +219,5 @@ function importErrorResponse(error: unknown): Response {
       { status: 422 }
     );
   }
-  console.error('Unexpected CSV import error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The CSV import failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('csv-import', error, request);
 }

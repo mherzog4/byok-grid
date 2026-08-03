@@ -72,7 +72,7 @@ export async function GET(request: Request, context: RouteContext) {
       },
     });
   } catch (error) {
-    return gridErrorResponse(error);
+    return gridErrorResponse(error, request);
   }
 }
 

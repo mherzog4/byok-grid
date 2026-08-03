@@ -6,8 +6,12 @@ import {
   SqliteSourceConflictError,
   SqliteSourceValidationError,
 } from '@byok-grid/db';
+import { unexpectedApiErrorResponse } from './request-correlation';
 
-export function sourceErrorResponse(error: unknown): Response {
+export function sourceErrorResponse(
+  error: unknown,
+  request: Request
+): Response {
   if (
     error instanceof SourceAccessError ||
     error instanceof SqliteSourceAccessError
@@ -26,8 +30,5 @@ export function sourceErrorResponse(error: unknown): Response {
   ) {
     return Response.json({ error: error.message }, { status: 422 });
   }
-  console.error('Unexpected source API error', {
-    errorName: error instanceof Error ? error.name : 'UnknownError',
-  });
-  return Response.json({ error: 'The request failed.' }, { status: 500 });
+  return unexpectedApiErrorResponse('source', error, request);
 }
