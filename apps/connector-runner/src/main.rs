@@ -10,6 +10,7 @@ use byok_grid_connector_runner::{
 };
 use serde_json::json;
 use std::env;
+use std::future::Future;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -63,9 +64,10 @@ async fn main() -> anyhow::Result<()> {
         .layer(TraceLayer::new_for_http())
         .with_state(state);
     let listener = tokio::net::TcpListener::bind(listen).await?;
+    let shutdown = shutdown_signal()?;
     info!(%listen, "connector runner listening");
     axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
+        .with_graceful_shutdown(shutdown)
         .await?;
     Ok(())
 }
@@ -156,6 +158,38 @@ fn optional_boolean(name: &str, default: bool) -> anyhow::Result<bool> {
     }
 }
 
-async fn shutdown_signal() {
-    let _ = tokio::signal::ctrl_c().await;
+#[cfg(unix)]
+fn shutdown_signal() -> anyhow::Result<impl Future<Output = ()>> {
+    use tokio::signal::unix::{SignalKind, signal};
+
+    // Construct both streams before accepting traffic. Tokio keeps the
+    // process-wide handlers installed after registration, so a setup failure
+    // must stop startup rather than leave SIGTERM behavior ambiguous.
+    let mut interrupt = signal(SignalKind::interrupt())?;
+    let mut terminate = signal(SignalKind::terminate())?;
+    Ok(async move {
+        tokio::select! {
+            _ = interrupt.recv() => {
+                info!(signal = "SIGINT", "connector runner received shutdown signal");
+            }
+            _ = terminate.recv() => {
+                info!(signal = "SIGTERM", "connector runner received shutdown signal");
+            }
+        }
+    })
+}
+
+#[cfg(not(unix))]
+fn shutdown_signal() -> anyhow::Result<impl Future<Output = ()>> {
+    Ok(async {
+        match tokio::signal::ctrl_c().await {
+            Ok(()) => info!(
+                signal = "CTRL_C",
+                "connector runner received shutdown signal"
+            ),
+            Err(error) => {
+                tracing::error!(error = %error, "connector runner signal listener failed")
+            }
+        }
+    })
 }

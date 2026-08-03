@@ -6,6 +6,40 @@ This record is reproducible repository evidence; it is not a substitute for an
 authenticated production Hatchet, remote libSQL, or reference Kubernetes
 deployment.
 
+## Connector-runner SIGTERM drain
+
+The Unix integration test launched the real compiled connector-runner binary
+against the signed reference registry, waited for the listener, and sent the
+same `SIGTERM` used by Kubernetes:
+
+```text
+cargo test --locked --package byok-grid-connector-runner \
+  --test signal_shutdown -- --nocapture
+```
+
+The child process emitted its explicit `SIGTERM` shutdown log and exited with
+code 0 rather than being reported as signal-terminated. The retained marker was:
+
+```text
+{"exitCode":0,"marker":"BYOK_GRID_CONNECTOR_RUNNER_SIGTERM_DRILL_PASSED","signal":"SIGTERM"}
+```
+
+The Helm verifier separately rendered the optional runner with a 60-second
+startup window, five-second endpoint-withdrawal delay, and 60-second total
+termination grace period, and rejected delay/grace collisions. This proves the
+repository's process and chart contracts.
+
+The production `connector-runner` Docker target was then built and loaded. Its
+image configuration named user `65532:65532` and
+`/usr/local/bin/connector-runner` as the entrypoint. The image ran read-only
+against the signed reference registry, logged listener readiness, and received
+Docker `SIGTERM` with the runner binary as container PID 1. The final state was
+`ExitCode: 0`, `OOMKilled: false`, and the log contained
+`connector runner received shutdown signal signal="SIGTERM"`. The disposable
+container and image tag were removed after inspection. An enabled reference
+deployment must still exercise termination during one of its reviewed real
+connector invocations.
+
 ## Standalone web signal drain
 
 After the production build, this command started the compiled standalone

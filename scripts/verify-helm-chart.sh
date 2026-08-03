@@ -71,6 +71,9 @@ grep -q 'name: byok-grid-byok-grid-default-deny-ingress' "$default_render"
 grep -q 'name: byok-grid-byok-grid-web-ingress' "$default_render"
 grep -q 'name: byok-grid-byok-grid-worker-monitoring-ingress' "$default_render"
 grep -q 'name: byok-grid-full-byok-grid-connector-runner' "$full_render"
+grep -q 'terminationGracePeriodSeconds: 60' "$full_render"
+grep -q -- '- sleep 5' "$full_render"
+test "$(grep -c 'startupProbe:' "$full_render")" -eq 2
 grep -q 'kubernetes.io/metadata.name: ingress-nginx' "$full_render"
 grep -q 'kubernetes.io/metadata.name: monitoring' "$full_render"
 grep -q 'name: byok-grid-egress-byok-grid-default-deny-runtime-egress' "$egress_render"
@@ -170,6 +173,20 @@ fi
 if helm template invalid-web-grace "$chart_dir" \
   --set web.terminationGracePeriodSeconds=14 >/dev/null 2>&1; then
   echo 'expected a web termination grace period below 15 seconds to fail' >&2
+  exit 1
+fi
+
+if helm template invalid-runner-drain "$chart_dir" \
+  --values "$chart_dir/ci-values.yaml" \
+  --set connectorRunner.terminationGracePeriodSeconds=30 \
+  --set connectorRunner.preStopSleepSeconds=30 >/dev/null 2>&1; then
+  echo 'expected a connector-runner preStop delay consuming the full grace period to fail' >&2
+  exit 1
+fi
+
+if helm template invalid-runner-grace "$chart_dir" \
+  --set connectorRunner.terminationGracePeriodSeconds=14 >/dev/null 2>&1; then
+  echo 'expected a connector-runner termination grace period below 15 seconds to fail' >&2
   exit 1
 fi
 

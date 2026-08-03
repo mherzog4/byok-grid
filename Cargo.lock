@@ -147,6 +147,7 @@ dependencies = [
  "hex",
  "hmac",
  "http",
+ "libc",
  "serde",
  "serde_json",
  "sha2",

@@ -157,6 +157,22 @@ performs the request through DNS-pinned egress, then reinvokes the guest with a
 bounded response and the guest's JSON continuation state. The default action
 budget is four HTTP effects.
 
+## Runtime shutdown
+
+In Kubernetes, the runner registers both `SIGINT` and `SIGTERM` before serving.
+Its default five-second pre-stop delay withdraws the internal Service endpoint,
+then Axum stops accepting requests and drains active invocations inside the
+remaining 55 seconds of a 60-second grace period. Tune
+`connectorRunner.preStopSleepSeconds` and
+`connectorRunner.terminationGracePeriodSeconds` from the reviewed connector
+set; fuel is deterministic but does not itself define a wall-clock duration.
+
+The binary-level `SIGTERM` contract is covered by the Rust integration suite and
+documented in [ADR 0047](adr/0047-connector-runner-sigterm-draining.md). A
+forced shutdown after the grace period remains a retryable workflow failure;
+connectors must preserve the idempotency rules documented for each external
+effect.
+
 ## Review checklist
 
 - Rebuild the artifact from reviewed source and compare its SHA-256 digest.

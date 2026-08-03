@@ -219,10 +219,19 @@ read-only PVC containing the reviewed registry, detached signature, and pinned
 Wasm artifacts, and configure the same public trust map for the web, worker,
 and runner. The schema rejects `allowUnsignedRegistry=true`.
 
+The runner validates and compiles its registry before binding. Its startup
+probe allows 60 seconds for that work. During termination, Kubernetes withdraws
+the endpoint during a five-second pre-stop delay, then the runner's explicit
+`SIGTERM` handler asks Axum to stop accepting connections and drain active Wasm
+requests within the remaining 55 seconds. The delay must remain shorter than
+`connectorRunner.terminationGracePeriodSeconds`; tune both from observed
+connector duration. See
+[ADR 0047](adr/0047-connector-runner-sigterm-draining.md).
+
 For analytics, set `analyticsProjector.enabled=true` and point it at an
 independently secured HTTPS ClickHouse endpoint. The projector uses SQLite's
-independent analytics lease fields to claim allowlisted outbox events. It does not become part
-of web availability or product authorization.
+independent analytics lease fields to claim allowlisted outbox events. It does
+not become part of web availability or product authorization.
 
 See `docs/COMMUNITY_CONNECTORS.md` and `docs/CLICKHOUSE_ANALYTICS.md` for the
 security and data contracts behind those flags.

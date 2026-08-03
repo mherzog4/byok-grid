@@ -253,11 +253,27 @@
         { "$ref": "#/definitions/imageWorkload" },
         {
           "type": "object",
-          "required": ["enabled", "existingClaim", "allowUnsignedRegistry"],
+          "required": [
+            "enabled",
+            "existingClaim",
+            "allowUnsignedRegistry",
+            "terminationGracePeriodSeconds",
+            "preStopSleepSeconds"
+          ],
           "properties": {
             "enabled": { "type": "boolean" },
             "existingClaim": { "type": "string" },
-            "allowUnsignedRegistry": { "const": false }
+            "allowUnsignedRegistry": { "const": false },
+            "terminationGracePeriodSeconds": {
+              "type": "integer",
+              "minimum": 15,
+              "maximum": 300
+            },
+            "preStopSleepSeconds": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60
+            }
           },
           "if": { "properties": { "enabled": { "const": true } } },
           "then": { "properties": { "existingClaim": { "minLength": 1 } } }

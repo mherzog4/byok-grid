@@ -153,6 +153,8 @@ migration:
 
 connectorRunner:
   enabled: false
+  terminationGracePeriodSeconds: 60
+  preStopSleepSeconds: 5
   image:
     repository: ghcr.io/mherzog4/byok-grid-connector-runner
     pullPolicy: IfNotPresent

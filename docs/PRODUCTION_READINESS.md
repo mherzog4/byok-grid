@@ -56,7 +56,9 @@ working tree:
   private IDs, reaches proxy-level rejections and compiled application
   responses, and joins generic 500 responses to one bounded structured log
   event without messages, stacks, URLs, payloads, credentials, or tenant data;
-- Rust connector-runner formatting, linting, and tests;
+- Rust connector-runner formatting, linting, tests, fail-fast Unix signal
+  registration, a real child-process `SIGTERM`, and production-image PID 1
+  evidence proving clean Axum shutdown as the unprivileged runtime user;
 - current-schema migration plus an N-1-to-current SQLite upgrade preserving
   tenant data, migration history, foreign keys, and integrity;
 - driver-level five-second local SQLite busy handling applied to every internal
@@ -95,8 +97,8 @@ working tree:
 - Compose rendering and Helm security/health/migration contract verification;
 - chart-owned default-deny runtime ingress, trusted web and monitoring peer
   contracts, permanent connector-runner egress denial, opt-in component-scoped
-  runtime egress isolation, and render-time rejection of an exposed Ingress
-  without a trusted peer;
+  runtime egress isolation, bounded connector-runner startup and termination,
+  and render-time rejection of an exposed Ingress without a trusted peer;
 - local builds of the web, worker, migration, and maintenance image targets;
 - release metadata, Helm chart, connector SDK package, and checksum dry run;
 - digest-aware Helm rendering plus a tested release-asset generator that
