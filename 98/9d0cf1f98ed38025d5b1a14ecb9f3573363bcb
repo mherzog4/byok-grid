@@ -1,0 +1,125 @@
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/writebacks/[destinationId]/deliveries/route.ts
+  s_28ae7db8033464::t_161eea96f4084f 1,19-21
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_b6c6b8d6c01b9e 30
+  s_28ae7db8033464::t_4401b8b21dd53d 38-42
+  s_28ae7db8033464::t_556cad76d031e6 25-29,34
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/columns/http/route.ts
+  s_28ae7db8033464::t_a3d275bc70097b 1,25-26
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/columns/formula/route.ts
+  s_28ae7db8033464::t_a3d275bc70097b 1,35-36
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/archive/route.ts
+  s_28ae7db8033464::t_27b8e4db0ab94d 1,38-40
+apps/web/src/app/api/invitations/accept/route.ts
+  s_28ae7db8033464::t_9b520f2d05a95a 1,16-18
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/ingestion-endpoints/route.ts
+  s_28ae7db8033464::t_a3d275bc70097b 1,35-37
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_6d4c323c1bf33b 19-22
+docs/API_SECURITY.md
+  s_28ae7db8033464::t_6d4c323c1bf33b 7-9,13-17,28-32,48,63-66
+  s_28ae7db8033464::t_e671225f7011c1 1-6,10-12,18-27,33-47,49-62,67-78
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/webhooks/route.ts
+  s_28ae7db8033464::t_161eea96f4084f 1,35-37
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/columns/waterfall/route.ts
+  s_28ae7db8033464::t_a3d275bc70097b 1,35-36
+apps/web/src/app/api/workspaces/[workspaceId]/workflows/[workflowId]/runs/route.ts
+  s_28ae7db8033464::t_4836516cb4a6ff 1,38-40
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/rows/[rowId]/cells/[columnId]/route.ts
+  s_28ae7db8033464::t_4d7382eb978400 1,26-27
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/columns/input/route.ts
+  s_28ae7db8033464::t_a3d275bc70097b 1,16-18
+apps/web/src/app/api/workspaces/[workspaceId]/credentials/route.ts
+  s_28ae7db8033464::t_9b520f2d05a95a 1,52-53
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/sources/route.ts
+  s_28ae7db8033464::t_4d7382eb978400 1,39-40
+SECURITY.md
+  s_28ae7db8033464::t_6d4c323c1bf33b 39-46
+  s_28ae7db8033464::t_e671225f7011c1 47
+README.md
+  s_28ae7db8033464::t_6d4c323c1bf33b 94-96
+  s_28ae7db8033464::t_e671225f7011c1 297-298
+apps/web/src/app/api/auth/[...all]/route.ts
+  s_28ae7db8033464::t_69668fc76014c9 2-5,8-19
+apps/web/src/app/api/workspaces/[workspaceId]/connector-revocations/[revocationId]/route.ts
+  s_28ae7db8033464::t_9b520f2d05a95a 1,15-17
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/sources/[sourceId]/route.ts
+  s_28ae7db8033464::t_4d7382eb978400 1,19-21
+apps/web/src/app/api/workspaces/[workspaceId]/collaboration/route.ts
+  s_28ae7db8033464::t_27b8e4db0ab94d 1,37-39
+apps/web/src/app/api/workspaces/[workspaceId]/purge/route.ts
+  s_28ae7db8033464::t_27b8e4db0ab94d 1,37-39
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/columns/[columnId]/type/route.ts
+  s_28ae7db8033464::t_a3d275bc70097b 1,55-57
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/webhooks/[destinationId]/route.ts
+  s_28ae7db8033464::t_161eea96f4084f 1,19-21
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/writebacks/route.ts
+  s_28ae7db8033464::t_161eea96f4084f 1,35-37
+apps/web/src/app/api/workspaces/[workspaceId]/workflows/[workflowId]/publish/route.ts
+  s_28ae7db8033464::t_4836516cb4a6ff 1,20-22
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/columns/[columnId]/archive/route.ts
+  s_28ae7db8033464::t_27b8e4db0ab94d 1,43-45
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/views/[viewId]/route.ts
+  s_28ae7db8033464::t_4d7382eb978400 1,18-20
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/views/route.ts
+  s_28ae7db8033464::t_4d7382eb978400 1,35-37
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/columns/[columnId]/bulk-runs/route.ts
+  s_28ae7db8033464::t_a3d275bc70097b 1,73-75
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/columns/connector/route.ts
+  s_28ae7db8033464::t_a3d275bc70097b 1,40-41
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/route.ts
+  s_28ae7db8033464::t_4d7382eb978400 1,50-52
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/writebacks/[destinationId]/route.ts
+  s_28ae7db8033464::t_161eea96f4084f 1,19-21
+apps/web/src/lib/request-body.test.ts
+  s_28ae7db8033464::t_3266ea578cdcd3 118-126
+  s_28ae7db8033464::t_f52e80788fbfd6 21,27-29,39
+  s_28ae7db8033464::t_f647b635e47d59 4-9,98-117,151-162,165,167
+  s_28ae7db8033464::t_eec573995b7d87 134-148
+  s_28ae7db8033464::t_7795fb4bc9614b 1-3,10-16,18-20,22-26,30-34,40-57,61-75,79-85,89-91,127-133,149-150,163-164,166,168-201
+  s_28ae7db8033464::t_d1f3f3e17f4c7a 17,35-38,58-60,76-78,86-88
+  s_28ae7db8033464::t_1d1c70da45c06f 92-97
+apps/web/src/lib/request-body.ts
+  s_28ae7db8033464::t_1d1c70da45c06f 62
+  s_28ae7db8033464::t_33609818cebc16 40
+  s_28ae7db8033464::t_f52e80788fbfd6 63,67-74
+  s_28ae7db8033464::t_3266ea578cdcd3 54-59,120-129
+  s_28ae7db8033464::t_d1f3f3e17f4c7a 13,102-104,106-111,114-119,130-131
+  s_28ae7db8033464::t_7795fb4bc9614b 1,3-12,50-53,60-61,64-66,75-76,78-98,100-101,112-113,132-133,138
+  s_28ae7db8033464::t_69668fc76014c9 2,14-39,41-49,77,99,105,134-137
+apps/web/src/app/api/workspaces/[workspaceId]/tables/[tableId]/webhooks/[destinationId]/deliveries/route.ts
+  s_28ae7db8033464::t_161eea96f4084f 1,24-26
+apps/web/src/app/api/workspaces/[workspaceId]/workflows/route.ts
+  s_28ae7db8033464::t_4836516cb4a6ff 1,32-34
+apps/web/src/app/api/workspaces/[workspaceId]/tables/route.ts
+  s_28ae7db8033464::t_27b8e4db0ab94d 1,16-18
+apps/web/src/app/api/workspaces/[workspaceId]/connector-revocations/route.ts
+  s_28ae7db8033464::t_27b8e4db0ab94d 1,34-36
+apps/web/src/app/api/workspaces/[workspaceId]/members/[targetUserId]/route.ts
+  s_28ae7db8033464::t_27b8e4db0ab94d 1,24-26
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_e671225f7011c1 109-111
+  s_28ae7db8033464::t_6d4c323c1bf33b 118-122
+  s_28ae7db8033464::t_0b96561eb0e9ef 123
+apps/web/src/workflow-sqlite.e2e.test.ts
+  s_28ae7db8033464::t_f647b635e47d59 3-6,47-62
+  s_28ae7db8033464::t_491ee571913b5f 104-121
+apps/web/src/app/api/workspaces/[workspaceId]/workflows/[workflowId]/route.ts
+  s_28ae7db8033464::t_4836516cb4a6ff 1,33-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "989d0cf1f98ed38025d5b1a14ecb9f3573363bcb",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
