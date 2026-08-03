@@ -133,6 +133,11 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
 
@@ -184,6 +189,35 @@ jobs:
           ignore-unfixed: true
           vuln-type: os,library
           severity: HIGH,CRITICAL
+
+      - name: Smoke immutable image on both architectures
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-smoke
+          for platform in linux/amd64 linux/arm64; do
+            timeout --signal=KILL 30s docker run --rm --pull=always \
+              --platform "$platform" \
+              --network=none \
+              --read-only \
+              --cap-drop=ALL \
+              --security-opt=no-new-privileges \
+              --pids-limit=64 \
+              "$IMAGE@${{ steps.build.outputs.digest }}" \
+              --image-smoke |
+              node scripts/verify-release-image-smoke.mjs \
+                '${{ matrix.target }}' \
+                "$platform" \
+                '${{ steps.build.outputs.digest }}' \
+                >> "release-smoke/${{ matrix.target }}.jsonl"
+          done
+
+      - name: Upload multi-architecture smoke evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: release-smoke-${{ matrix.target }}
+          path: release-smoke/${{ matrix.target }}.jsonl
+          retention-days: 14
 
       - name: Attest image digest
         uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4

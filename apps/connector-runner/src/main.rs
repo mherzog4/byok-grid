@@ -31,6 +31,10 @@ async fn main() -> anyhow::Result<()> {
                 .unwrap_or_else(|_| "byok_grid_connector_runner=info,tower_http=info".into()),
         )
         .init();
+    if env::args().nth(1).as_deref() == Some("--image-smoke") {
+        println!(r#"{{"marker":"BYOK_GRID_IMAGE_SMOKE_READY","target":"connector-runner"}}"#);
+        return Ok(());
+    }
     let registry_path = required_env("CONNECTOR_RUNNER_REGISTRY_PATH")?;
     let shared_secret = required_env("CONNECTOR_RUNNER_SHARED_SECRET")?.into_bytes();
     if shared_secret.len() < 32 {

@@ -65,14 +65,18 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    `docs/PRODUCTION_CAPACITY_DRILL.md`.
 4. Create and push a signed annotated tag such as `v0.1.0-rc.1`.
 5. Let `.github/workflows/release.yml` verify source, build images, publish
-   attestations, and create the GitHub Release. Do not manually replace failed
-   assets or move the tag.
+   attestations, smoke every immutable image on `linux/amd64` and `linux/arm64`,
+   and create the GitHub Release. Retain the seven two-record
+   `release-smoke-<target>` artifacts. Do not manually replace failed assets or
+   move the tag.
 6. Verify every released file and image using `docs/VERIFY_RELEASE.md`, then
    install a digest-pinned candidate in the reference environment by applying
    the release's generated `values.digests.yaml` after operator values.
 7. Run the read-only public deployment verifier from
    `docs/VERIFY_DEPLOYMENT.md` against the canonical TLS origin and retain its
    structured success record with the deployment evidence.
+   Before stable promotion, repeat the isolated image smoke from
+   `docs/MULTI_ARCH_IMAGE_SMOKE.md` on native hosts for both architectures.
 
 The image job initially publishes only commit-scoped staging tags. Each image
 is scanned at its immutable digest and attested only after the scan passes. A

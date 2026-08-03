@@ -19,6 +19,19 @@ const catalog = {
 };
 
 describe('Airbyte destination commands', () => {
+  it('emits the side-effect-free release image marker', async () => {
+    const emitted: string[] = [];
+    expect(
+      await main(['--image-smoke'], {
+        runtime: runtimeWithResponses(emitted, []),
+      })
+    ).toBe(0);
+    expect(JSON.parse(emitted.join('\n'))).toEqual({
+      marker: 'BYOK_GRID_IMAGE_SMOKE_READY',
+      target: 'airbyte-destination',
+    });
+  });
+
   it('emits protocol spec and connection status documents', async () => {
     const emitted: string[] = [];
     const runtime = runtimeWithResponses(emitted, [capabilityResponse()]);

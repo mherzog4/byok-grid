@@ -64,7 +64,7 @@ its contents.
 | `reference-deployment`         | Digest-pinned Helm release, TLS, external secrets, network policy, centralized telemetry, alerts, and rollback ownership        |
 | `public-ingress-and-proxy`     | Canonical deployment marker plus real proxy-chain, direct-access denial, and multi-network edge/application rate-limit evidence |
 | `smtp-delivery`                | TLS verification/recovery delivery, SPF/DKIM/DMARC alignment, and provider failure monitoring                                   |
-| `multi-architecture-smoke`     | Boot and smoke results for published `linux/amd64` and `linux/arm64` manifest-list images                                       |
+| `multi-architecture-smoke`     | Seven release-workflow JSONL artifacts plus native-host boot records for published `linux/amd64` and `linux/arm64` digests      |
 | `release-tag-protection`       | Protected release tags/ruleset and strongest available GHCR immutability evidence                                               |
 | `production-capacity`          | Passing declared-envelope marker, provider/ingress metrics, supported limit, alert threshold, and saturation response           |
 | `observation-window`           | Start/end record and zero unresolved security, correctness, restore, or data-loss blockers                                      |
@@ -74,6 +74,8 @@ These marker arrays are exact:
 
 - `authenticated-worker-drain`:
   `BYOK_GRID_KUBERNETES_WORKER_DRAIN_VERIFIED`;
+- `multi-architecture-smoke`:
+  `BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED`;
 - `remote-libsql-recovery`:
   `BYOK_GRID_REMOTE_LIBSQL_DRILL_PREPARED` and
   `BYOK_GRID_REMOTE_LIBSQL_RESTORE_VERIFIED`;

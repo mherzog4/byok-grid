@@ -34,7 +34,7 @@
     {
       "artifactSha256": "<64-character-lowercase-SHA-256>",
       "id": "multi-architecture-smoke",
-      "markers": [],
+      "markers": ["BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED"],
       "reference": "https://evidence.example.com/releases/<version>/multi-architecture-smoke",
       "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
     },

@@ -111,6 +111,37 @@ if (
   fail('The release scanner must inspect the immutable build digest.');
 }
 
+for (const smokeContract of [
+  'set -euo pipefail',
+  'for platform in linux/amd64 linux/arm64',
+  'timeout --signal=KILL 30s docker run --rm --pull=always',
+  '--platform "$platform"',
+  '--network=none',
+  '--read-only',
+  '--cap-drop=ALL',
+  '--security-opt=no-new-privileges',
+  '--pids-limit=64',
+  '--image-smoke',
+  'scripts/verify-release-image-smoke.mjs',
+  'release-smoke-${{ matrix.target }}',
+]) {
+  if (!releaseWorkflow.includes(smokeContract)) {
+    fail('Every release image must retain isolated multi-architecture smoke.');
+  }
+}
+
+if (releaseWorkflow.includes('smoke_output=')) {
+  fail('Release image output must stream directly into the bounded verifier.');
+}
+
+if (
+  !/FROM \$\{NODE_IMAGE\} AS worker-runtime[\s\S]*?ENV TSX_DISABLE_CACHE=1/u.test(
+    dockerfile
+  )
+) {
+  fail('The TypeScript worker images must not require a writable cache path.');
+}
+
 if (releaseWorkflow.includes('type=raw,value=${{ env.VERSION }}')) {
   fail('Version image tags must not be published before every scan passes.');
 }

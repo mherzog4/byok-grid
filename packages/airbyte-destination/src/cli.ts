@@ -26,6 +26,15 @@ export async function main(
   const runtime = dependencies.runtime ?? defaultRuntime();
   const readJsonFile = dependencies.readJson ?? readJson;
   const command = args[0]?.replace(/^--/, '');
+  if (command === 'image-smoke') {
+    runtime.emit(
+      JSON.stringify({
+        marker: 'BYOK_GRID_IMAGE_SMOKE_READY',
+        target: 'airbyte-destination',
+      })
+    );
+    return 0;
+  }
   if (command === 'spec') {
     runtime.emit(JSON.stringify(destinationSpecification));
     return 0;

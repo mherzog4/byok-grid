@@ -119,6 +119,10 @@ FROM ${NODE_IMAGE} AS worker-runtime
 WORKDIR /app
 
 ENV NODE_ENV=production
+# The production images execute TypeScript through tsx. Its default cache lives
+# under /tmp, so disable it at the image boundary to keep every entrypoint
+# compatible with a completely read-only root filesystem.
+ENV TSX_DISABLE_CACHE=1
 
 COPY --from=worker-dependencies --chown=node:node /app/node_modules ./node_modules
 # npm nests Ajv 8 under the connectors workspace because the root development

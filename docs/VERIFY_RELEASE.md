@@ -28,6 +28,13 @@ gh attestation verify \
   --bundle-from-oci
 ```
 
+Download the seven `release-smoke-<target>` workflow artifacts and verify that
+each contains exactly one `linux/amd64` and one `linux/arm64`
+`BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED` record for the same digest manifest.
+Then follow [`MULTI_ARCH_IMAGE_SMOKE.md`](MULTI_ARCH_IMAGE_SMOKE.md) to repeat
+the isolated smoke on native hosts for both architectures before stable
+promotion.
+
 After cryptographic verification, render the chart with image tags replaced by
 the verified digests. The release includes `values.digests.yaml`, generated
 from the same complete `IMAGE_DIGESTS.txt` manifest after every image scan

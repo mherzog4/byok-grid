@@ -1,6 +1,12 @@
 #!/bin/sh
 set -eu
 
+if [ "${1:-}" = "--image-smoke" ]; then
+  node --version >/dev/null
+  printf '%s\n' '{"marker":"BYOK_GRID_IMAGE_SMOKE_READY","target":"maintenance"}'
+  exit 0
+fi
+
 command_name="${1:-}"
 case "$command_name" in
   backup|restore|verify)

@@ -144,7 +144,11 @@ working tree:
   path allowlist that forces a new RC after any runtime or verifier change;
 - full-digest pins for release bases, CI services, and Compose third-party
   images, with registry evidence that each referenced manifest supports both
-  `linux/amd64` and `linux/arm64`.
+  `linux/amd64` and `linux/arm64`;
+- a release-matrix runtime smoke for all seven immutable image digests on both
+  supported platforms, with QEMU execution, exact target markers, no network,
+  a read-only/capability-free boundary, bounded host parsing, two-record JSONL
+  evidence artifacts, and version tags blocked on any platform failure.
 
 The dated local runtime, drain, SQLite recovery, and ClickHouse projection
 record is in
@@ -194,8 +198,9 @@ dated evidence linked from a release issue or runbook record:
   and recovery delivery to controlled inboxes, configure and validate SPF,
   DKIM, and DMARC alignment, and monitor deferrals, rejections, bounces,
   complaints, and authentication failures;
-- boot and smoke-test both `linux/amd64` and `linux/arm64` release images from
-  their published manifest-list digests;
+- independently repeat the digest-bound image smoke on native `linux/amd64` and
+  native `linux/arm64` hosts, retaining those records with the release
+  workflow's seven emulated two-platform evidence artifacts;
 - enable and verify protected release tags or a repository ruleset and the
   strongest available GHCR tag immutability controls;
 - measure web/API latency and SQLite/libSQL contention at the intended tenant,
