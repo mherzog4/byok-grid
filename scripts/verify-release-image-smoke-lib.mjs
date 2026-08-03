@@ -17,6 +17,63 @@ export function verifyReleaseImageSmoke(raw, options) {
   if (typeof raw !== 'string' || Buffer.byteLength(raw) > 4_096) {
     fail('The image smoke response must be bounded text.');
   }
+  const expected = validateExpectedSmoke(options);
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    throw new ReleaseImageSmokeError(
+      'The image smoke response must be valid JSON.',
+      { cause: error }
+    );
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    fail('The image smoke response must be an object.');
+  }
+  const keys = Object.keys(parsed).sort();
+  if (keys.length !== 2 || keys[0] !== 'marker' || keys[1] !== 'target') {
+    fail('The image smoke response contains missing or unexpected fields.');
+  }
+  if (
+    parsed.marker !== IMAGE_SMOKE_READY_MARKER ||
+    parsed.target !== expected.target
+  ) {
+    fail(
+      'The image smoke response does not match the expected release target.'
+    );
+  }
+
+  return evidenceRecord(expected);
+}
+
+export function verifyReleaseImageSmokeEvidence(value, options) {
+  const expected = validateExpectedSmoke(options);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    fail('The release image smoke evidence must be an object.');
+  }
+  const keys = Object.keys(value).sort();
+  if (
+    keys.length !== 4 ||
+    keys[0] !== 'digest' ||
+    keys[1] !== 'marker' ||
+    keys[2] !== 'platform' ||
+    keys[3] !== 'target'
+  ) {
+    fail('The release image smoke evidence has unexpected fields.');
+  }
+  if (
+    value.digest !== expected.digest ||
+    value.marker !== RELEASE_IMAGE_SMOKE_MARKER ||
+    value.platform !== expected.platform ||
+    value.target !== expected.target
+  ) {
+    fail('The release image smoke evidence does not match its release image.');
+  }
+  return evidenceRecord(expected);
+}
+
+function validateExpectedSmoke(options) {
   if (
     !options ||
     typeof options !== 'object' ||
@@ -43,37 +100,19 @@ export function verifyReleaseImageSmoke(raw, options) {
   ) {
     fail('The image smoke digest must be a lowercase sha256 digest.');
   }
-
-  let parsed;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (error) {
-    throw new ReleaseImageSmokeError(
-      'The image smoke response must be valid JSON.',
-      { cause: error }
-    );
-  }
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    fail('The image smoke response must be an object.');
-  }
-  const keys = Object.keys(parsed).sort();
-  if (keys.length !== 2 || keys[0] !== 'marker' || keys[1] !== 'target') {
-    fail('The image smoke response contains missing or unexpected fields.');
-  }
-  if (
-    parsed.marker !== IMAGE_SMOKE_READY_MARKER ||
-    parsed.target !== expectedTarget
-  ) {
-    fail(
-      'The image smoke response does not match the expected release target.'
-    );
-  }
-
   return {
     digest: options.expectedDigest,
-    marker: RELEASE_IMAGE_SMOKE_MARKER,
     platform: options.expectedPlatform,
     target: expectedTarget,
+  };
+}
+
+function evidenceRecord(expected) {
+  return {
+    digest: expected.digest,
+    marker: RELEASE_IMAGE_SMOKE_MARKER,
+    platform: expected.platform,
+    target: expected.target,
   };
 }
 

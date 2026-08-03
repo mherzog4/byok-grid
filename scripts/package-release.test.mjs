@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   existsSync,
@@ -15,9 +16,11 @@ import test from 'node:test';
 
 import {
   collectReleaseDigests,
+  collectReleaseSmokeEvidence,
   createChecksumManifest,
   packageRelease,
 } from './package-release.mjs';
+import { RELEASE_IMAGE_SMOKE_MARKER } from './verify-release-image-smoke-lib.mjs';
 
 const releaseImages = [
   ['web', 'byok-grid-web'],
@@ -47,8 +50,77 @@ test('collects exactly one immutable digest for every release target', () => {
   });
 });
 
+test('consolidates exactly two digest-bound smoke records per target', () => {
+  withFixture(({ digests, smoke }) => {
+    const digestManifest = collectReleaseDigests(digests, releaseConfig);
+    const evidence = collectReleaseSmokeEvidence(
+      smoke,
+      digestManifest,
+      releaseConfig
+    );
+    const records = evidence
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+
+    assert.equal(records.length, 14);
+    assert.deepEqual(
+      records
+        .filter(({ target }) => target === 'web')
+        .map(({ platform }) => platform),
+      ['linux/amd64', 'linux/arm64']
+    );
+    assert.equal(records[0].target, 'airbyte-destination');
+    assert.equal(records.at(-1).target, 'workflow-worker');
+
+    writeFileSync(join(smoke, 'unexpected.jsonl'), '{}\n', 'utf8');
+    assert.throws(
+      () => collectReleaseSmokeEvidence(smoke, digestManifest, releaseConfig),
+      /Unexpected image smoke artifact/u
+    );
+  });
+});
+
+test('rejects mismatched, duplicate, and truncated smoke evidence', () => {
+  withFixture(({ digests, smoke }) => {
+    const digestManifest = collectReleaseDigests(digests, releaseConfig);
+    const webPath = join(smoke, 'web.jsonl');
+    const original = readFileSync(webPath, 'utf8');
+    const records = original
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+
+    writeFileSync(
+      webPath,
+      `${JSON.stringify({ ...records[0], digest: `sha256:${'f'.repeat(64)}` })}\n${JSON.stringify(records[1])}\n`,
+      'utf8'
+    );
+    assert.throws(
+      () => collectReleaseSmokeEvidence(smoke, digestManifest, releaseConfig),
+      /does not match its release image/u
+    );
+
+    writeFileSync(
+      webPath,
+      `${JSON.stringify(records[0])}\n${JSON.stringify(records[0])}\n`,
+      'utf8'
+    );
+    assert.throws(
+      () => collectReleaseSmokeEvidence(smoke, digestManifest, releaseConfig),
+      /repeats linux\/arm64/u
+    );
+
+    writeFileSync(webPath, original.trim(), 'utf8');
+    assert.throws(
+      () => collectReleaseSmokeEvidence(smoke, digestManifest, releaseConfig),
+      /must end with a newline/u
+    );
+  });
+});
+
 test('assembles a complete release atomically with portable checksums', () => {
-  withFixture(({ root, digests }) => {
+  withFixture(({ root, digests, smoke }) => {
     const output = join(root, 'dist', 'release');
     const runCommand = (command, args) => {
       const destinationFlag =
@@ -64,6 +136,7 @@ test('assembles a complete release atomically with portable checksums', () => {
     packageRelease({
       version: '0.1.0-rc.1',
       digestsDirectory: digests,
+      smokeDirectory: smoke,
       outputDirectory: output,
       rootDirectory: root,
       runCommand,
@@ -71,6 +144,7 @@ test('assembles a complete release atomically with portable checksums', () => {
 
     assert.deepEqual(readdirSync(output).sort(), [
       'IMAGE_DIGESTS.txt',
+      'IMAGE_SMOKE.jsonl',
       'SHA256SUMS',
       'byok-grid-0.1.0-rc.1.tgz',
       'byok-grid-connector-sdk-0.2.0.tgz',
@@ -84,12 +158,18 @@ test('assembles a complete release atomically with portable checksums', () => {
       checksums,
       new RegExp(`^${chartHash}  byok-grid-0\\.1\\.0-rc\\.1\\.tgz$`, 'm')
     );
+    assert.equal(
+      readFileSync(join(output, 'IMAGE_SMOKE.jsonl'), 'utf8').trim().split('\n')
+        .length,
+      14
+    );
     assert.doesNotMatch(checksums, /SHA256SUMS/);
     assert.throws(
       () =>
         packageRelease({
           version: '0.1.0-rc.1',
           digestsDirectory: digests,
+          smokeDirectory: smoke,
           outputDirectory: output,
           rootDirectory: root,
           runCommand,
@@ -100,7 +180,7 @@ test('assembles a complete release atomically with portable checksums', () => {
 });
 
 test('removes staging output when artifact creation fails', () => {
-  withFixture(({ root, digests }) => {
+  withFixture(({ root, digests, smoke }) => {
     const output = join(root, 'dist', 'release');
 
     assert.throws(
@@ -108,6 +188,7 @@ test('removes staging output when artifact creation fails', () => {
         packageRelease({
           version: '0.1.0-rc.1',
           digestsDirectory: digests,
+          smokeDirectory: smoke,
           outputDirectory: output,
           rootDirectory: root,
           runCommand: () => {
@@ -145,12 +226,13 @@ test('rejects unsafe release target paths', () => {
 });
 
 test('rejects non-canonical numeric prerelease identifiers', () => {
-  withFixture(({ root, digests }) => {
+  withFixture(({ root, digests, smoke }) => {
     assert.throws(
       () =>
         packageRelease({
           version: '0.1.0-01',
           digestsDirectory: digests,
+          smokeDirectory: smoke,
           outputDirectory: join(root, 'dist', 'release'),
           rootDirectory: root,
           runCommand: () => undefined,
@@ -166,16 +248,31 @@ test(
   () => {
     const directory = mkdtempSync(join(tmpdir(), 'byok-grid-real-release-'));
     const digests = join(directory, 'release-digests');
+    const smoke = join(directory, 'release-smoke');
     const output = join(directory, 'release');
     mkdirSync(digests, { recursive: true });
+    mkdirSync(smoke, { recursive: true });
     writeDigestFixtures(digests);
+    writeSmokeFixtures(smoke);
 
     try {
-      packageRelease({
-        version: '0.1.0-rc.1',
-        digestsDirectory: digests,
-        outputDirectory: output,
-      });
+      const result = spawnSync(
+        process.execPath,
+        [
+          'scripts/package-release.mjs',
+          '--version',
+          '0.1.0-rc.1',
+          '--digests-dir',
+          digests,
+          '--smoke-dir',
+          smoke,
+          '--output-dir',
+          output,
+        ],
+        { encoding: 'utf8' }
+      );
+      assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+      assert.match(result.stdout, /assembled atomically/u);
       assert.equal(existsSync(join(output, 'byok-grid-0.1.0-rc.1.tgz')), true);
       assert.equal(
         readdirSync(output).filter((name) => name.endsWith('.tgz')).length,
@@ -184,7 +281,7 @@ test(
       assert.equal(
         readFileSync(join(output, 'SHA256SUMS'), 'utf8').trim().split('\n')
           .length,
-        4
+        5
       );
     } finally {
       rmSync(directory, { force: true, recursive: true });
@@ -195,15 +292,18 @@ test(
 function withFixture(callback) {
   const root = mkdtempSync(join(tmpdir(), 'byok-grid-release-package-'));
   const digests = join(root, 'release-digests');
+  const smoke = join(root, 'release-smoke');
   mkdirSync(digests, { recursive: true });
+  mkdirSync(smoke, { recursive: true });
   writeFileSync(
     join(root, 'release-images.json'),
     `${JSON.stringify(releaseConfig)}\n`,
     'utf8'
   );
   writeDigestFixtures(digests);
+  writeSmokeFixtures(smoke);
   try {
-    callback({ root, digests });
+    callback({ root, digests, smoke });
   } finally {
     rmSync(root, { force: true, recursive: true });
   }
@@ -214,6 +314,25 @@ function writeDigestFixtures(digests) {
     writeFileSync(
       join(digests, `${target}.txt`),
       `ghcr.io/mherzog4/${image}@sha256:${String(index + 1).repeat(64)}\n`,
+      'utf8'
+    );
+  });
+}
+
+function writeSmokeFixtures(smoke) {
+  releaseImages.forEach(({ target }, index) => {
+    const digest = `sha256:${String(index + 1).repeat(64)}`;
+    const records = ['linux/arm64', 'linux/amd64'].map((platform) =>
+      JSON.stringify({
+        digest,
+        marker: RELEASE_IMAGE_SMOKE_MARKER,
+        platform,
+        target,
+      })
+    );
+    writeFileSync(
+      join(smoke, `${target}.jsonl`),
+      `${records.join('\n')}\n`,
       'utf8'
     );
   });

@@ -15,16 +15,16 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { generateHelmDigestValues } from './generate-helm-digest-values.mjs';
+import { verifyReleaseImageSmokeEvidence } from './verify-release-image-smoke-lib.mjs';
 
 const semverPattern =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|[A-Za-z-][0-9A-Za-z-]*))*))?$/;
+const smokePlatforms = Object.freeze(['linux/amd64', 'linux/arm64']);
 
 export function collectReleaseDigests(digestsDirectory, releaseConfig) {
   const entries = validateReleaseConfig(releaseConfig);
   const expectedFiles = new Set(entries.map(({ target }) => `${target}.txt`));
-  const actualFiles = readdirSync(digestsDirectory).filter(
-    (name) => !name.startsWith('.')
-  );
+  const actualFiles = readdirSync(digestsDirectory);
 
   for (const file of actualFiles) {
     if (!expectedFiles.has(file)) {
@@ -38,7 +38,12 @@ export function collectReleaseDigests(digestsDirectory, releaseConfig) {
     if (!actualFiles.includes(file)) {
       throw new Error(`Missing digest artifact ${file}.`);
     }
-    const reference = readFileSync(join(digestsDirectory, file), 'utf8').trim();
+    const path = join(digestsDirectory, file);
+    const metadata = lstatSync(path);
+    if (!metadata.isFile() || metadata.size > 4_096) {
+      throw new Error(`Digest artifact ${file} must be a bounded file.`);
+    }
+    const reference = readFileSync(path, 'utf8').trim();
     const pattern = new RegExp(
       `^ghcr\\.io\\/[A-Za-z0-9._-]+\\/${escapeRegex(image)}@sha256:[0-9a-f]{64}$`
     );
@@ -49,6 +54,83 @@ export function collectReleaseDigests(digestsDirectory, releaseConfig) {
   }
 
   return `${records.sort().join('\n')}\n`;
+}
+
+export function collectReleaseSmokeEvidence(
+  smokeDirectory,
+  digestManifest,
+  releaseConfig
+) {
+  const entries = validateReleaseConfig(releaseConfig);
+  const releaseTargets = entries.map(({ target }) => target);
+  const expectedFiles = new Set(entries.map(({ target }) => `${target}.jsonl`));
+  const actualFiles = readdirSync(smokeDirectory);
+
+  for (const file of actualFiles) {
+    if (!expectedFiles.has(file)) {
+      throw new Error(`Unexpected image smoke artifact ${file}.`);
+    }
+  }
+
+  const digests = digestTargets(digestManifest, entries);
+  const records = [];
+  for (const { target } of entries) {
+    const file = `${target}.jsonl`;
+    if (!actualFiles.includes(file)) {
+      throw new Error(`Missing image smoke artifact ${file}.`);
+    }
+    const path = join(smokeDirectory, file);
+    const metadata = lstatSync(path);
+    if (!metadata.isFile() || metadata.size > 16_384) {
+      throw new Error(`Image smoke artifact ${file} must be a bounded file.`);
+    }
+    const source = readFileSync(path, 'utf8');
+    if (!source.endsWith('\n')) {
+      throw new Error(`Image smoke artifact ${file} must end with a newline.`);
+    }
+    const lines = source.slice(0, -1).split('\n');
+    if (
+      lines.length !== smokePlatforms.length ||
+      lines.some((line) => line.length === 0 || line.includes('\r'))
+    ) {
+      throw new Error(
+        `Image smoke artifact ${file} must contain exactly two JSONL records.`
+      );
+    }
+
+    const platforms = new Set();
+    for (const line of lines) {
+      let parsed;
+      try {
+        parsed = JSON.parse(line);
+      } catch {
+        throw new Error(`Image smoke artifact ${file} contains invalid JSON.`);
+      }
+      const platform = parsed?.platform;
+      const verified = verifyReleaseImageSmokeEvidence(parsed, {
+        expectedDigest: digests.get(target),
+        expectedPlatform: platform,
+        expectedTarget: target,
+        releaseTargets,
+      });
+      if (platforms.has(platform)) {
+        throw new Error(`Image smoke artifact ${file} repeats ${platform}.`);
+      }
+      platforms.add(platform);
+      records.push(verified);
+    }
+    if (smokePlatforms.some((platform) => !platforms.has(platform))) {
+      throw new Error(`Image smoke artifact ${file} is missing a platform.`);
+    }
+  }
+
+  records.sort(
+    (left, right) =>
+      compareAscii(left.target, right.target) ||
+      smokePlatforms.indexOf(left.platform) -
+        smokePlatforms.indexOf(right.platform)
+  );
+  return `${records.map((record) => JSON.stringify(record)).join('\n')}\n`;
 }
 
 export function createChecksumManifest(directory) {
@@ -77,6 +159,7 @@ export function createChecksumManifest(directory) {
 export function packageRelease({
   version,
   digestsDirectory,
+  smokeDirectory,
   outputDirectory,
   rootDirectory = process.cwd(),
   runCommand = runExternalCommand,
@@ -87,6 +170,7 @@ export function packageRelease({
 
   const root = resolve(rootDirectory);
   const digests = resolve(root, digestsDirectory);
+  const smoke = resolve(root, smokeDirectory);
   const output = resolve(root, outputDirectory);
   if (existsSync(output)) {
     throw new Error(`Release output already exists: ${output}`);
@@ -102,6 +186,11 @@ export function packageRelease({
     );
     const digestManifest = collectReleaseDigests(digests, releaseConfig);
     writeFileSync(join(staging, 'IMAGE_DIGESTS.txt'), digestManifest, 'utf8');
+    writeFileSync(
+      join(staging, 'IMAGE_SMOKE.jsonl'),
+      collectReleaseSmokeEvidence(smoke, digestManifest, releaseConfig),
+      'utf8'
+    );
     writeFileSync(
       join(staging, 'values.digests.yaml'),
       generateHelmDigestValues(digestManifest, releaseConfig),
@@ -179,6 +268,45 @@ function validateReleaseConfig(config) {
   });
 }
 
+function digestTargets(manifest, entries) {
+  if (typeof manifest !== 'string' || Buffer.byteLength(manifest) > 16_384) {
+    throw new Error('Image digest manifest must be bounded text.');
+  }
+  const targetsByImage = new Map(
+    entries.map(({ image, target }) => [image, target])
+  );
+  const digests = new Map();
+  const lines = manifest
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  for (const line of lines) {
+    const match = line.match(
+      /^ghcr\.io\/[A-Za-z0-9._-]+\/(?<image>byok-grid-[a-z0-9-]+)@(?<digest>sha256:[0-9a-f]{64})$/u
+    );
+    const target = match?.groups
+      ? targetsByImage.get(match.groups.image)
+      : undefined;
+    if (!match?.groups || !target || digests.has(target)) {
+      throw new Error('Image digest manifest does not match the release set.');
+    }
+    digests.set(target, match.groups.digest);
+  }
+  if (
+    digests.size !== entries.length ||
+    entries.some(({ target }) => !digests.has(target))
+  ) {
+    throw new Error('Image digest manifest is incomplete.');
+  }
+  return digests;
+}
+
+function compareAscii(left, right) {
+  if (left < right) return -1;
+  if (left > right) return 1;
+  return 0;
+}
+
 function requireArtifact(directory, name) {
   const path = join(directory, name);
   if (!existsSync(path) || !lstatSync(path).isFile()) {
@@ -208,7 +336,12 @@ function parseArguments(args) {
     }
     values.set(key, value);
   }
-  const allowed = new Set(['--version', '--digests-dir', '--output-dir']);
+  const allowed = new Set([
+    '--version',
+    '--digests-dir',
+    '--smoke-dir',
+    '--output-dir',
+  ]);
   for (const key of values.keys()) {
     if (!allowed.has(key)) throw new Error(`Unknown argument ${key}.`);
   }
@@ -218,6 +351,7 @@ function parseArguments(args) {
   return {
     version: values.get('--version'),
     digestsDirectory: values.get('--digests-dir'),
+    smokeDirectory: values.get('--smoke-dir'),
     outputDirectory: values.get('--output-dir'),
   };
 }

@@ -27,6 +27,12 @@ parser binds the inner response to target, platform, and digest and creates two
 JSONL evidence records per image. Those artifacts are uploaded before image
 attestation and version-tag publication can proceed.
 
+The publish job revalidates the complete seven-file set against the release
+digest manifest and produces one canonical fourteen-record `IMAGE_SMOKE.jsonl`
+release asset. Checksums and release-file attestation cover this durable asset;
+the temporary per-job artifacts are transport inputs rather than the long-term
+audit record.
+
 The shared TypeScript worker image disables the `tsx` disk cache. This makes
 its entrypoints independent of a writable `/tmp` and preserves the read-only
 smoke boundary without granting a test-only filesystem exception.
@@ -42,5 +48,5 @@ behavior.
 - Smoke mode becomes a small public image contract and must remain
   side-effect-free.
 - The release workflow produces structured evidence that can be hashed into the
-  stable promotion manifest.
+  stable promotion manifest even after workflow artifacts expire.
 - External-service and full deployment startup remain separate gates.

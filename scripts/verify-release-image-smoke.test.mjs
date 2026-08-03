@@ -6,6 +6,7 @@ import {
   IMAGE_SMOKE_READY_MARKER,
   RELEASE_IMAGE_SMOKE_MARKER,
   verifyReleaseImageSmoke,
+  verifyReleaseImageSmokeEvidence,
 } from './verify-release-image-smoke-lib.mjs';
 
 const DIGEST = `sha256:${'a'.repeat(64)}`;
@@ -27,6 +28,50 @@ describe('multi-architecture release image smoke', () => {
         platform: 'linux/amd64',
         target: 'web',
       }
+    );
+  });
+
+  it('revalidates a packaged outer evidence record', () => {
+    const evidence = {
+      digest: DIGEST,
+      marker: RELEASE_IMAGE_SMOKE_MARKER,
+      platform: 'linux/arm64',
+      target: 'web',
+    };
+    assert.deepEqual(
+      verifyReleaseImageSmokeEvidence(evidence, {
+        expectedDigest: DIGEST,
+        expectedPlatform: 'linux/arm64',
+        expectedTarget: 'web',
+        releaseTargets,
+      }),
+      evidence
+    );
+    assert.throws(
+      () =>
+        verifyReleaseImageSmokeEvidence(
+          { ...evidence, note: 'untrusted' },
+          {
+            expectedDigest: DIGEST,
+            expectedPlatform: 'linux/arm64',
+            expectedTarget: 'web',
+            releaseTargets,
+          }
+        ),
+      /unexpected fields/u
+    );
+    assert.throws(
+      () =>
+        verifyReleaseImageSmokeEvidence(
+          { ...evidence, platform: 'linux/amd64' },
+          {
+            expectedDigest: DIGEST,
+            expectedPlatform: 'linux/arm64',
+            expectedTarget: 'web',
+            releaseTargets,
+          }
+        ),
+      /does not match/u
     );
   });
 
@@ -183,6 +228,8 @@ describe('multi-architecture release image smoke', () => {
       '--image-smoke',
       'scripts/verify-release-image-smoke.mjs',
       'release-smoke-${{ matrix.target }}',
+      'pattern: release-smoke-*',
+      '--smoke-dir release-smoke',
     ]) {
       assert.ok(workflow.includes(fragment), `missing workflow: ${fragment}`);
     }

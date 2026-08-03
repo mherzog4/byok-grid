@@ -154,6 +154,16 @@ if (!releaseWorkflow.includes('npm run release:package --')) {
   fail('The release must use the tested atomic artifact packager.');
 }
 
+for (const evidencePackagingContract of [
+  'pattern: release-smoke-*',
+  'path: release-smoke',
+  '--smoke-dir release-smoke',
+]) {
+  if (!releaseWorkflow.includes(evidencePackagingContract)) {
+    fail('Release packaging must retain validated image smoke evidence.');
+  }
+}
+
 if (
   releaseWorkflow.includes('helm package deploy/helm/byok-grid') ||
   releaseWorkflow.includes('sha256sum ./*')

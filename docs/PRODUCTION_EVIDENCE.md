@@ -64,7 +64,7 @@ its contents.
 | `reference-deployment`         | Digest-pinned Helm release, TLS, external secrets, network policy, centralized telemetry, alerts, and rollback ownership        |
 | `public-ingress-and-proxy`     | Canonical deployment marker plus real proxy-chain, direct-access denial, and multi-network edge/application rate-limit evidence |
 | `smtp-delivery`                | TLS verification/recovery delivery, SPF/DKIM/DMARC alignment, and provider failure monitoring                                   |
-| `multi-architecture-smoke`     | Seven release-workflow JSONL artifacts plus native-host boot records for published `linux/amd64` and `linux/arm64` digests      |
+| `multi-architecture-smoke`     | Attested fourteen-record release asset plus native-host boot records for published `linux/amd64` and `linux/arm64` digests      |
 | `release-tag-protection`       | Protected release tags/ruleset and strongest available GHCR immutability evidence                                               |
 | `production-capacity`          | Passing declared-envelope marker, provider/ingress metrics, supported limit, alert threshold, and saturation response           |
 | `observation-window`           | Start/end record and zero unresolved security, correctness, restore, or data-loss blockers                                      |

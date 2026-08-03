@@ -11,6 +11,13 @@ containing them:
 sha256sum --check SHA256SUMS
 ```
 
+`IMAGE_SMOKE.jsonl` is the durable release-CI runtime evidence. It must contain
+exactly fourteen `BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED` records: one
+`linux/amd64` and one `linux/arm64` record for each target in
+`IMAGE_DIGESTS.txt`, with matching immutable digests. The atomic release
+packager reconstructs and validates this file from the seven matrix artifacts
+before checksumming and attesting it.
+
 Verify a downloaded chart or SDK package against the repository identity:
 
 ```text
@@ -28,12 +35,10 @@ gh attestation verify \
   --bundle-from-oci
 ```
 
-Download the seven `release-smoke-<target>` workflow artifacts and verify that
-each contains exactly one `linux/amd64` and one `linux/arm64`
-`BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED` record for the same digest manifest.
-Then follow [`MULTI_ARCH_IMAGE_SMOKE.md`](MULTI_ARCH_IMAGE_SMOKE.md) to repeat
-the isolated smoke on native hosts for both architectures before stable
-promotion.
+Cross-check `IMAGE_SMOKE.jsonl` against the seven `release-smoke-<target>`
+workflow artifacts while they remain available. Then follow
+[`MULTI_ARCH_IMAGE_SMOKE.md`](MULTI_ARCH_IMAGE_SMOKE.md) to repeat the isolated
+smoke on native hosts for both architectures before stable promotion.
 
 After cryptographic verification, render the chart with image tags replaced by
 the verified digests. The release includes `values.digests.yaml`, generated

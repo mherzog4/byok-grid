@@ -148,7 +148,9 @@ working tree:
 - a release-matrix runtime smoke for all seven immutable image digests on both
   supported platforms, with QEMU execution, exact target markers, no network,
   a read-only/capability-free boundary, bounded host parsing, two-record JSONL
-  evidence artifacts, and version tags blocked on any platform failure.
+  evidence artifacts, version tags blocked on any platform failure, and a
+  revalidated fourteen-record `IMAGE_SMOKE.jsonl` asset covered by release
+  checksums and attestation.
 
 The dated local runtime, drain, SQLite recovery, and ClickHouse projection
 record is in
@@ -200,7 +202,7 @@ dated evidence linked from a release issue or runbook record:
   complaints, and authentication failures;
 - independently repeat the digest-bound image smoke on native `linux/amd64` and
   native `linux/arm64` hosts, retaining those records with the release
-  workflow's seven emulated two-platform evidence artifacts;
+  workflow's attested fourteen-record `IMAGE_SMOKE.jsonl` asset;
 - enable and verify protected release tags or a repository ruleset and the
   strongest available GHCR tag immutability controls;
 - measure web/API latency and SQLite/libSQL contention at the intended tenant,

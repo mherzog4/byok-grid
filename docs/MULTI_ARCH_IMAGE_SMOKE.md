@@ -62,6 +62,14 @@ records. The image matrix does not finish—and version tags cannot publish—if
 either architecture times out, exits unsuccessfully, emits malformed output,
 or resolves to the wrong target contract.
 
+The publish job downloads all seven artifacts into a closed directory. The
+atomic release packager rejects missing or unexpected files, non-regular or
+oversized input, malformed or expanded objects, duplicate/missing platforms,
+unknown targets, and any digest mismatch. It writes the fourteen canonical
+records to `IMAGE_SMOKE.jsonl`; that release asset is covered by `SHA256SUMS`
+and the release-file attestation, so it remains auditable after the temporary
+workflow artifacts expire.
+
 ## Independent release verification
 
 The CI run is emulated architecture evidence, not native-hardware evidence.
@@ -91,7 +99,7 @@ node scripts/verify-release-image-smoke.mjs \
 ```
 
 Retain the two native-host verifier records, host architecture/runtime details,
-the seven workflow JSONL artifacts, the release digest manifest, and the
+the attested `IMAGE_SMOKE.jsonl` asset, the release digest manifest, and the
 workflow URL. The stable `multi-architecture-smoke` evidence record must carry
 the `BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED` marker and hash the retained bundle.
 

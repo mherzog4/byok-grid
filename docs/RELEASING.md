@@ -3,7 +3,8 @@
 BYOK Grid uses one application version for the repository and Helm chart. The
 Apache-licensed connector SDK keeps an independent package version. Tagged
 application releases publish seven multi-platform GHCR images, a Helm chart,
-the connector SDK package, checksums, and an exact image-digest manifest.
+the connector SDK package, checksums, an exact image-digest manifest, and the
+validated fourteen-record image-smoke manifest.
 
 ## Release contract
 
@@ -29,12 +30,16 @@ every artifact succeeds:
 npm run release:package -- \
   --version 0.1.0-rc.1 \
   --digests-dir release-digests \
+  --smoke-dir release-smoke \
   --output-dir dist/release
 ```
 
 The digest directory must contain exactly one `<target>.txt` record for each
-entry in `release-images.json`. The output directory must not already exist;
-this prevents a retry from mixing artifacts from different attempts.
+entry in `release-images.json`. The smoke directory must contain exactly one
+two-record `<target>.jsonl` file for each entry, bound to the same digest and
+covering `linux/amd64` and `linux/arm64` once each. The output directory must
+not already exist; this prevents a retry from mixing artifacts from different
+attempts.
 
 Maintainers can exercise the real local Helm/npm packaging toolchain without
 publishing anything:
@@ -66,9 +71,9 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
 4. Create and push a signed annotated tag such as `v0.1.0-rc.1`.
 5. Let `.github/workflows/release.yml` verify source, build images, publish
    attestations, smoke every immutable image on `linux/amd64` and `linux/arm64`,
-   and create the GitHub Release. Retain the seven two-record
-   `release-smoke-<target>` artifacts. Do not manually replace failed assets or
-   move the tag.
+   revalidate the seven two-record `release-smoke-<target>` artifacts into the
+   checksummed and attested `IMAGE_SMOKE.jsonl` release asset, and create the
+   GitHub Release. Do not manually replace failed assets or move the tag.
 6. Verify every released file and image using `docs/VERIFY_RELEASE.md`, then
    install a digest-pinned candidate in the reference environment by applying
    the release's generated `values.digests.yaml` after operator values.
