@@ -23,22 +23,16 @@ import {
 } from '@byok-grid/domain';
 import {
   decryptCredential,
-  parseMasterKey,
-  unwrapWorkspaceKey,
+  unwrapWorkspaceKeyFromRing,
 } from '@byok-grid/security';
 import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { config } from './config';
+import { workerMasterKeys } from './master-keys';
 import { db } from './database';
 import { hatchet } from './hatchet';
 
 const maximumRetries = 4;
-const masterKey = parseMasterKey(
-  config.BYOK_GRID_MASTER_KEY_ID,
-  config.BYOK_GRID_MASTER_KEY
-);
-
 export const executeWebhookDeliveryTask = hatchet.task({
   name: 'execute-webhook-delivery',
   retries: maximumRetries,
@@ -197,10 +191,10 @@ function resolveSigningSecret(
       false
     );
   }
-  const workspaceKey = unwrapWorkspaceKey(
+  const workspaceKey = unwrapWorkspaceKeyFromRing(
     workspaceId,
     execution.workspaceKey.wrappedKey,
-    masterKey
+    workerMasterKeys
   );
   try {
     const decrypted = decryptCredential(

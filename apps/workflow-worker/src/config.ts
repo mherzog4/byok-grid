@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { loadEnvFile } from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { parseMasterKey } from '@byok-grid/security';
+import { parseMasterKeyRing } from '@byok-grid/security';
 import { z } from 'zod';
 
 const rootEnvFile = resolve(
@@ -45,6 +45,7 @@ export const workflowWorkerConfig = z
       .default(8002),
     BYOK_GRID_MASTER_KEY: z.string().min(1),
     BYOK_GRID_MASTER_KEY_ID: z.string().min(1),
+    BYOK_GRID_ADDITIONAL_MASTER_KEYS: optionalSecret,
     CONNECTOR_RUNNER_SHARED_SECRET: z.preprocess(
       (value) => (value === '' ? undefined : value),
       z.string().min(32).optional()
@@ -101,12 +102,16 @@ export const workflowWorkerConfig = z
     }
 
     try {
-      parseMasterKey(value.BYOK_GRID_MASTER_KEY_ID, value.BYOK_GRID_MASTER_KEY);
+      parseMasterKeyRing(
+        value.BYOK_GRID_MASTER_KEY_ID,
+        value.BYOK_GRID_MASTER_KEY,
+        value.BYOK_GRID_ADDITIONAL_MASTER_KEYS
+      );
     } catch {
       context.addIssue({
         code: 'custom',
         message:
-          'The master key must be exactly 32 bytes of canonical base64 and its ID must not be empty.',
+          'The current and additional master-key configuration is invalid.',
         path: ['BYOK_GRID_MASTER_KEY'],
       });
     }

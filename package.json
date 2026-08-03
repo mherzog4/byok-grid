@@ -18,6 +18,8 @@
     "db:backup:verify": "npm run db:backup:verify --workspace=@byok-grid/db --",
     "db:generate": "npm run db:sqlite:generate --workspace=@byok-grid/db",
     "db:migrate": "npm run db:sqlite:migrate --workspace=@byok-grid/db",
+    "db:master-key:apply": "npm run db:master-key:apply --workspace=@byok-grid/db --",
+    "db:master-key:plan": "npm run db:master-key:plan --workspace=@byok-grid/db",
     "db:postgres:generate": "npm run db:generate --workspace=@byok-grid/db",
     "db:postgres:migrate": "npm run db:migrate --workspace=@byok-grid/db",
     "db:sqlite:generate": "npm run db:sqlite:generate --workspace=@byok-grid/db",

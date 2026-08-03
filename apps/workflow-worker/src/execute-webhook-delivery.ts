@@ -23,22 +23,16 @@ import {
 } from '@byok-grid/domain';
 import {
   decryptCredential,
-  parseMasterKey,
-  unwrapWorkspaceKey,
+  unwrapWorkspaceKeyFromRing,
 } from '@byok-grid/security';
 import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { workflowWorkerConfig } from './config';
+import { workflowMasterKeys } from './master-keys';
 import { workflowDb } from './database';
 import { workflowHatchet } from './hatchet';
 
 export const MAXIMUM_WEBHOOK_RETRIES = 4;
-const masterKey = parseMasterKey(
-  workflowWorkerConfig.BYOK_GRID_MASTER_KEY_ID,
-  workflowWorkerConfig.BYOK_GRID_MASTER_KEY
-);
-
 export const executeSqliteWebhookDeliveryTask = workflowHatchet.task({
   name: 'execute-sqlite-webhook-delivery',
   retries: MAXIMUM_WEBHOOK_RETRIES,
@@ -197,10 +191,10 @@ function resolveSigningSecret(
       false
     );
   }
-  const workspaceKey = unwrapWorkspaceKey(
+  const workspaceKey = unwrapWorkspaceKeyFromRing(
     workspaceId,
     execution.workspaceKey.wrappedKey,
-    masterKey
+    workflowMasterKeys
   );
   try {
     return webhookSigningCredentialSchema.parse(

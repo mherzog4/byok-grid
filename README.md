@@ -36,6 +36,8 @@ release. It currently includes:
 - type-aware text, finite-number, boolean, local-date-time/UTC, and JSON cell
   editors backed by a shared 256 KiB manual-value boundary;
 - workspace-scoped envelope encryption for connector credentials;
+- resumable deployment master-key rotation without rewriting provider-secret
+  ciphertext;
 - a hardened HTTPS connector with host allowlists, bounded responses, and
   stable idempotency keys;
 - an Apache-2.0 versioned connector SDK with serializable JSON Schema
@@ -305,6 +307,9 @@ See [the API transport security guide](docs/API_SECURITY.md) for application
 body ceilings, edge alignment, compressed-body policy, and regression tests.
 The current pass/fail evidence and the remaining stable-release blockers are in
 [the production-readiness ledger](docs/PRODUCTION_READINESS.md).
+Deployment key changes must use the overlapped procedure in
+[the master-key rotation guide](docs/MASTER_KEY_ROTATION.md); replacing the
+current key directly is not a supported rotation.
 See [the recoverable schema lifecycle ADR](docs/adr/0019-recoverable-schema-lifecycle.md)
 for preview recomputation, integration blockers, audit events, restoration, and
 the boundary between archival and physical erasure.

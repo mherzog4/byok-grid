@@ -28,24 +28,18 @@ import {
   decryptCredential,
   decryptSourceCursor,
   encryptSourceCursor,
-  parseMasterKey,
-  unwrapWorkspaceKey,
+  unwrapWorkspaceKeyFromRing,
 } from '@byok-grid/security';
 import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { config } from './config';
+import { workerMasterKeys } from './master-keys';
 import { db } from './database';
 import { guardedEgressFetch } from '@byok-grid/connectors';
 import { hatchet } from './hatchet';
 
 const maximumRetries = 2;
 const maximumSourceResponseBytes = 5 * 1_048_576;
-const masterKey = parseMasterKey(
-  config.BYOK_GRID_MASTER_KEY_ID,
-  config.BYOK_GRID_MASTER_KEY
-);
-
 export const executeSourceRunTask = hatchet.task({
   name: 'execute-source-run',
   retries: maximumRetries,
@@ -240,10 +234,10 @@ function resolveWorkspaceKey(
       false
     );
   }
-  return unwrapWorkspaceKey(
+  return unwrapWorkspaceKeyFromRing(
     workspaceId,
     execution.workspaceKey.wrappedKey,
-    masterKey
+    workerMasterKeys
   );
 }
 

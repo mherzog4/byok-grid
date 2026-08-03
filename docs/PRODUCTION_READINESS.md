@@ -64,6 +64,10 @@ working tree:
 - readiness rejection for a database missing the latest required migration;
 - online SQLite backup, integrity verification, restore to a new file, and
   digest equality while the web container remained available;
+- bounded deployment master-key overlap and workspace-key-only rewrapping with
+  fail-closed startup validation, plan/apply separation, explicit current-key
+  confirmation, ciphertext-preserving SQLite integration coverage, real CLI
+  process evidence, and Compose/Helm Secret contracts;
 - web startup rejection for absent or malformed runtime secrets and healthy
   startup with canonical runtime configuration;
 - worker startup rejection before Hatchet connection when its master key is

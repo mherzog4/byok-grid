@@ -23,5 +23,6 @@ deployments should use the same interface with a cloud KMS or Vault adapter.
   authentication.
 - Logs and traces must redact credential-shaped values.
 - Revoked credentials cannot start new work.
-- Key identifiers are stored with ciphertext so master keys can be rotated.
+- Key identifiers are stored with ciphertext. ADR 0044 defines the implemented
+  overlapped keyring and workspace-key rewrap procedure for master-key rotation.
 - Decrypted material is not cached beyond one connector invocation.

@@ -3,6 +3,8 @@ import { z } from 'zod';
 
 const KEY_BYTES = 32;
 const NONCE_BYTES = 12;
+const MAXIMUM_ADDITIONAL_MASTER_KEYS = 8;
+const MAXIMUM_ADDITIONAL_MASTER_KEYS_BYTES = 4_096;
 
 export const cryptoEnvelopeSchema = z.object({
   algorithm: z.literal('A256GCM'),
@@ -20,9 +22,16 @@ export type MasterKey = Readonly<{
   value: Buffer;
 }>;
 
+export type MasterKeyRing = Readonly<{
+  current: MasterKey;
+  keys: ReadonlyMap<string, MasterKey>;
+}>;
+
 export function parseMasterKey(id: string, encoded: string): MasterKey {
-  if (!id.trim()) {
-    throw new Error('The master key ID must not be empty.');
+  if (!id || id !== id.trim() || id.length > 128 || /\p{Cc}/u.test(id)) {
+    throw new Error(
+      'The master key ID must contain 1 to 128 non-control characters without surrounding whitespace.'
+    );
   }
 
   const value = Buffer.from(encoded, 'base64');
@@ -35,6 +44,84 @@ export function parseMasterKey(id: string, encoded: string): MasterKey {
   return { id, value };
 }
 
+export function parseMasterKeyRing(
+  currentId: string,
+  currentEncoded: string,
+  additionalEncoded = ''
+): MasterKeyRing {
+  const current = parseMasterKey(currentId, currentEncoded);
+  const keys = new Map<string, MasterKey>([[current.id, current]]);
+  if (!additionalEncoded) return { current, keys };
+  if (
+    Buffer.byteLength(additionalEncoded, 'utf8') >
+    MAXIMUM_ADDITIONAL_MASTER_KEYS_BYTES
+  ) {
+    throw new Error('The additional master-key configuration is too large.');
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(additionalEncoded);
+  } catch {
+    throw new Error(
+      'The additional master-key configuration must be a JSON object.'
+    );
+  }
+  if (parsed === null || Array.isArray(parsed) || typeof parsed !== 'object') {
+    throw new Error(
+      'The additional master-key configuration must be a JSON object.'
+    );
+  }
+
+  const entries = Object.entries(parsed);
+  if (entries.length > MAXIMUM_ADDITIONAL_MASTER_KEYS) {
+    throw new Error(
+      `At most ${MAXIMUM_ADDITIONAL_MASTER_KEYS} additional master keys may be configured.`
+    );
+  }
+  for (const [id, encoded] of entries) {
+    if (id === current.id) {
+      throw new Error(
+        'The current master key must not be repeated in the additional key set.'
+      );
+    }
+    if (typeof encoded !== 'string') {
+      throw new Error('Every additional master key must be a base64 string.');
+    }
+    const key = parseMasterKey(id, encoded);
+    if (
+      [...keys.values()].some((existing) => existing.value.equals(key.value))
+    ) {
+      throw new Error(
+        'The same master-key material must not be assigned to multiple IDs.'
+      );
+    }
+    keys.set(key.id, key);
+  }
+  return { current, keys };
+}
+
+export function masterKeyRingFromMasterKey(
+  masterKey: MasterKey
+): MasterKeyRing {
+  return {
+    current: masterKey,
+    keys: new Map([[masterKey.id, masterKey]]),
+  };
+}
+
+export function masterKeyForEnvelope(
+  envelope: CryptoEnvelope,
+  masterKeys: MasterKeyRing
+): MasterKey {
+  const parsedEnvelope = cryptoEnvelopeSchema.parse(envelope);
+  const masterKey = masterKeys.keys.get(parsedEnvelope.keyId);
+  if (!masterKey) {
+    throw new Error('The required master key is not available.');
+  }
+  return masterKey;
+}
+
 export function generateWorkspaceKey(
   workspaceId: string,
   masterKey: MasterKey
@@ -42,6 +129,20 @@ export function generateWorkspaceKey(
   return seal(
     masterKey.value,
     randomBytes(KEY_BYTES),
+    workspaceKeyContext(workspaceId),
+    masterKey.id
+  );
+}
+
+export function wrapWorkspaceKey(
+  workspaceId: string,
+  workspaceKey: Buffer,
+  masterKey: MasterKey
+): CryptoEnvelope {
+  assertWorkspaceKey(workspaceKey);
+  return seal(
+    masterKey.value,
+    workspaceKey,
     workspaceKeyContext(workspaceId),
     masterKey.id
   );
@@ -65,6 +166,35 @@ export function unwrapWorkspaceKey(
     throw new Error('The unwrapped workspace key has an invalid length.');
   }
   return key;
+}
+
+export function unwrapWorkspaceKeyFromRing(
+  workspaceId: string,
+  wrappedKey: CryptoEnvelope,
+  masterKeys: MasterKeyRing
+): Buffer {
+  return unwrapWorkspaceKey(
+    workspaceId,
+    wrappedKey,
+    masterKeyForEnvelope(wrappedKey, masterKeys)
+  );
+}
+
+export function rewrapWorkspaceKey(
+  workspaceId: string,
+  wrappedKey: CryptoEnvelope,
+  masterKeys: MasterKeyRing
+): CryptoEnvelope {
+  const workspaceKey = unwrapWorkspaceKeyFromRing(
+    workspaceId,
+    wrappedKey,
+    masterKeys
+  );
+  try {
+    return wrapWorkspaceKey(workspaceId, workspaceKey, masterKeys.current);
+  } finally {
+    workspaceKey.fill(0);
+  }
 }
 
 export function encryptCredential(

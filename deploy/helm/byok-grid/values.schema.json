@@ -130,6 +130,7 @@
             "smtpUser": { "type": "string" },
             "smtpPassword": { "type": "string" },
             "masterKey": { "type": "string" },
+            "additionalMasterKeys": { "type": "string" },
             "hatchetClientToken": { "type": "string" },
             "connectorRunnerSharedSecret": { "type": "string" },
             "clickhousePassword": { "type": "string" }

@@ -71,6 +71,11 @@ Use this production recovery sequence:
 - Back up `BYOK_GRID_MASTER_KEY` and its key ID through a separate secret-manager
   recovery process. Database backups contain encrypted credentials but not the
   key needed to decrypt them.
+- During master-key rotation, retain every old key outside the live runtime for
+  at least as long as a backup may contain workspace envelopes wrapped by it.
+  Do not destroy old material merely because live rotation reports zero pending
+  rows. Restore-test a pre-rotation backup with the archived key and follow
+  [the master-key rotation runbook](MASTER_KEY_ROTATION.md).
 - Define recovery point and recovery time objectives, schedule backups more
   frequently than the recovery point objective, and alert on missed jobs.
 - Run a restore drill after schema changes and at least quarterly. Record the

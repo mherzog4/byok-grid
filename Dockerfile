@@ -141,7 +141,8 @@ COPY --chown=node:node packages/security/package.json packages/security/package.
 COPY --chown=node:node packages/security/src packages/security/src
 COPY --chown=node:node scripts/container/workflow-worker-entrypoint.sh ./scripts/container/workflow-worker-entrypoint.sh
 COPY --chown=node:node scripts/container/migration-entrypoint.sh ./scripts/container/migration-entrypoint.sh
-RUN chmod 0555 ./scripts/container/workflow-worker-entrypoint.sh ./scripts/container/migration-entrypoint.sh
+COPY --chown=node:node scripts/container/maintenance-entrypoint.sh ./scripts/container/maintenance-entrypoint.sh
+RUN chmod 0555 ./scripts/container/workflow-worker-entrypoint.sh ./scripts/container/migration-entrypoint.sh ./scripts/container/maintenance-entrypoint.sh
 RUN mkdir -p /data && chown node:node /data
 
 USER node
@@ -160,4 +161,4 @@ ENTRYPOINT ["./scripts/container/migration-entrypoint.sh"]
 CMD ["node", "--import", "tsx", "packages/db/src/sqlite/migrate-cli.ts"]
 
 FROM worker-runtime AS maintenance
-ENTRYPOINT ["node", "--import", "tsx", "packages/db/src/sqlite/backup-cli.ts"]
+ENTRYPOINT ["./scripts/container/maintenance-entrypoint.sh"]

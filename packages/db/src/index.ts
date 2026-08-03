@@ -39,6 +39,7 @@ export * from './sqlite/grid-views';
 export * from './sqlite/ingestion';
 export * from './sqlite/imports';
 export * from './sqlite/migrate';
+export * from './sqlite/master-key-rotation';
 export * from './sqlite/outbox';
 export * from './sqlite/row-automations';
 export * from './sqlite/row-mutations';

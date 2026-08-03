@@ -90,6 +90,12 @@ spec:
                 secretKeyRef:
                   name: {{ include "byok-grid.secretName" . }}
                   key: {{ .Values.secrets.keys.masterKey }}
+            - name: BYOK_GRID_ADDITIONAL_MASTER_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "byok-grid.secretName" . }}
+                  key: {{ .Values.secrets.keys.additionalMasterKeys }}
+                  optional: true
           ports:
             - name: http
               containerPort: 3000

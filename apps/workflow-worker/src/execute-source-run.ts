@@ -31,22 +31,16 @@ import {
   decryptCredential,
   decryptSourceCursor,
   encryptSourceCursor,
-  parseMasterKey,
-  unwrapWorkspaceKey,
+  unwrapWorkspaceKeyFromRing,
 } from '@byok-grid/security';
 import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { z } from 'zod';
-import { workflowWorkerConfig } from './config';
+import { workflowMasterKeys } from './master-keys';
 import { workflowDb } from './database';
 import { workflowHatchet } from './hatchet';
 
 const maximumRetries = 2;
 const maximumSourceResponseBytes = 5 * 1_048_576;
-const masterKey = parseMasterKey(
-  workflowWorkerConfig.BYOK_GRID_MASTER_KEY_ID,
-  workflowWorkerConfig.BYOK_GRID_MASTER_KEY
-);
-
 export const executeSqliteSourceRunTask = workflowHatchet.task({
   name: 'execute-sqlite-source-run',
   retries: maximumRetries,
@@ -228,10 +222,10 @@ function resolveWorkspaceKey(
       false
     );
   }
-  return unwrapWorkspaceKey(
+  return unwrapWorkspaceKeyFromRing(
     workspaceId,
     execution.workspaceKey.wrappedKey,
-    masterKey
+    workflowMasterKeys
   );
 }
 

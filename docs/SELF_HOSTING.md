@@ -78,7 +78,12 @@ workflow-worker target runs portable visual graphs and every background
 integration from the shared SQLite store. The web and workflow-worker runtimes
 receive the same deployment master key: the web control plane encrypts
 credentials when they are saved, and credential-bearing nodes decrypt them only
-at execution time. Hatchet receives delivery and run identifiers, never those
+at execution time. During a planned rotation they must also receive the same
+bounded `BYOK_GRID_ADDITIONAL_MASTER_KEYS` Secret. Follow the complete overlap,
+plan, apply, verification, and backup-key retirement sequence in the
+[master-key rotation guide](MASTER_KEY_ROTATION.md); replacing the current key
+without that overlap can make existing workspace credentials unreadable.
+Hatchet receives delivery and run identifiers, never those
 secrets. When community connectors are enabled, the workflow worker also needs
 the signed registry mount plus the connector-runner URL and shared RPC secret.
 The runner remains isolated from SQLite and workspace encryption keys.
@@ -223,7 +228,9 @@ defaults:
 - an authenticated, release-pinned Hatchet deployment or compatible managed
   Hatchet endpoint with TLS;
 - unique `BETTER_AUTH_SECRET`, `BYOK_GRID_MASTER_KEY`, and
-  `BYOK_GRID_MASTER_KEY_ID` values from a secret manager;
+  `BYOK_GRID_MASTER_KEY_ID` values from a secret manager, plus an optional
+  secret-managed `BYOK_GRID_ADDITIONAL_MASTER_KEYS` overlap set used only
+  during documented rotation;
 - HTTPS termination with the canonical public URL configured consistently;
 - disabled or secret-backed allowlisted account provisioning, with approved
   addresses removed after use;
@@ -262,8 +269,9 @@ untested provider snapshot is not sufficient recovery evidence.
 
 Run SQLite migrations as a one-shot release job with `SQLITE_DATABASE_URL` and,
 for remote libSQL, `SQLITE_AUTH_TOKEN`. The web container needs those values,
-`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BYOK_GRID_MASTER_KEY`, and
-`BYOK_GRID_MASTER_KEY_ID`. The workflow worker needs the same SQLite and BYOK
+`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BYOK_GRID_MASTER_KEY`,
+`BYOK_GRID_MASTER_KEY_ID`, and optional `BYOK_GRID_ADDITIONAL_MASTER_KEYS`.
+The workflow worker needs the same SQLite and BYOK
 encryption-key settings plus Hatchet client settings. No BYOK Grid runtime needs
 PostgreSQL credentials.
 

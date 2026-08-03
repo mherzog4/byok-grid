@@ -1,9 +1,9 @@
-import { parseMasterKey } from '@byok-grid/security';
+import { parseMasterKeyRing } from '@byok-grid/security';
 
-let cachedMasterKey: ReturnType<typeof parseMasterKey> | undefined;
+let cachedMasterKeys: ReturnType<typeof parseMasterKeyRing> | undefined;
 
-export function getDeploymentMasterKey() {
-  if (cachedMasterKey) return cachedMasterKey;
+export function getDeploymentMasterKeys() {
+  if (cachedMasterKeys) return cachedMasterKeys;
 
   const id = process.env.BYOK_GRID_MASTER_KEY_ID;
   const encoded = process.env.BYOK_GRID_MASTER_KEY;
@@ -12,6 +12,10 @@ export function getDeploymentMasterKey() {
       'BYOK_GRID_MASTER_KEY_ID and BYOK_GRID_MASTER_KEY are required to store credentials.'
     );
   }
-  cachedMasterKey = parseMasterKey(id, encoded);
-  return cachedMasterKey;
+  cachedMasterKeys = parseMasterKeyRing(
+    id,
+    encoded,
+    process.env.BYOK_GRID_ADDITIONAL_MASTER_KEYS
+  );
+  return cachedMasterKeys;
 }

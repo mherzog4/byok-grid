@@ -51,23 +51,27 @@ version fallback.
 The secure default is `secrets.create=false`. Create a Secret such as
 `byok-grid-secrets` with these keys:
 
-| Key                              | Consumer              | Required                |
-| -------------------------------- | --------------------- | ----------------------- |
-| `sqlite-database-url`            | all product workloads | yes                     |
-| `sqlite-auth-token`              | all product workloads | when service requires   |
-| `better-auth-secret`             | web                   | yes                     |
-| `signup-allowed-emails`          | web                   | when allowlist enabled  |
-| `smtp-user`                      | web                   | when SMTP requires auth |
-| `smtp-password`                  | web                   | when SMTP requires auth |
-| `byok-grid-master-key`           | web and worker        | yes                     |
-| `hatchet-client-token`           | worker                | yes                     |
-| `connector-runner-shared-secret` | worker and runner     | when runner enabled     |
-| `clickhouse-password`            | projector             | when projector enabled  |
+| Key                                | Consumer              | Required                |
+| ---------------------------------- | --------------------- | ----------------------- |
+| `sqlite-database-url`              | all product workloads | yes                     |
+| `sqlite-auth-token`                | all product workloads | when service requires   |
+| `better-auth-secret`               | web                   | yes                     |
+| `signup-allowed-emails`            | web                   | when allowlist enabled  |
+| `smtp-user`                        | web                   | when SMTP requires auth |
+| `smtp-password`                    | web                   | when SMTP requires auth |
+| `byok-grid-master-key`             | web and worker        | yes                     |
+| `byok-grid-additional-master-keys` | web and worker        | during key rotation     |
+| `hatchet-client-token`             | worker                | yes                     |
+| `connector-runner-shared-secret`   | worker and runner     | when runner enabled     |
+| `clickhouse-password`              | projector             | when projector enabled  |
 
 Use External Secrets, Secrets Store CSI, Sealed Secrets, SOPS, or the cluster's
 equivalent to materialize that object. The web encrypts credentials and the
 worker decrypts them, so both deployments must receive the same master-key
-version. Do not pass production secrets through
+version and optional overlap keyring. Use the digest-pinned maintenance image
+in an operator-owned Job for plan/apply and follow
+[`MASTER_KEY_ROTATION.md`](MASTER_KEY_ROTATION.md); never place key JSON in the
+ConfigMap or Job arguments. Do not pass production secrets through
 `--set` or a committed values file: Helm release state can retain supplied
 values. If an external controller changes the Secret, use its rollout/reloader
 integration or restart the affected Deployment; Helm can checksum only the

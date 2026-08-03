@@ -24,22 +24,16 @@ import {
 } from '@byok-grid/domain';
 import {
   decryptCredential,
-  parseMasterKey,
-  unwrapWorkspaceKey,
+  unwrapWorkspaceKeyFromRing,
 } from '@byok-grid/security';
 import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { z } from 'zod';
-import { workflowWorkerConfig } from './config';
+import { workflowMasterKeys } from './master-keys';
 import { workflowDb } from './database';
 import { workflowHatchet } from './hatchet';
 
 const maximumRetries = 3;
 const maximumResponseBytes = 64 * 1_024;
-const masterKey = parseMasterKey(
-  workflowWorkerConfig.BYOK_GRID_MASTER_KEY_ID,
-  workflowWorkerConfig.BYOK_GRID_MASTER_KEY
-);
-
 export const executeSqliteWritebackDeliveryTask = workflowHatchet.task({
   name: 'execute-sqlite-writeback-delivery',
   retries: maximumRetries,
@@ -148,10 +142,10 @@ function resolveCredential(
       false
     );
   }
-  const workspaceKey = unwrapWorkspaceKey(
+  const workspaceKey = unwrapWorkspaceKeyFromRing(
     workspaceId,
     execution.workspaceKey.wrappedKey,
-    masterKey
+    workflowMasterKeys
   );
   try {
     return hubSpotCredentialSchema.parse(

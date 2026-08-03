@@ -37,6 +37,7 @@ secrets:
     smtpUser: ci-only-smtp-user
     smtpPassword: ci-only-smtp-password
     masterKey: Y2ktb25seS1mb3ItdGVtcGxhdGUtcmVuZGVyaW5n
+    additionalMasterKeys: '{"old-v0":"CQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQk="}'
     hatchetClientToken: ci-only-token
     connectorRunnerSharedSecret: ci-only-runner-secret-0000000000000000
     clickhousePassword: ci-only-clickhouse-password

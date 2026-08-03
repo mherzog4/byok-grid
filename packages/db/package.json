@@ -17,6 +17,8 @@
     "db:generate": "drizzle-kit generate",
     "db:sqlite:generate": "drizzle-kit generate --config=drizzle.sqlite.config.ts",
     "db:sqlite:migrate": "tsx src/sqlite/migrate-cli.ts",
+    "db:master-key:apply": "tsx src/sqlite/master-key-rotation-cli.ts apply",
+    "db:master-key:plan": "tsx src/sqlite/master-key-rotation-cli.ts plan",
     "db:restore": "tsx src/sqlite/backup-cli.ts restore",
     "db:migrate": "tsx src/migrate.ts",
     "lint": "tsc --noEmit",

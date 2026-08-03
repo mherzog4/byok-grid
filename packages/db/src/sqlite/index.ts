@@ -17,6 +17,7 @@ export * from './imports';
 export * from './ingestion';
 export * from './migrate';
 export * from './migration-status';
+export * from './master-key-rotation';
 export * from './outbox';
 export * from './operational-metrics';
 export * from './row-automations';

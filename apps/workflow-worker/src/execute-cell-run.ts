@@ -31,23 +31,18 @@ import {
 } from '@byok-grid/domain';
 import {
   decryptCredential,
-  parseMasterKey,
-  unwrapWorkspaceKey,
+  unwrapWorkspaceKeyFromRing,
 } from '@byok-grid/security';
 import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { and, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 import { workflowWorkerConfig } from './config';
+import { workflowMasterKeys } from './master-keys';
 import { workflowDb } from './database';
 import { workflowHatchet } from './hatchet';
 import { executeWaterfallPlan } from './waterfall';
 
 export const MAXIMUM_SQLITE_CELL_RUN_RETRIES = MAXIMUM_CELL_RUN_ATTEMPTS - 1;
-const masterKey = parseMasterKey(
-  workflowWorkerConfig.BYOK_GRID_MASTER_KEY_ID,
-  workflowWorkerConfig.BYOK_GRID_MASTER_KEY
-);
-
 export const executeSqliteCellRunTask = workflowHatchet.task({
   name: 'execute-sqlite-cell-run',
   retries: MAXIMUM_SQLITE_CELL_RUN_RETRIES,
@@ -328,10 +323,10 @@ async function resolveWaterfallCredential(
       false
     );
   }
-  const workspaceKey = unwrapWorkspaceKey(
+  const workspaceKey = unwrapWorkspaceKeyFromRing(
     workspaceId,
     workspaceKeyRecord.wrappedKey,
-    masterKey
+    workflowMasterKeys
   );
   try {
     const value = decryptCredential(
@@ -427,10 +422,10 @@ function resolveCredential(
       false
     );
   }
-  const workspaceKey = unwrapWorkspaceKey(
+  const workspaceKey = unwrapWorkspaceKeyFromRing(
     workspaceId,
     execution.workspaceKey.wrappedKey,
-    masterKey
+    workflowMasterKeys
   );
   try {
     return decryptCredential(

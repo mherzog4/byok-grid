@@ -1,5 +1,5 @@
 import { sqliteDatabaseConfigSchema } from '@byok-grid/db';
-import { parseMasterKey } from '@byok-grid/security';
+import { parseMasterKeyRing } from '@byok-grid/security';
 import {
   ClientIpPolicyConfigurationError,
   resolveClientIpPolicy,
@@ -117,10 +117,14 @@ export function assertWebRuntimeConfiguration(
     );
   } else {
     try {
-      parseMasterKey(masterKeyId, masterKey);
+      parseMasterKeyRing(
+        masterKeyId,
+        masterKey,
+        environment.BYOK_GRID_ADDITIONAL_MASTER_KEYS
+      );
     } catch {
       issues.push(
-        'BYOK_GRID_MASTER_KEY must be exactly 32 bytes of canonical base64 and BYOK_GRID_MASTER_KEY_ID must not be empty.'
+        'BYOK_GRID_MASTER_KEY, BYOK_GRID_MASTER_KEY_ID, and BYOK_GRID_ADDITIONAL_MASTER_KEYS form an invalid master-key configuration.'
       );
     }
   }

@@ -32,6 +32,10 @@ const configSchema = z
       .default(50),
     BYOK_GRID_MASTER_KEY: z.string().min(1),
     BYOK_GRID_MASTER_KEY_ID: z.string().min(1),
+    BYOK_GRID_ADDITIONAL_MASTER_KEYS: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z.string().min(1).optional()
+    ),
     CONNECTOR_RUNNER_SHARED_SECRET: z.preprocess(
       (value) => (value === '' ? undefined : value),
       z.string().min(32).optional()

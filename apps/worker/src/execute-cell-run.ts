@@ -30,14 +30,14 @@ import {
 } from '@byok-grid/domain';
 import {
   decryptCredential,
-  parseMasterKey,
-  unwrapWorkspaceKey,
+  unwrapWorkspaceKeyFromRing,
 } from '@byok-grid/security';
 import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { config } from './config';
+import { workerMasterKeys } from './master-keys';
 import { classifyCellRunFailure } from './cell-run-failure-policy';
+import { config } from './config';
 import { db } from './database';
 import { guardedEgressFetch } from '@byok-grid/connectors';
 import { hatchet } from './hatchet';
@@ -45,11 +45,6 @@ import { executeWaterfallPlan } from './waterfall';
 import { providerUnitsForRun } from './usage';
 import { executeSandboxConnector } from './sandbox-runner';
 import { requirePinnedSandboxConnector } from './sandbox-execution-policy';
-
-const masterKey = parseMasterKey(
-  config.BYOK_GRID_MASTER_KEY_ID,
-  config.BYOK_GRID_MASTER_KEY
-);
 
 const maximumRetries = MAXIMUM_CELL_RUN_ATTEMPTS - 1;
 
@@ -435,10 +430,10 @@ async function resolveWaterfallCredential(
     );
   }
 
-  const workspaceKey = unwrapWorkspaceKey(
+  const workspaceKey = unwrapWorkspaceKeyFromRing(
     workspaceId,
     workspaceKeyRecord.wrappedKey,
-    masterKey
+    workerMasterKeys
   );
   try {
     const value = decryptCredential(
@@ -531,10 +526,10 @@ function resolveCredential(
     throw new NonRetryableError('The workspace encryption key is missing.');
   }
 
-  const workspaceKey = unwrapWorkspaceKey(
+  const workspaceKey = unwrapWorkspaceKeyFromRing(
     workspaceId,
     execution.workspaceKey.wrappedKey,
-    masterKey
+    workerMasterKeys
   );
   try {
     return decryptCredential(

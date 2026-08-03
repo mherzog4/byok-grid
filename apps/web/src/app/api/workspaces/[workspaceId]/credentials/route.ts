@@ -11,7 +11,7 @@ import {
 } from '@byok-grid/db';
 import { credentialErrorResponse } from '@/lib/credential-api';
 import { getApiUser } from '@/lib/grid-api';
-import { getDeploymentMasterKey } from '@/lib/master-key';
+import { getDeploymentMasterKeys } from '@/lib/master-key';
 import { sqliteDb } from '@/lib/sqlite-database';
 import { z } from 'zod';
 
@@ -89,7 +89,7 @@ export async function POST(request: Request, context: RouteContext) {
     return Response.json(
       await createSqliteEncryptedCredential(sqliteDb, {
         connectorId: parsed.data.connectorId,
-        masterKey: getDeploymentMasterKey(),
+        masterKeys: getDeploymentMasterKeys(),
         name: parsed.data.name,
         secret: builtInSecret?.success
           ? builtInSecret.data

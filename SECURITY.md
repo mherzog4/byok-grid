@@ -132,6 +132,15 @@ Formula expressions are interpreted from a bounded typed tree and never passed
 to JavaScript evaluation. Waterfall result paths traverse only own properties
 of parsed provider responses. Provider credentials are resolved by ID and
 decrypted only in the worker immediately before the corresponding request.
+Deployment master-key rotation uses one current key plus at most eight
+additional decrypt-only overlap keys. The maintenance plan authenticates every
+workspace-key envelope before apply rewraps only those workspace data keys in
+bounded, resumable transactions; credential and cursor ciphertext is not
+rewritten. Every web and worker replica must carry both keys before the current
+ID changes. Never put key values in arguments or logs, remove an old runtime key
+only after the plan reports zero pending rows, and retain it separately until
+every backup that needs it has expired. Follow
+`docs/MASTER_KEY_ROTATION.md`; direct `workspace_keys` edits are unsupported.
 Installed provider actions derive fixed host allowlists from reviewed manifests,
 not mutable workspace configuration. Provider API keys must never enter action
 inputs, column configuration, outbox payloads, or run records. Built-ins are

@@ -136,6 +136,32 @@ protocol and application evidence, not proof of production inbox delivery,
 sending-domain alignment, or reputation; public open signup remains rejected
 outside loopback.
 
+## Deployment master-key rotation
+
+The security and SQLite integration suites generated independent old and new
+32-byte master keys, created credentials before and during an overlap window,
+and authenticated both credential ciphertexts after rewrapping only the
+workspace data-key envelope. The stored credential envelopes remained exactly
+unchanged. A second apply rotated zero rows, while unavailable old material,
+relational/envelope ID disagreement, malformed keyrings, duplicate material,
+and a wrong apply confirmation all failed before mutation. The real child-
+process CLI returned only key IDs, counts, and fixed markers; neither key value
+appeared in output.
+
+The production maintenance target was then built with its pruned dependency
+graph and run as the unprivileged `node` user against a fresh, container-migrated
+SQLite database. Its normal entrypoint emitted:
+
+```text
+{"currentKeyId":"container-v1","marker":"BYOK_GRID_MASTER_KEY_ROTATION_PLAN_VALID","pending":0,"total":0}
+```
+
+The same rebuilt entrypoint successfully ran the existing backup verification
+command, proving the maintenance dispatcher preserved that contract. This is
+local packaging and SQLite evidence; a supported production deployment must
+still rehearse overlap rollout, remote-libSQL rewrap, provider canaries, backup
+key retention, replica drain, and old-key removal with its real secret manager.
+
 ## SQLite recovery
 
 The live SQLite database was backed up online, independently verified, and

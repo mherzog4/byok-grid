@@ -6,7 +6,9 @@ import {
   encryptCredential,
   generateWorkspaceKey,
   type MasterKey,
-  unwrapWorkspaceKey,
+  type MasterKeyRing,
+  masterKeyRingFromMasterKey,
+  unwrapWorkspaceKeyFromRing,
 } from '@byok-grid/security';
 import { and, desc, eq } from 'drizzle-orm';
 import { type SqliteDatabase, withSqliteWriteTransaction } from './client';
@@ -28,6 +30,10 @@ interface CredentialScope {
   userId: string;
   workspaceId: string;
 }
+
+type CredentialEncryptionKeys =
+  | { masterKey: MasterKey; masterKeys?: never }
+  | { masterKey?: never; masterKeys: MasterKeyRing };
 
 export async function listSqliteCredentialMetadata(
   db: SqliteDatabase,
@@ -57,12 +63,12 @@ export async function listSqliteCredentialMetadata(
 
 export async function createSqliteEncryptedCredential(
   db: SqliteDatabase,
-  input: CredentialScope & {
-    connectorId: string;
-    masterKey: MasterKey;
-    name: string;
-    secret: Readonly<Record<string, unknown>>;
-  }
+  input: CredentialScope &
+    CredentialEncryptionKeys & {
+      connectorId: string;
+      name: string;
+      secret: Readonly<Record<string, unknown>>;
+    }
 ): Promise<SqliteCredentialMetadata> {
   const name = input.name.trim();
   if (!name || name.length > 120) {
@@ -70,6 +76,9 @@ export async function createSqliteEncryptedCredential(
       'Credential names must contain 1 to 120 characters.'
     );
   }
+
+  const masterKeys =
+    input.masterKeys ?? masterKeyRingFromMasterKey(input.masterKey);
 
   return withSqliteWriteTransaction(db, async (tx) => {
     await requireWorkspaceMembership(tx, input, 'credentials.manage');
@@ -83,9 +92,12 @@ export async function createSqliteEncryptedCredential(
       await tx
         .insert(workspaceKeys)
         .values({
-          keyId: input.masterKey.id,
+          keyId: masterKeys.current.id,
           workspaceId: input.workspaceId,
-          wrappedKey: generateWorkspaceKey(input.workspaceId, input.masterKey),
+          wrappedKey: generateWorkspaceKey(
+            input.workspaceId,
+            masterKeys.current
+          ),
         })
         .onConflictDoNothing({ target: workspaceKeys.workspaceId });
       [storedKey] = await tx
@@ -95,17 +107,15 @@ export async function createSqliteEncryptedCredential(
         .limit(1);
     }
     if (!storedKey) throw new Error('The workspace key could not be created.');
-    if (storedKey.keyId !== input.masterKey.id) {
-      throw new SqliteCredentialValidationError(
-        `Master key ${storedKey.keyId} is required for this workspace.`
-      );
+    if (storedKey.keyId !== storedKey.wrappedKey.keyId) {
+      throw new Error('The stored workspace key has inconsistent identifiers.');
     }
 
     const credentialId = crypto.randomUUID();
-    const workspaceKey = unwrapWorkspaceKey(
+    const workspaceKey = unwrapWorkspaceKeyFromRing(
       input.workspaceId,
       storedKey.wrappedKey,
-      input.masterKey
+      masterKeys
     );
     try {
       const [created] = await tx

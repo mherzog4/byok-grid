@@ -42,6 +42,7 @@ secrets:
     smtpUser: ''
     smtpPassword: ''
     masterKey: ''
+    additionalMasterKeys: ''
     hatchetClientToken: ''
     connectorRunnerSharedSecret: ''
     clickhousePassword: ''
@@ -53,6 +54,7 @@ secrets:
     smtpUser: smtp-user
     smtpPassword: smtp-password
     masterKey: byok-grid-master-key
+    additionalMasterKeys: byok-grid-additional-master-keys
     hatchetClientToken: hatchet-client-token
     connectorRunnerSharedSecret: connector-runner-shared-secret
     clickhousePassword: clickhouse-password

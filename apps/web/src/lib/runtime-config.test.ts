@@ -153,6 +153,32 @@ describe('web runtime configuration', () => {
     expect(String(error)).not.toContain('do-not-log-this-invalid-secret');
   });
 
+  it('validates bounded rotation-overlap keys without exposing their values', () => {
+    const oldKey = Buffer.alloc(32, 9).toString('base64');
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_ADDITIONAL_MASTER_KEYS: JSON.stringify({
+          'old-v1': oldKey,
+        }),
+      })
+    ).not.toThrow();
+
+    const unsafeValue = '{"old-v1":"do-not-log-this-key"}';
+    let error: unknown;
+    try {
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_ADDITIONAL_MASTER_KEYS: unsafeValue,
+      });
+    } catch (caught) {
+      error = caught;
+    }
+    expect(String(error)).toContain('invalid master-key configuration');
+    expect(String(error)).not.toContain(unsafeValue);
+    expect(String(error)).not.toContain('do-not-log-this-key');
+  });
+
   it('rejects missing and empty database locations', () => {
     expect(() =>
       assertWebRuntimeConfiguration({
