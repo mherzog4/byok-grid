@@ -1,0 +1,55 @@
+packages/db/src/sqlite/client.ts
+  s_28ae7db8033464::t_0dd859ea4ce7e8 3,21-23,91-94,110,119-137,145-146,149-154,164-168,173-181,186-187,189-214
+  s_28ae7db8033464::t_e5107174aa6f48 16-19,24-25,33-37,63-67,71-79,138-144,147-148,155-156,162-163,169-172
+  s_28ae7db8033464::t_076071fe314b07 182-185,188
+  s_28ae7db8033464::t_095ec0a6b19760 157-161
+  s_28ae7db8033464::t_3491aab95644eb 215
+docs/adr/0035-sqlite-first-application-core.md
+  s_28ae7db8033464::t_33a857cbaea0be 37-40
+apps/workflow-worker/src/index.ts
+  s_28ae7db8033464::t_b5ab25e5ecd1e2 1-4,46
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_33a857cbaea0be 63-66,89-90
+packages/db/src/sqlite/client.test.ts
+  s_28ae7db8033464::t_0dd859ea4ce7e8 4-7,11-12,14,16,45-88,110-113,115-125,131-132,197
+  s_28ae7db8033464::t_c0c1fbac704349 170,191,196,198-231
+  s_28ae7db8033464::t_34845103a77cf2 89,97-109,133-156,158-159,168-169,171-178,184-190,193-195,232-234
+  s_28ae7db8033464::t_076071fe314b07 90-96
+  s_28ae7db8033464::t_3c4e1c0adce41f 1-3,15,114,126-130
+  s_28ae7db8033464::t_ce594d333a051a 157,160-167,179-183
+apps/workflow-worker/src/operational-metrics.test.ts
+  s_28ae7db8033464::t_b5ab25e5ecd1e2 15-18,45-50
+docs/adr/0045-pre-callback-sqlite-write-retries.md
+  s_28ae7db8033464::t_33a857cbaea0be 1-29,35-63
+  s_28ae7db8033464::t_1376b35c3b0f7a 30
+  s_28ae7db8033464::t_095ec0a6b19760 31-34
+apps/workflow-worker/src/operational-metrics.ts
+  s_28ae7db8033464::t_b5ab25e5ecd1e2 3-6,27,36-39,47-48,87-91,121-127,138-141
+  s_28ae7db8033464::t_20858addc864c1 142
+docs/OBSERVABILITY.md
+  s_28ae7db8033464::t_ef6e63f32434fd 52,106-108,121-124
+  s_28ae7db8033464::t_33a857cbaea0be 59-65,109-119
+  s_28ae7db8033464::t_0926355ce36605 120
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_5eed940f1f783d 82-87
+  s_28ae7db8033464::t_ef6e63f32434fd 88
+  s_28ae7db8033464::t_33a857cbaea0be 71-81
+packages/db/src/sqlite/credentials.integration.test.ts
+  s_28ae7db8033464::t_3b3f9f0a5e07e1 432
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "6acc66a7d91e78db1be630f923ad5b7d81193edd",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
