@@ -13,7 +13,7 @@
   "properties": {
     "app": {
       "type": "object",
-      "required": ["publicUrl", "signupMode", "session"],
+      "required": ["publicUrl", "signupMode", "email", "session"],
       "properties": {
         "publicUrl": {
           "type": "string",
@@ -21,6 +21,57 @@
           "pattern": "^https://"
         },
         "signupMode": { "enum": ["disabled", "allowlist"] },
+        "email": {
+          "type": "object",
+          "required": ["mode", "smtp"],
+          "additionalProperties": false,
+          "properties": {
+            "mode": { "enum": ["disabled", "smtp"] },
+            "smtp": {
+              "type": "object",
+              "required": [
+                "fromEmail",
+                "fromName",
+                "host",
+                "port",
+                "requireTls",
+                "secure"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "fromEmail": { "type": "string" },
+                "fromName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "host": { "type": "string" },
+                "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+                "requireTls": { "type": "boolean" },
+                "secure": { "type": "boolean" }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "mode": { "const": "smtp" } } },
+              "then": {
+                "properties": {
+                  "smtp": {
+                    "properties": {
+                      "fromEmail": { "format": "email", "minLength": 3 },
+                      "host": { "minLength": 1 }
+                    },
+                    "anyOf": [
+                      { "properties": { "secure": { "const": true } } },
+                      { "properties": { "requireTls": { "const": true } } }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
         "session": {
           "type": "object",
           "required": [
@@ -58,6 +109,8 @@
             "sqliteAuthToken": { "type": "string" },
             "betterAuthSecret": { "type": "string" },
             "signupAllowedEmails": { "type": "string" },
+            "smtpUser": { "type": "string" },
+            "smtpPassword": { "type": "string" },
             "masterKey": { "type": "string" },
             "hatchetClientToken": { "type": "string" },
             "connectorRunnerSharedSecret": { "type": "string" },

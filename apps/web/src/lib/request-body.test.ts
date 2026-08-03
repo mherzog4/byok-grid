@@ -157,9 +157,9 @@ describe('bounded API JSON bodies', () => {
     );
     expect(source).toContain('MAXIMUM_AUTH_REQUEST_BODY_BYTES');
     expect(source).toContain('cloneRequestWithBoundedBody');
-    expect(source).toMatch(
-      /if \(boundedRequest instanceof Response\) return boundedRequest;/u
-    );
+    expect(source).toMatch(/boundedRequest\s+instanceof\s+Response/u);
+    expect(source).toContain('handlers.POST(boundedRequest)');
+    expect(source).not.toContain('handlers.POST(request)');
   });
 
   it('retains the production API and authentication ceilings', () => {

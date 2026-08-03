@@ -51,16 +51,18 @@ version fallback.
 The secure default is `secrets.create=false`. Create a Secret such as
 `byok-grid-secrets` with these keys:
 
-| Key                              | Consumer              | Required               |
-| -------------------------------- | --------------------- | ---------------------- |
-| `sqlite-database-url`            | all product workloads | yes                    |
-| `sqlite-auth-token`              | all product workloads | when service requires  |
-| `better-auth-secret`             | web                   | yes                    |
-| `signup-allowed-emails`          | web                   | when allowlist enabled |
-| `byok-grid-master-key`           | web and worker        | yes                    |
-| `hatchet-client-token`           | worker                | yes                    |
-| `connector-runner-shared-secret` | worker and runner     | when runner enabled    |
-| `clickhouse-password`            | projector             | when projector enabled |
+| Key                              | Consumer              | Required                |
+| -------------------------------- | --------------------- | ----------------------- |
+| `sqlite-database-url`            | all product workloads | yes                     |
+| `sqlite-auth-token`              | all product workloads | when service requires   |
+| `better-auth-secret`             | web                   | yes                     |
+| `signup-allowed-emails`          | web                   | when allowlist enabled  |
+| `smtp-user`                      | web                   | when SMTP requires auth |
+| `smtp-password`                  | web                   | when SMTP requires auth |
+| `byok-grid-master-key`           | web and worker        | yes                     |
+| `hatchet-client-token`           | worker                | yes                     |
+| `connector-runner-shared-secret` | worker and runner     | when runner enabled     |
+| `clickhouse-password`            | projector             | when projector enabled  |
 
 Use External Secrets, Secrets Store CSI, Sealed Secrets, SOPS, or the cluster's
 equivalent to materialize that object. The web encrypts credentials and the
@@ -89,6 +91,14 @@ comma-separated address. The chart defaults to a hard seven-day session through
 refresh threshold if an operator explicitly enables sliding refresh. The schema
 permits expiries from 15 minutes through 30 days, while application readiness
 also requires the update age to remain shorter than the expiry.
+
+`app.email.mode` defaults to `disabled`. Set it to `smtp`, then configure
+`app.email.smtp.host`, `port`, `fromEmail`, `fromName`, and either implicit TLS
+or required STARTTLS. Put `smtp-user` and `smtp-password` in the external Secret
+when authentication is required; they must be present as a pair. The chart
+rejects public plaintext SMTP. If runtime egress isolation is enabled, add the
+SMTP destination IP/CIDR and port to `networkPolicy.egress.web`; the chart does
+not infer provider addresses or open email egress automatically.
 
 Validate before changing the cluster:
 

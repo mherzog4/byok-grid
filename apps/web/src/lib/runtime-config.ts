@@ -1,5 +1,9 @@
 import { sqliteDatabaseConfigSchema } from '@byok-grid/db';
 import { parseMasterKey } from '@byok-grid/security';
+import {
+  EmailPolicyConfigurationError,
+  resolveEmailPolicy,
+} from './email-policy';
 import { isLoopbackHostname } from './runtime-origin';
 import {
   resolveSessionPolicy,
@@ -50,6 +54,16 @@ export function assertWebRuntimeConfiguration(
     resolveSignupPolicy(environment);
   } catch (error) {
     if (error instanceof SignupPolicyConfigurationError) {
+      issues.push(...error.issues);
+    } else {
+      throw error;
+    }
+  }
+
+  try {
+    resolveEmailPolicy(environment);
+  } catch (error) {
+    if (error instanceof EmailPolicyConfigurationError) {
       issues.push(...error.issues);
     } else {
       throw error;

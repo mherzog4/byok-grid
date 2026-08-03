@@ -19,12 +19,18 @@ working tree:
 - fail-closed public registration with disabled and secret-backed allowlist
   modes, loopback-only open signup, startup validation, Better Auth hook-level
   enforcement, UI reflection, temporary SQLite integration coverage, and a
-  two-process compiled-standalone HTTP drill;
+  four-process compiled-standalone HTTP drill;
 - bounded database-backed sessions with a hard seven-day public default,
   configurable 15-minute-to-30-day expiry, explicit sliding refresh,
   cache-free immediate revocation, token-safe other-session controls, SQLite
   integration coverage, and compiled-standalone HTTP evidence that revokes the
   older session while preserving the current one;
+- provider-neutral SMTP authentication email with fail-closed configuration,
+  non-loopback TLS enforcement, header-safe messages, one-hour verified-email
+  and single-use reset links, outage-safe enumeration-neutral reset responses,
+  a bounded anti-enumeration response-time floor, session revocation after
+  reset, SQLite integration coverage, private reset-page headers, and a
+  compiled-standalone drill using real SMTP protocol delivery;
 - bounded incremental reads across Better Auth POST requests and every product
   Route Handler, with declared and observed 64-KiB/five-MiB enforcement,
   compressed-body rejection, transport-specific responses, and source contracts
@@ -112,6 +118,10 @@ dated evidence linked from a release issue or runbook record:
 - deploy the reference Helm release behind real TLS with an external secret
   manager, default-deny network policy, provider-specific egress, centralized
   logs, metrics, alert routing, and an operator-owned rollback decision path;
+- exercise the chosen authenticated SMTP service over TLS, prove verification
+  and recovery delivery to controlled inboxes, configure and validate SPF,
+  DKIM, and DMARC alignment, and monitor deferrals, rejections, bounces,
+  complaints, and authentication failures;
 - boot and smoke-test both `linux/amd64` and `linux/arm64` release images from
   their published manifest-list digests;
 - enable and verify protected release tags or a repository ruleset and the

@@ -110,10 +110,58 @@ case-insensitive. Remove an address after its account is created, then switch to
 key by default. The chart schema intentionally permits only `disabled` and
 `allowlist` for public Kubernetes releases.
 
-This mechanism limits account creation; it does not verify control of an email
-inbox and does not provide password-reset delivery. Do not enable public open
-signup until a reviewed transactional-email implementation and Better Auth
-verified-email enforcement are configured.
+Without SMTP, this mechanism limits account creation but does not verify control
+of an inbox. Public open signup remains rejected even after SMTP is enabled;
+delivery reputation, abuse controls, and public-registration policy require a
+separate promotion decision.
+
+## Authentication email and recovery
+
+Email delivery is disabled by default. Set `BYOK_GRID_EMAIL_MODE=smtp` to
+enable verified-email enforcement and password recovery for controlled
+accounts. SMTP mode requires `SMTP_HOST` and `SMTP_FROM_EMAIL`; credentials are
+optional, but `SMTP_USER` and `SMTP_PASSWORD` must be supplied together.
+
+```text
+BYOK_GRID_EMAIL_MODE=smtp
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
+SMTP_FROM_EMAIL=security@example.com
+SMTP_FROM_NAME=BYOK Grid
+SMTP_USER=mailer
+SMTP_PASSWORD=from-your-secret-manager
+```
+
+Use `SMTP_SECURE=true` with port 465 for implicit TLS, or require STARTTLS with
+`SMTP_REQUIRE_TLS=true` on port 587. Cleartext SMTP is rejected unless the host
+is loopback, which exists only for disposable local delivery drills. The
+transport uses certificate validation, a TLS 1.2 minimum, bounded connection
+and socket timeouts, a two-connection pool, and no debug logging.
+
+SMTP mode sends a one-hour verification link after signup and again after a
+correct sign-in attempt by an unverified account. Signup does not create a
+session until inbox control is proven. Password-reset requests return the same
+message for known and unknown addresses, use a one-hour single-use token, and
+revoke every session after a successful reset. Recovery and reset pages return
+`404` while delivery is disabled; token-bearing reset pages are private,
+non-cacheable, non-indexable, and covered by the global no-referrer policy.
+
+Before relying on recovery, verify the SMTP connection and a complete delivery
+to a controlled inbox, configure SPF, DKIM, and DMARC for the sending domain,
+and monitor rejection, deferral, bounce, complaint, and authentication-failure
+signals. BYOK Grid does not ingest bounces or complaints in this release.
+With deployment environment variables available, verify connection and SMTP
+authentication without sending a message:
+
+```text
+npm run email:verify
+```
+
+Success emits only `BYOK_GRID_SMTP_CONNECTION_VERIFIED`. This proves SMTP
+connection and authentication, not inbox placement; follow it with a real
+verification and password-reset delivery to a controlled account.
 
 ## Session lifecycle
 
@@ -137,7 +185,8 @@ database revocation is checked without a cookie cache.
 The Helm equivalents are `app.session.expiresInSeconds`,
 `app.session.refreshEnabled`, and `app.session.updateAgeSeconds`. Treat longer
 lifetimes and public sliding refresh as explicit risk acceptance for a stolen
-cookie. This policy does not provide password recovery or verified email.
+cookie. Password recovery and verified email are available only when the SMTP
+mode above is configured.
 
 ## Production boundary
 
@@ -154,6 +203,8 @@ defaults:
 - HTTPS termination with the canonical public URL configured consistently;
 - disabled or secret-backed allowlisted account provisioning, with approved
   addresses removed after use;
+- a TLS-authenticated SMTP service, secret-managed credentials, aligned sending
+  domain, and tested inbox delivery when account recovery is enabled;
 - an explicitly reviewed bounded session lifetime and refresh policy;
 - preservation of the application's request-scoped nonce CSP, HSTS,
   no-referrer, anti-framing, MIME-sniffing, browser-capability, and cache-control

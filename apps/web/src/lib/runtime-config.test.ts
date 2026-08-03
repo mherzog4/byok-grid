@@ -53,6 +53,34 @@ describe('web runtime configuration', () => {
     ).toThrow('must be a whole number');
   });
 
+  it('validates SMTP recovery configuration without exposing credentials', () => {
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_EMAIL_MODE: 'smtp',
+        SMTP_FROM_EMAIL: 'security@example.com',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PASSWORD: 'do-not-print-this-password',
+        SMTP_USER: 'mailer',
+      })
+    ).not.toThrow();
+
+    let error: unknown;
+    try {
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_EMAIL_MODE: 'smtp',
+        SMTP_FROM_EMAIL: 'security@example.com',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PASSWORD: 'do-not-print-this-password',
+      });
+    } catch (caught) {
+      error = caught;
+    }
+    expect(String(error)).toContain('SMTP_USER and SMTP_PASSWORD');
+    expect(String(error)).not.toContain('do-not-print-this-password');
+  });
+
   it('allows HTTP only for loopback evaluation', () => {
     expect(() =>
       assertWebRuntimeConfiguration({

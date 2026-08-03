@@ -408,6 +408,43 @@ input:focus {
   padding: 10px 12px;
 }
 
+.form-success {
+  background: rgb(184 243 74 / 8%);
+  border: 1px solid rgb(184 243 74 / 28%);
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 12px;
+  padding: 10px 12px;
+}
+
+.auth-secondary-link {
+  color: var(--muted);
+  font-size: 12px;
+  justify-self: center;
+}
+
+.auth-form-copy,
+.auth-result p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.auth-result {
+  display: grid;
+  gap: 18px;
+  padding-top: 20px;
+}
+
+.auth-result h2 {
+  font-size: 22px;
+}
+
+.auth-result .primary-action {
+  justify-self: start;
+  text-decoration: none;
+}
+
 .auth-card .primary-action {
   padding: 12px 14px;
 }

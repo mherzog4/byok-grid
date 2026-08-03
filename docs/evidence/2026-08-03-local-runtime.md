@@ -79,7 +79,7 @@ readiness ledger.
 
 ## Public account provisioning
 
-After a production build, the following repository command launched three
+After a production build, the following repository command launched four
 independent standalone Next.js processes against fresh migrated SQLite files:
 
 ```text
@@ -105,6 +105,7 @@ emitted by the command:
 {"marker":"BYOK_GRID_SIGNUP_DISABLED_VERIFIED"}
 {"marker":"BYOK_GRID_SIGNUP_ALLOWLIST_VERIFIED"}
 {"marker":"BYOK_GRID_SESSION_POLICY_DRILL_PASSED"}
+{"marker":"BYOK_GRID_SMTP_RECOVERY_DRILL_PASSED"}
 {"marker":"BYOK_GRID_SIGNUP_POLICY_DRILL_PASSED"}
 ```
 
@@ -112,9 +113,16 @@ Separate file-backed SQLite integration tests additionally proved that rejected
 requests created no users and an approved signup created exactly one user,
 personal workspace, and membership. They also proved two active session rows,
 bounded expiry, other-session revocation, and current-session preservation.
-This is controlled provisioning and bounded-session evidence, not
-verified-email or password-recovery evidence; public open signup remains
-rejected outside loopback.
+The compiled drill also started a disposable loopback SMTP receiver and a
+fourth public-origin application process with SMTP mode enabled. It observed
+the final verification and reset MIME messages, followed their exact HTTPS auth
+URLs through the local listener, proved signup created no pre-verification
+session, and compared identical known/unknown reset responses. The reset token
+worked once, invalidated the verified session and old password, and enabled the
+replacement password. The unknown address generated no message. This is local
+protocol and application evidence, not proof of production inbox delivery,
+sending-domain alignment, or reputation; public open signup remains rejected
+outside loopback.
 
 ## SQLite recovery
 

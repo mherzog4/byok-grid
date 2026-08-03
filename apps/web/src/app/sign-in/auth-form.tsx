@@ -1,7 +1,9 @@
 'use client';
 
 import { authClient } from '@/lib/auth-client';
+import type { EmailMode } from '@/lib/email-policy';
 import type { SignupMode } from '@/lib/signup-policy';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type FormEvent, useState } from 'react';
 
@@ -9,22 +11,27 @@ type Mode = 'sign-in' | 'sign-up';
 
 export function AuthForm({
   nextPath = '/app',
+  emailMode,
   signupMode,
 }: {
   nextPath?: string;
+  emailMode: EmailMode;
   signupMode: SignupMode;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>('sign-in');
   const [error, setError] = useState<string>();
+  const [notice, setNotice] = useState<string>();
   const [pending, setPending] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(undefined);
+    setNotice(undefined);
     setPending(true);
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const email = String(form.get('email') ?? '');
     const password = String(form.get('password') ?? '');
 
@@ -34,11 +41,26 @@ export function AuthForm({
             email,
             name: String(form.get('name') ?? ''),
             password,
+            ...(emailMode === 'smtp' ? { callbackURL: nextPath } : {}),
           })
         : await authClient.signIn.email({ email, password });
 
     if (result.error) {
-      setError(result.error.message ?? 'Authentication failed.');
+      setError(
+        result.error.code === 'EMAIL_NOT_VERIFIED'
+          ? 'Check your email for a verification link before signing in.'
+          : (result.error.message ?? 'Authentication failed.')
+      );
+      setPending(false);
+      return;
+    }
+
+    if (mode === 'sign-up' && emailMode === 'smtp') {
+      formElement.reset();
+      setMode('sign-in');
+      setNotice(
+        'Check your email for the verification link before signing in.'
+      );
       setPending(false);
       return;
     }
@@ -108,6 +130,7 @@ export function AuthForm({
               mode === 'sign-up' ? 'new-password' : 'current-password'
             }
             minLength={12}
+            maxLength={128}
             name="password"
             required
             type="password"
@@ -116,6 +139,7 @@ export function AuthForm({
         </label>
 
         {error ? <p className="form-error">{error}</p> : null}
+        {notice ? <p className="form-success">{notice}</p> : null}
 
         <button className="primary-action" disabled={pending} type="submit">
           {pending
@@ -124,6 +148,11 @@ export function AuthForm({
               ? 'Create account'
               : 'Sign in'}
         </button>
+        {mode === 'sign-in' && emailMode === 'smtp' ? (
+          <Link className="auth-secondary-link" href="/forgot-password">
+            Forgot your password?
+          </Link>
+        ) : null}
       </form>
     </section>
   );

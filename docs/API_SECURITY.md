@@ -47,9 +47,36 @@ sessions. A user can revoke those sessions without invalidating the current
 one. The Next.js boundary returns `404` for external requests to Better Auth's
 raw-token-bearing session-list endpoint; internal server calls do not traverse
 that route. Other-session tokens must not be logged, rendered, or exposed
-through product API responses. Password-reset delivery and verified-email
-enforcement remain separate release gates; bounded sessions do not replace
-account recovery.
+through product API responses. Production provider delivery remains a separate
+deployment gate; bounded sessions do not replace account recovery.
+
+## Authentication email and recovery
+
+SMTP delivery is opt-in and structurally validated at startup. Non-loopback
+SMTP must use implicit TLS or require STARTTLS; certificate verification and a
+TLS 1.2 minimum remain enabled. Credentials are accepted only as a complete
+username/password pair, header fields reject control characters, and generated
+messages cannot read files or URLs. SMTP debug and protocol logging are off.
+The delivery boundary refuses any authentication URL outside the canonical
+`BETTER_AUTH_URL` origin and `/api/auth/*` route.
+
+Verification and reset links expire after one hour. Reset tokens are stored in
+the Better Auth verification table, consumed once, and every active session is
+deleted after a successful password change. Known and unknown reset requests
+return the same response even when SMTP delivery fails. The failure diagnostic
+contains only the email kind, never the recipient, URL, SMTP response, or
+exception. The Next route wrapper gives reset and verification requests a
+500-millisecond minimum response time across success, unknown-account,
+validation, and outage paths. Better Auth applies its database-backed three-
+per-minute special rate-limit bucket. Edge rate limiting remains required
+because IP identity and distributed abuse controls belong to the deployment
+ingress.
+
+Token-bearing `/reset-password` responses are private and non-cacheable, carry
+`X-Robots-Tag: noindex, nofollow`, and inherit `Referrer-Policy: no-referrer`.
+Do not log reset or verification URLs. SMTP server responses may contain
+recipient metadata and must receive the same centralized-log redaction policy
+as other identity data.
 
 The five-MiB generic limit is intentionally larger than a typical form. A
 published workflow may contain up to 100 nodes, 200 edges, and bounded mapping

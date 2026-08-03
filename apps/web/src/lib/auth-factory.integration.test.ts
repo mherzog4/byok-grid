@@ -6,7 +6,9 @@ import {
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { AuthenticationEmailDelivery } from './email-delivery';
+import { resolveEmailPolicy } from './email-policy';
 import { createByokGridAuth } from './auth-factory';
 import { resolveSessionPolicy } from './session-policy';
 import { resolveSignupPolicy } from './signup-policy';
@@ -14,6 +16,7 @@ import { resolveSignupPolicy } from './signup-policy';
 const baseURL = 'https://grid.example.com';
 const password = 'correct-horse-battery-staple';
 const secret = 'test-only-better-auth-secret-000000000';
+const disabledEmailPolicy = resolveEmailPolicy({});
 
 describe('Better Auth signup policy integration', () => {
   let database: SqliteDatabaseHandle;
@@ -36,6 +39,8 @@ describe('Better Auth signup policy integration', () => {
     const auth = createByokGridAuth({
       baseURL,
       database: database.db,
+      emailDelivery: undefined,
+      emailPolicy: disabledEmailPolicy,
       secret,
       sessionPolicy: resolveSessionPolicy({ BETTER_AUTH_URL: baseURL }),
       signupPolicy: resolveSignupPolicy({
@@ -57,6 +62,8 @@ describe('Better Auth signup policy integration', () => {
     const auth = createByokGridAuth({
       baseURL,
       database: database.db,
+      emailDelivery: undefined,
+      emailPolicy: disabledEmailPolicy,
       secret,
       sessionPolicy: resolveSessionPolicy({ BETTER_AUTH_URL: baseURL }),
       signupPolicy: resolveSignupPolicy({
@@ -113,6 +120,142 @@ describe('Better Auth signup policy integration', () => {
     await expect(
       auth.api.getSession({ headers: secondHeaders })
     ).resolves.toMatchObject({ user: { email: 'owner@example.com' } });
+  });
+
+  it('verifies email, issues one-time reset links, and revokes sessions after reset', async () => {
+    const deliveries: Array<{
+      kind: 'password-reset' | 'verify-email';
+      to: string;
+      url: string;
+    }> = [];
+    let failDelivery = false;
+    const emailDelivery: AuthenticationEmailDelivery = {
+      async send(message) {
+        if (failDelivery) throw new Error('secret SMTP diagnostic');
+        deliveries.push(message);
+      },
+      async verify() {},
+    };
+    const emailPolicy = resolveEmailPolicy({
+      BYOK_GRID_EMAIL_MODE: 'smtp',
+      SMTP_FROM_EMAIL: 'security@example.com',
+      SMTP_HOST: 'smtp.example.com',
+    });
+    const auth = createByokGridAuth({
+      baseURL,
+      database: database.db,
+      emailDelivery,
+      emailPolicy,
+      secret,
+      sessionPolicy: resolveSessionPolicy({ BETTER_AUTH_URL: baseURL }),
+      signupPolicy: resolveSignupPolicy({
+        BETTER_AUTH_URL: baseURL,
+        BYOK_GRID_SIGNUP_ALLOWED_EMAILS: 'owner@example.com',
+        BYOK_GRID_SIGNUP_MODE: 'allowlist',
+      }),
+    });
+
+    const signup = await auth.api.signUpEmail({
+      asResponse: true,
+      body: { email: 'owner@example.com', name: 'Owner', password },
+    });
+    expect(signup.status).toBe(200);
+    expect(signup.headers.get('set-cookie')).toBeNull();
+    expect(deliveries).toHaveLength(1);
+    expect(deliveries[0]).toMatchObject({
+      kind: 'verify-email',
+      to: 'owner@example.com',
+    });
+
+    const verificationUrl = new URL(deliveries[0]!.url);
+    const verificationToken = verificationUrl.searchParams.get('token');
+    expect(verificationToken).toBeTruthy();
+    await expect(
+      auth.api.verifyEmail({ query: { token: verificationToken! } })
+    ).resolves.toMatchObject({ status: true });
+
+    const login = await auth.api.signInEmail({
+      asResponse: true,
+      body: { email: 'owner@example.com', password },
+    });
+    expect(login.status).toBe(200);
+    const activeCookie = cookieHeader(login);
+
+    await expect(
+      auth.api.requestPasswordReset({
+        body: { email: 'missing@example.com', redirectTo: '/reset-password' },
+      })
+    ).resolves.toMatchObject({ status: true });
+    expect(deliveries).toHaveLength(1);
+
+    await expect(
+      auth.api.requestPasswordReset({
+        body: { email: 'owner@example.com', redirectTo: '/reset-password' },
+      })
+    ).resolves.toMatchObject({ status: true });
+    expect(deliveries).toHaveLength(2);
+    expect(deliveries[1]).toMatchObject({
+      kind: 'password-reset',
+      to: 'owner@example.com',
+    });
+    const resetToken = new URL(deliveries[1]!.url).pathname.split('/').at(-1);
+    expect(resetToken).toBeTruthy();
+
+    const newPassword = 'new-correct-horse-battery-staple';
+    await expect(
+      auth.api.resetPassword({
+        body: { newPassword, token: resetToken! },
+      })
+    ).resolves.toEqual({ status: true });
+    await expect(
+      auth.api.getSession({ headers: new Headers({ cookie: activeCookie }) })
+    ).resolves.toBeNull();
+    await expect(
+      auth.api.resetPassword({
+        body: { newPassword: `${newPassword}-again`, token: resetToken! },
+      })
+    ).rejects.toMatchObject({ status: 'BAD_REQUEST' });
+
+    expect(
+      (
+        await auth.api.signInEmail({
+          asResponse: true,
+          body: { email: 'owner@example.com', password },
+        })
+      ).status
+    ).toBe(401);
+    expect(
+      (
+        await auth.api.signInEmail({
+          asResponse: true,
+          body: { email: 'owner@example.com', password: newPassword },
+        })
+      ).status
+    ).toBe(200);
+
+    failDelivery = true;
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const knownDuringOutage = await auth.api.requestPasswordReset({
+      body: { email: 'owner@example.com', redirectTo: '/reset-password' },
+    });
+    const unknownDuringOutage = await auth.api.requestPasswordReset({
+      body: {
+        email: 'another-missing@example.com',
+        redirectTo: '/reset-password',
+      },
+    });
+    expect(knownDuringOutage).toEqual(unknownDuringOutage);
+    expect(errorLog).toHaveBeenCalledWith(
+      'Authentication email delivery failed.',
+      { kind: 'password-reset' }
+    );
+    expect(JSON.stringify(errorLog.mock.calls)).not.toContain(
+      'secret SMTP diagnostic'
+    );
+    expect(JSON.stringify(errorLog.mock.calls)).not.toContain(
+      'owner@example.com'
+    );
+    errorLog.mockRestore();
   });
 });
 

@@ -1,6 +1,15 @@
 app:
   publicUrl: https://grid.test.example
   signupMode: allowlist
+  email:
+    mode: smtp
+    smtp:
+      fromEmail: security@grid.test.example
+      fromName: BYOK Grid CI
+      host: smtp.test.example
+      port: 587
+      requireTls: true
+      secure: false
   session:
     expiresInSeconds: 43200
     refreshEnabled: false
@@ -22,6 +31,8 @@ secrets:
     sqliteAuthToken: ci-only-libsql-token
     betterAuthSecret: ci-only-better-auth-secret-000000000
     signupAllowedEmails: release-owner@example.test
+    smtpUser: ci-only-smtp-user
+    smtpPassword: ci-only-smtp-password
     masterKey: Y2ktb25seS1mb3ItdGVtcGxhdGUtcmVuZGVyaW5n
     hatchetClientToken: ci-only-token
     connectorRunnerSharedSecret: ci-only-runner-secret-0000000000000000

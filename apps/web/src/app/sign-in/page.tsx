@@ -1,4 +1,4 @@
-import { auth, signupPolicy } from '@/lib/auth';
+import { auth, emailPolicy, signupPolicy } from '@/lib/auth';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -28,7 +28,11 @@ export default async function SignInPage({
           keys are encrypted separately and are never placed in session data.
         </p>
       </div>
-      <AuthForm nextPath={nextPath} signupMode={signupPolicy.mode} />
+      <AuthForm
+        emailMode={emailPolicy.mode}
+        nextPath={nextPath}
+        signupMode={signupPolicy.mode}
+      />
     </main>
   );
 }

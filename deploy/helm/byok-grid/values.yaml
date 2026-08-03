@@ -10,6 +10,15 @@ app:
   # Public deployments fail closed. Use allowlist with the corresponding
   # Secret value for controlled account provisioning.
   signupMode: disabled
+  email:
+    mode: disabled
+    smtp:
+      fromEmail: ''
+      fromName: BYOK Grid
+      host: ''
+      port: 587
+      requireTls: true
+      secure: false
   session:
     # Public releases use a hard expiry unless an operator explicitly enables
     # sliding refresh after reviewing the stolen-cookie lifetime tradeoff.
@@ -26,6 +35,8 @@ secrets:
     sqliteAuthToken: ''
     betterAuthSecret: ''
     signupAllowedEmails: ''
+    smtpUser: ''
+    smtpPassword: ''
     masterKey: ''
     hatchetClientToken: ''
     connectorRunnerSharedSecret: ''
@@ -35,6 +46,8 @@ secrets:
     sqliteAuthToken: sqlite-auth-token
     betterAuthSecret: better-auth-secret
     signupAllowedEmails: signup-allowed-emails
+    smtpUser: smtp-user
+    smtpPassword: smtp-password
     masterKey: byok-grid-master-key
     hatchetClientToken: hatchet-client-token
     connectorRunnerSharedSecret: connector-runner-shared-secret

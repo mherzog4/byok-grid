@@ -40,6 +40,7 @@ grep -q 'path: /api/live' "$default_render"
 grep -q 'helm.sh/hook: pre-install,pre-upgrade' "$default_render"
 grep -q 'key: sqlite-database-url' "$default_render"
 grep -q 'BYOK_GRID_SIGNUP_MODE: "disabled"' "$default_render"
+grep -q 'BYOK_GRID_EMAIL_MODE: "disabled"' "$default_render"
 grep -q 'BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: "604800"' "$default_render"
 grep -q 'BYOK_GRID_SESSION_REFRESH_ENABLED: "false"' "$default_render"
 grep -q 'BYOK_GRID_SESSION_UPDATE_AGE_SECONDS: "86400"' "$default_render"
@@ -69,6 +70,12 @@ grep -q 'cidr: 198.51.100.0/24' "$egress_render"
 grep -q 'cidr: 203.0.113.0/24' "$egress_render"
 grep -q 'value: "10000000"' "$full_render"
 grep -q 'BYOK_GRID_SIGNUP_MODE: "allowlist"' "$full_render"
+grep -q 'BYOK_GRID_EMAIL_MODE: "smtp"' "$full_render"
+grep -q 'SMTP_HOST: "smtp.test.example"' "$full_render"
+grep -q 'SMTP_REQUIRE_TLS: "true"' "$full_render"
+grep -q 'smtp-user: "ci-only-smtp-user"' "$full_render"
+grep -q 'smtp-password: "ci-only-smtp-password"' "$full_render"
+grep -q 'name: SMTP_PASSWORD' "$full_render"
 grep -q 'BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: "43200"' "$full_render"
 grep -q 'BYOK_GRID_SESSION_UPDATE_AGE_SECONDS: "3600"' "$full_render"
 grep -q 'signup-allowed-emails: "release-owner@example.test"' "$full_render"
@@ -102,6 +109,23 @@ fi
 if helm template invalid-public-signup "$chart_dir" \
   --set app.signupMode=open >/dev/null 2>&1; then
   echo 'expected public open signup to fail chart validation' >&2
+  exit 1
+fi
+
+if helm template missing-smtp-host "$chart_dir" \
+  --set app.email.mode=smtp \
+  --set app.email.smtp.fromEmail=security@example.com >/dev/null 2>&1; then
+  echo 'expected SMTP mode without a host to fail chart validation' >&2
+  exit 1
+fi
+
+if helm template plaintext-smtp "$chart_dir" \
+  --set app.email.mode=smtp \
+  --set app.email.smtp.fromEmail=security@example.com \
+  --set app.email.smtp.host=smtp.example.com \
+  --set app.email.smtp.requireTls=false \
+  --set app.email.smtp.secure=false >/dev/null 2>&1; then
+  echo 'expected plaintext production SMTP to fail chart validation' >&2
   exit 1
 fi
 
