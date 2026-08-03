@@ -1,0 +1,66 @@
+apps/web/src/lib/runtime-config.ts
+  s_28ae7db8033464::t_92a00deb2dd236 101,106
+deploy/helm/byok-grid/templates/analytics-projector.yaml
+  s_28ae7db8033464::t_92a00deb2dd236 46-47
+apps/workflow-worker/src/database.ts
+  s_28ae7db8033464::t_92a00deb2dd236 19
+deploy/helm/byok-grid/templates/worker-deployment.yaml
+  s_28ae7db8033464::t_92a00deb2dd236 56-57
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_dca9266e01e9c1 9-30
+deploy/helm/byok-grid/templates/web-deployment.yaml
+  s_28ae7db8033464::t_92a00deb2dd236 65-66
+scripts/verify-helm-chart.sh
+  s_28ae7db8033464::t_92a00deb2dd236 50-51,101-102
+apps/analytics-projector/src/index.ts
+  s_28ae7db8033464::t_92a00deb2dd236 21
+packages/db/src/sqlite/migrate-cli.test.ts
+  s_28ae7db8033464::t_f1a0877a61b6be 1-42
+docs/adr/0048-kubernetes-remote-database-mode.md
+  s_28ae7db8033464::t_f1a0877a61b6be 49-53
+  s_28ae7db8033464::t_dca9266e01e9c1 1-48,54-57
+apps/analytics-projector/src/config.ts
+  s_28ae7db8033464::t_92a00deb2dd236 5,20,58-68
+.env.example
+  s_28ae7db8033464::t_dca9266e01e9c1 3
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_dca9266e01e9c1 70-73
+apps/workflow-worker/src/config.ts
+  s_28ae7db8033464::t_92a00deb2dd236 6,50,132-140
+  s_28ae7db8033464::t_60b92b5be31ead 141-142
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_dca9266e01e9c1 38-42,122-125
+  s_28ae7db8033464::t_2a84081be90dac 126
+apps/web/src/lib/sqlite-database.ts
+  s_28ae7db8033464::t_92a00deb2dd236 1-5,13-21
+  s_28ae7db8033464::t_45b867d124aca1 26
+packages/db/src/sqlite/config.test.ts
+  s_28ae7db8033464::t_92a00deb2dd236 1-41
+packages/db/src/sqlite/config.ts
+  s_28ae7db8033464::t_92a00deb2dd236 10-12,14-33
+deploy/helm/byok-grid/templates/migration-job.yaml
+  s_28ae7db8033464::t_92a00deb2dd236 49-50
+apps/analytics-projector/src/config.test.ts
+  s_28ae7db8033464::t_92a00deb2dd236 26,31-45
+  s_28ae7db8033464::t_71ec78d22e67e9 46-47
+apps/web/src/lib/runtime-config.test.ts
+  s_28ae7db8033464::t_92a00deb2dd236 197-213
+packages/db/src/sqlite/migrate-cli.ts
+  s_28ae7db8033464::t_92a00deb2dd236 2,7,11-12,14-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "995834fc4c07ce54a69172769fe0c0c24c667054",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
