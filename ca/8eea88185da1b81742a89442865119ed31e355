@@ -1,0 +1,50 @@
+deploy/helm/byok-grid/templates/connector-runner.yaml
+  s_28ae7db8033464::t_9ae58cbfb537c7 2-4,29,45-51,85-93,99-100
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_74ddbb8091c285 222-230,233-234
+deploy/helm/byok-grid/values.schema.json
+  s_28ae7db8033464::t_9ae58cbfb537c7 256-262,266-276
+apps/connector-runner/Cargo.toml
+  s_28ae7db8033464::t_253580a1e06f3a 26
+docs/adr/0047-connector-runner-sigterm-draining.md
+  s_28ae7db8033464::t_9774c70d642f34 1-52
+  s_28ae7db8033464::t_3a362d03333180 53-55
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_3a362d03333180 30-41
+  s_28ae7db8033464::t_c9bb76d0e7a823 9-29,42
+apps/connector-runner/src/main.rs
+  s_28ae7db8033464::t_253580a1e06f3a 13,67,70,161-192
+  s_28ae7db8033464::t_d8af6efcd79d18 193-194
+deploy/helm/byok-grid/values.yaml
+  s_28ae7db8033464::t_9ae58cbfb537c7 156-157
+apps/connector-runner/tests/signal_shutdown.rs
+  s_28ae7db8033464::t_6e9201e863df81 58
+  s_28ae7db8033464::t_9774c70d642f34 10,50-54,56-57,66-68
+  s_28ae7db8033464::t_253580a1e06f3a 1-9,11-49,55,59-65,69-105
+scripts/verify-helm-chart.sh
+  s_28ae7db8033464::t_9ae58cbfb537c7 74-76,179-191
+  s_28ae7db8033464::t_6c57401a410218 192
+docs/COMMUNITY_CONNECTORS.md
+  s_28ae7db8033464::t_74ddbb8091c285 160-175
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_c9bb76d0e7a823 59,100-101
+  s_28ae7db8033464::t_3a362d03333180 60-61
+Cargo.lock
+  s_28ae7db8033464::t_ccc4f886196ae2 150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "ca8eea88185da1b81742a89442865119ed31e355",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
