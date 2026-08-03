@@ -1,0 +1,75 @@
+apps/workflow-worker/src/operational-metrics.test.ts
+  s_28ae7db8033464::t_eb6ed06891e98b 1-111
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_d30fc652f247f0 137,139-145
+apps/workflow-worker/src/config.ts
+  s_28ae7db8033464::t_ded16f681dd6ce 39-45,90-102
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_d30fc652f247f0 38-40
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_9c33fefeccfb6d 37-39
+  s_28ae7db8033464::t_3fa0f135cb9125 30
+packages/db/src/sqlite/index.ts
+  s_28ae7db8033464::t_ded16f681dd6ce 21
+apps/workflow-worker/src/index.ts
+  s_28ae7db8033464::t_ded16f681dd6ce 1,13-14,38-46
+docs/OBSERVABILITY.md
+  s_28ae7db8033464::t_d30fc652f247f0 1-82
+README.md
+  s_28ae7db8033464::t_d30fc652f247f0 287-289
+deploy/helm/byok-grid/values.yaml
+  s_28ae7db8033464::t_d30fc652f247f0 90-92
+docker-compose.yml
+  s_28ae7db8033464::t_51f63000109fb2 109-110
+.env.example
+  s_28ae7db8033464::t_d30fc652f247f0 39-40
+SECURITY.md
+  s_28ae7db8033464::t_d30fc652f247f0 60-65
+.github/workflows/ci.yml
+  s_28ae7db8033464::t_e9edf87d984417 125
+packages/db/src/sqlite/operational-metrics.ts
+  s_28ae7db8033464::t_9ded0d1154a56f 51,78-82
+  s_28ae7db8033464::t_ecf9b1bc2d588c 2,21,25,48-50,52-53,56-58,63-69,71,75-77,98
+  s_28ae7db8033464::t_ded16f681dd6ce 1,3-20,22-24,26-47,54-55,59-62,70,72-74,83-97,99-204
+deploy/helm/byok-grid/templates/worker-deployment.yaml
+  s_28ae7db8033464::t_51f63000109fb2 1-3
+  s_28ae7db8033464::t_d30fc652f247f0 88-92
+scripts/verify-helm-chart.sh
+  s_28ae7db8033464::t_d30fc652f247f0 40-42
+  s_28ae7db8033464::t_51f63000109fb2 74-79
+packages/db/src/sqlite/operational-metrics.integration.test.ts
+  s_28ae7db8033464::t_eb6ed06891e98b 1-119,122-123
+  s_28ae7db8033464::t_ecf9b1bc2d588c 120-121
+apps/workflow-worker/src/dispatcher.ts
+  s_28ae7db8033464::t_ecf9b1bc2d588c 4,48
+apps/workflow-worker/src/operational-metrics.ts
+  s_28ae7db8033464::t_ded16f681dd6ce 1-7,21-85,88-91,93-94,96,101-102,104-226
+  s_28ae7db8033464::t_9ded0d1154a56f 8-20,86-87,92,95,97-100,103
+deploy/helm/byok-grid/templates/configmap.yaml
+  s_28ae7db8033464::t_d30fc652f247f0 15-16
+scripts/drill-workflow-drain.mjs
+  s_28ae7db8033464::t_9c33fefeccfb6d 36,186-191,232-245
+  s_28ae7db8033464::t_8320bde91bcd3e 246-247
+deploy/helm/byok-grid/values.schema.json
+  s_28ae7db8033464::t_d30fc652f247f0 82-87,117-122
+  s_28ae7db8033464::t_e7d4b246febd1a 123-125
+  s_28ae7db8033464::t_c821db0bacabf2 126-128
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_d30fc652f247f0 179-185
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "013b32c2021ea2761f321e5995c1c4f1c65ea523",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
