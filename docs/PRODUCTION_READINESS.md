@@ -31,6 +31,12 @@ working tree:
   a bounded anti-enumeration response-time floor, session revocation after
   reset, SQLite integration coverage, private reset-page headers, and a
   compiled-standalone drill using real SMTP protocol delivery;
+- fail-closed authentication client identity that ignores forwarded IP headers
+  by default, validated opt-in trusted proxy CIDRs, right-to-left proxy-chain
+  resolution, database-backed integration coverage against spoofed left hops,
+  Helm/Compose configuration, compiled startup rejection for trust-all ranges,
+  and HTTP evidence that rotating forged client addresses cannot escape the
+  shared bucket;
 - bounded incremental reads across Better Auth POST requests and every product
   Route Handler, with declared and observed 64-KiB/five-MiB enforcement,
   compressed-body rejection, transport-specific responses, and source contracts
@@ -118,6 +124,10 @@ dated evidence linked from a release issue or runbook record:
 - deploy the reference Helm release behind real TLS with an external secret
   manager, default-deny network policy, provider-specific egress, centralized
   logs, metrics, alert routing, and an operator-owned rollback decision path;
+- capture the production ingress `X-Forwarded-For` chain, prove the proxy
+  overwrites or predictably appends it, deny direct web access, configure only
+  the observed proxy IP/CIDR boundary, and exercise both application and edge
+  rate limits from multiple real client networks;
 - exercise the chosen authenticated SMTP service over TLS, prove verification
   and recovery delivery to controlled inboxes, configure and validate SPF,
   DKIM, and DMARC alignment, and monitor deferrals, rejections, bounces,

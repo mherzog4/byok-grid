@@ -1,5 +1,8 @@
 app:
   publicUrl: https://grid.test.example
+  auth:
+    trustedProxyCidrs:
+      - 10.20.0.0/16
   signupMode: allowlist
   email:
     mode: smtp

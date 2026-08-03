@@ -86,10 +86,16 @@ independent standalone Next.js processes against fresh migrated SQLite files:
 npm run drill:signup-policy
 ```
 
-The first process proved that public open signup exits before readiness. The
-second used a public HTTPS canonical origin with signup disabled. It returned
+The first process proved that public open signup and a trust-all `/0`
+authentication proxy range both exit before readiness, while the diagnostic
+named the setting without echoing its value. The second used a public HTTPS
+canonical origin with signup disabled. It returned
 `400` for account creation and omitted the Create account control from
-server-rendered HTML. The third used the same public-origin posture with a
+server-rendered HTML. It also sent four failed sign-ins with four forged
+single-value `X-Forwarded-For` addresses; the first three reached authentication
+and the fourth returned `429`, proving the production default ignored the
+spoofed rotation and retained one shared bucket. The third used the same
+public-origin posture with a
 secret-backed allowlist. It returned the stable `SIGNUP_NOT_ALLOWED` code for a
 different address, accepted a case-varied approved address, and issued a Better
 Auth session cookie. It then created a second session, verified that both
@@ -102,6 +108,8 @@ emitted by the command:
 
 ```text
 {"marker":"BYOK_GRID_PUBLIC_OPEN_SIGNUP_REJECTED"}
+{"marker":"BYOK_GRID_UNSAFE_PROXY_TRUST_REJECTED"}
+{"marker":"BYOK_GRID_AUTH_RATE_LIMIT_DRILL_PASSED"}
 {"marker":"BYOK_GRID_SIGNUP_DISABLED_VERIFIED"}
 {"marker":"BYOK_GRID_SIGNUP_ALLOWLIST_VERIFIED"}
 {"marker":"BYOK_GRID_SESSION_POLICY_DRILL_PASSED"}

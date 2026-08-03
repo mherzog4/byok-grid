@@ -94,6 +94,30 @@ derive Better Auth's base URL. Database URLs, auth secrets, provider keys,
 encryption keys, Hatchet tokens, and operator origins must never be passed as
 image build arguments.
 
+## Authentication rate limits and proxy trust
+
+Authentication rate limiting is database-backed. With
+`BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS` empty, the web process ignores every
+client-IP header and uses one shared fail-closed bucket per authentication
+route. This is safe for evaluation and small controlled installations, but a
+multi-user deployment should configure real client identity before traffic is
+admitted.
+
+After proving that the reverse proxy overwrites or predictably appends
+`X-Forwarded-For` and that the web service cannot be reached directly, set the
+exact proxy addresses or narrow CIDRs:
+
+```dotenv
+BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS=10.20.0.0/16,192.0.2.10
+```
+
+The rightmost trusted hops are skipped and the first untrusted address becomes
+the rate-limit identity. Do not copy an entire client-facing network or use a
+`/0` range; startup rejects trust-all ranges. Re-test the observed header chain
+after changing load balancers, CDN settings, ingress controllers, or network
+topology. This setting does not enable forwarded host/protocol trust and does
+not replace edge connection and distributed rate limits.
+
 ## Account provisioning
 
 Loopback evaluation defaults to `BYOK_GRID_SIGNUP_MODE=open`. A public origin

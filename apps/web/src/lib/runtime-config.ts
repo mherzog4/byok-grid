@@ -1,6 +1,10 @@
 import { sqliteDatabaseConfigSchema } from '@byok-grid/db';
 import { parseMasterKey } from '@byok-grid/security';
 import {
+  ClientIpPolicyConfigurationError,
+  resolveClientIpPolicy,
+} from './client-ip-policy';
+import {
   EmailPolicyConfigurationError,
   resolveEmailPolicy,
 } from './email-policy';
@@ -48,6 +52,16 @@ export function assertWebRuntimeConfiguration(
     issues.push('BETTER_AUTH_URL is required.');
   } else {
     validateAuthUrl(authUrl, issues);
+  }
+
+  try {
+    resolveClientIpPolicy(environment);
+  } catch (error) {
+    if (error instanceof ClientIpPolicyConfigurationError) {
+      issues.push(...error.issues);
+    } else {
+      throw error;
+    }
   }
 
   try {

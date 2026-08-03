@@ -68,9 +68,18 @@ contains only the email kind, never the recipient, URL, SMTP response, or
 exception. The Next route wrapper gives reset and verification requests a
 500-millisecond minimum response time across success, unknown-account,
 validation, and outage paths. Better Auth applies its database-backed three-
-per-minute special rate-limit bucket. Edge rate limiting remains required
-because IP identity and distributed abuse controls belong to the deployment
-ingress.
+per-minute special rate-limit bucket.
+
+By default, BYOK Grid gives Better Auth no client-IP headers. Authentication
+requests therefore share a fail-closed per-route bucket and rotating a forged
+`X-Forwarded-For` value cannot bypass the limiter. A deployment may set
+`BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS` to exact proxy IPs or bounded CIDRs; Better
+Auth then walks `X-Forwarded-For` from right to left and keys the first
+untrusted hop. Startup rejects malformed, duplicate, excessive, and `/0`
+entries. This opt-in is safe only when the selected ingress overwrites or
+appends the header predictably and direct web access is denied. Forwarded host
+and protocol headers remain untrusted. Edge rate limiting remains required for
+distributed volume, connection, and non-authentication abuse controls.
 
 Token-bearing `/reset-password` responses are private and non-cacheable, carry
 `X-Robots-Tag: noindex, nofollow`, and inherit `Referrer-Policy: no-referrer`.

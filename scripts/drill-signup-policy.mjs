@@ -35,17 +35,30 @@ try {
 }
 
 async function verifyPublicOpenRejected() {
+  const unsafeProxyRange = '0.0.0.0/0';
   try {
-    const runtime = await startRuntime('open', '');
+    const runtime = await startRuntime('open', '', {
+      BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS: unsafeProxyRange,
+    });
     await runtime.stop();
-    throw new Error('Public open signup unexpectedly reached readiness.');
+    throw new Error(
+      'Public open signup and trust-all proxy configuration unexpectedly reached readiness.'
+    );
   } catch (error) {
-    if (!String(error).includes('open is allowed only for loopback')) {
+    const diagnostic = String(error);
+    if (
+      !diagnostic.includes('open is allowed only for loopback') ||
+      !diagnostic.includes('BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS') ||
+      diagnostic.includes(unsafeProxyRange)
+    ) {
       throw error;
     }
   }
   console.log(
     JSON.stringify({ marker: 'BYOK_GRID_PUBLIC_OPEN_SIGNUP_REJECTED' })
+  );
+  console.log(
+    JSON.stringify({ marker: 'BYOK_GRID_UNSAFE_PROXY_TRUST_REJECTED' })
   );
 }
 
@@ -66,6 +79,28 @@ async function verifyDisabledSignup() {
     }
     const recoveryPage = await fetch(`${runtime.localUrl}/forgot-password`);
     assertStatus(recoveryPage, 404, 'disabled recovery page');
+
+    const spoofedAttempts = [];
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      spoofedAttempts.push(
+        await signIn(
+          runtime,
+          `missing-${crypto.randomUUID()}@example.test`,
+          'correct-horse-battery-staple-drill',
+          { 'x-forwarded-for': `198.51.100.${attempt + 1}` }
+        )
+      );
+    }
+    for (const [index, response] of spoofedAttempts.entries()) {
+      assertStatus(
+        response,
+        index < 3 ? 401 : 429,
+        `spoof-rotated authentication attempt ${index + 1}`
+      );
+    }
+    console.log(
+      JSON.stringify({ marker: 'BYOK_GRID_AUTH_RATE_LIMIT_DRILL_PASSED' })
+    );
   } finally {
     await runtime.stop();
   }
@@ -392,7 +427,8 @@ async function signUp(runtime, email, callbackURL) {
 async function signIn(
   runtime,
   email,
-  password = 'correct-horse-battery-staple-drill'
+  password = 'correct-horse-battery-staple-drill',
+  additionalHeaders = {}
 ) {
   return fetch(`${runtime.localUrl}/api/auth/sign-in/email`, {
     body: JSON.stringify({
@@ -402,6 +438,7 @@ async function signIn(
     headers: {
       'content-type': 'application/json',
       origin: runtime.publicUrl,
+      ...additionalHeaders,
     },
     method: 'POST',
   });

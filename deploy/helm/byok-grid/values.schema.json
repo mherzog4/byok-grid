@@ -13,12 +13,30 @@
   "properties": {
     "app": {
       "type": "object",
-      "required": ["publicUrl", "signupMode", "email", "session"],
+      "required": ["publicUrl", "auth", "signupMode", "email", "session"],
       "properties": {
         "publicUrl": {
           "type": "string",
           "format": "uri",
           "pattern": "^https://"
+        },
+        "auth": {
+          "type": "object",
+          "required": ["trustedProxyCidrs"],
+          "additionalProperties": false,
+          "properties": {
+            "trustedProxyCidrs": {
+              "type": "array",
+              "maxItems": 64,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 64,
+                "not": { "pattern": "/0$" }
+              }
+            }
+          }
         },
         "signupMode": { "enum": ["disabled", "allowlist"] },
         "email": {

@@ -6,6 +6,7 @@ metadata:
     {{- include "byok-grid.labels" . | nindent 4 }}
 data:
   BETTER_AUTH_URL: {{ .Values.app.publicUrl | quote }}
+  BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS: {{ join "," .Values.app.auth.trustedProxyCidrs | quote }}
   BYOK_GRID_SIGNUP_MODE: {{ .Values.app.signupMode | quote }}
   BYOK_GRID_EMAIL_MODE: {{ .Values.app.email.mode | quote }}
   SMTP_FROM_EMAIL: {{ .Values.app.email.smtp.fromEmail | quote }}

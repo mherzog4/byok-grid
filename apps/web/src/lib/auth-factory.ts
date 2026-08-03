@@ -6,6 +6,10 @@ import * as schema from '@byok-grid/db/sqlite/schema';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { APIError } from 'better-auth/api';
+import {
+  betterAuthIpAddressOptions,
+  type ClientIpPolicy,
+} from './client-ip-policy';
 import type { AuthenticationEmailDelivery } from './email-delivery';
 import {
   AUTHENTICATION_LINK_EXPIRES_IN_SECONDS,
@@ -17,6 +21,7 @@ import { signupPolicyAllowsEmail, type SignupPolicy } from './signup-policy';
 
 export function createByokGridAuth({
   baseURL,
+  clientIpPolicy,
   database,
   emailDelivery,
   emailPolicy,
@@ -25,6 +30,7 @@ export function createByokGridAuth({
   signupPolicy,
 }: {
   baseURL: string | undefined;
+  clientIpPolicy: ClientIpPolicy;
   database: SqliteDatabase;
   emailDelivery: AuthenticationEmailDelivery | undefined;
   emailPolicy: EmailPolicy;
@@ -95,6 +101,7 @@ export function createByokGridAuth({
       database: {
         generateId: 'uuid',
       },
+      ipAddress: betterAuthIpAddressOptions(clientIpPolicy),
       trustedProxyHeaders: false,
     },
     databaseHooks: {

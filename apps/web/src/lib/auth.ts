@@ -1,4 +1,5 @@
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
+import { resolveClientIpPolicy } from './client-ip-policy';
 import { createAuthenticationEmailDelivery } from './email-delivery';
 import { resolveEmailPolicy } from './email-policy';
 import { createByokGridAuth } from './auth-factory';
@@ -20,6 +21,7 @@ export const sessionPolicy = resolveSessionPolicy({
   BETTER_AUTH_URL: authBaseUrl,
 });
 export const emailPolicy = resolveEmailPolicy(process.env);
+export const clientIpPolicy = resolveClientIpPolicy(process.env);
 const emailDelivery = createAuthenticationEmailDelivery(
   emailPolicy,
   authBaseUrl
@@ -27,6 +29,7 @@ const emailDelivery = createAuthenticationEmailDelivery(
 
 export const auth = createByokGridAuth({
   baseURL: authBaseUrl,
+  clientIpPolicy,
   database: sqliteDb,
   emailDelivery,
   emailPolicy,

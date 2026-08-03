@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthenticationEmailDelivery } from './email-delivery';
+import { resolveClientIpPolicy } from './client-ip-policy';
 import { resolveEmailPolicy } from './email-policy';
 import { createByokGridAuth } from './auth-factory';
 import { resolveSessionPolicy } from './session-policy';
@@ -38,6 +39,7 @@ describe('Better Auth signup policy integration', () => {
   it('rejects every account when registration is disabled', async () => {
     const auth = createByokGridAuth({
       baseURL,
+      clientIpPolicy: resolveClientIpPolicy({}),
       database: database.db,
       emailDelivery: undefined,
       emailPolicy: disabledEmailPolicy,
@@ -61,6 +63,7 @@ describe('Better Auth signup policy integration', () => {
   it('rejects non-allowlisted accounts but provisions an allowlisted owner', async () => {
     const auth = createByokGridAuth({
       baseURL,
+      clientIpPolicy: resolveClientIpPolicy({}),
       database: database.db,
       emailDelivery: undefined,
       emailPolicy: disabledEmailPolicy,
@@ -143,6 +146,7 @@ describe('Better Auth signup policy integration', () => {
     });
     const auth = createByokGridAuth({
       baseURL,
+      clientIpPolicy: resolveClientIpPolicy({}),
       database: database.db,
       emailDelivery,
       emailPolicy,

@@ -53,6 +53,28 @@ describe('web runtime configuration', () => {
     ).toThrow('must be a whole number');
   });
 
+  it('validates explicit trusted proxy boundaries without echoing them', () => {
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS: '10.20.0.0/16,2001:db8::/48',
+      })
+    ).not.toThrow();
+
+    const unsafeValue = '0.0.0.0/0';
+    let error: unknown;
+    try {
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS: unsafeValue,
+      });
+    } catch (caught) {
+      error = caught;
+    }
+    expect(String(error)).toContain('BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS');
+    expect(String(error)).not.toContain(unsafeValue);
+  });
+
   it('validates SMTP recovery configuration without exposing credentials', () => {
     expect(() =>
       assertWebRuntimeConfiguration({

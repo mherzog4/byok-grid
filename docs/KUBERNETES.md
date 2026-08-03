@@ -171,6 +171,17 @@ selected ingress-controller and monitoring peers plus worker-to-runner RPC. An
 enabled Ingress without a trusted web peer fails chart rendering. The optional
 runner always has no egress.
 
+Authentication rate limiting ignores forwarded client addresses by default and
+uses a shared fail-closed bucket. Set `app.auth.trustedProxyCidrs` only to proxy
+IP addresses or narrow CIDRs actually present on the sanitized
+`X-Forwarded-For` chain. The chart renders them into
+`BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS`, rejects duplicates and `/0`, and the web
+runtime performs complete IP/CIDR validation. Keep `networkPolicy.ingress.web`
+restricted to that ingress path so clients cannot reach the web pod directly;
+also configure the ingress controller to overwrite or predictably append the
+forwarding header. The trusted NetworkPolicy peer selectors and the forwarded
+proxy CIDRs describe different layers and should be verified together.
+
 Runtime egress isolation is available but requires explicit shared and
 component rules. Provider egress is intentionally not guessed: BYOK Grid can
 call operator-selected APIs, and portable Kubernetes NetworkPolicy cannot

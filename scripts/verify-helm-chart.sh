@@ -40,6 +40,7 @@ grep -q 'path: /api/live' "$default_render"
 grep -q 'helm.sh/hook: pre-install,pre-upgrade' "$default_render"
 grep -q 'key: sqlite-database-url' "$default_render"
 grep -q 'BYOK_GRID_SIGNUP_MODE: "disabled"' "$default_render"
+grep -q 'BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS: ""' "$default_render"
 grep -q 'BYOK_GRID_EMAIL_MODE: "disabled"' "$default_render"
 grep -q 'BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: "604800"' "$default_render"
 grep -q 'BYOK_GRID_SESSION_REFRESH_ENABLED: "false"' "$default_render"
@@ -70,6 +71,7 @@ grep -q 'cidr: 198.51.100.0/24' "$egress_render"
 grep -q 'cidr: 203.0.113.0/24' "$egress_render"
 grep -q 'value: "10000000"' "$full_render"
 grep -q 'BYOK_GRID_SIGNUP_MODE: "allowlist"' "$full_render"
+grep -q 'BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS: "10.20.0.0/16"' "$full_render"
 grep -q 'BYOK_GRID_EMAIL_MODE: "smtp"' "$full_render"
 grep -q 'SMTP_HOST: "smtp.test.example"' "$full_render"
 grep -q 'SMTP_REQUIRE_TLS: "true"' "$full_render"
@@ -109,6 +111,12 @@ fi
 if helm template invalid-public-signup "$chart_dir" \
   --set app.signupMode=open >/dev/null 2>&1; then
   echo 'expected public open signup to fail chart validation' >&2
+  exit 1
+fi
+
+if helm template trust-all-auth-proxy "$chart_dir" \
+  --set 'app.auth.trustedProxyCidrs[0]=0.0.0.0/0' >/dev/null 2>&1; then
+  echo 'expected a trust-all authentication proxy range to fail chart validation' >&2
   exit 1
 fi
 

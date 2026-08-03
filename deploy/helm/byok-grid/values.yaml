@@ -7,6 +7,10 @@ app:
   # Runtime canonical origin used for authentication callbacks, cookies, and
   # unsafe API mutation checks. Do not include a path.
   publicUrl: https://byok-grid.example.com
+  auth:
+    # Empty means a shared fail-closed authentication rate-limit bucket. Add
+    # only proxy addresses present in a sanitized X-Forwarded-For chain.
+    trustedProxyCidrs: []
   # Public deployments fail closed. Use allowlist with the corresponding
   # Secret value for controlled account provisioning.
   signupMode: disabled
