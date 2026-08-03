@@ -42,12 +42,17 @@ jobs:
     steps:
       - name: Check out tagged source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 24
           cache: npm
+
+      - name: Verify workflow supply-chain policy
+        run: npm run ci:verify-workflows
 
       - name: Set up Helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
@@ -123,6 +128,8 @@ jobs:
     steps:
       - name: Check out tagged source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
@@ -243,11 +250,12 @@ jobs:
       contents: write
       id-token: write
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       VERSION: ${{ needs.verify.outputs.version }}
     steps:
       - name: Check out tagged source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -285,6 +293,8 @@ jobs:
 
       - name: Publish GitHub Release
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ "$VERSION" == *-* ]]; then
             gh release create "v$VERSION" dist/release/* --verify-tag --generate-notes --prerelease --latest=false

@@ -83,7 +83,14 @@ GitHub Actions in ordinary CI and the release workflow are pinned to full
 commit SHAs, with reviewed version labels retained as comments. Do not replace
 those pins with mutable major, version, branch, or `latest` references. Action
 updates must review upstream release notes, the resolved commit, permissions,
-and any nested action or binary download behavior before changing a pin.
+and any nested action or binary download behavior before changing a pin. The
+dependency-free `npm run ci:verify-workflows` gate runs before package
+installation and rejects mutable action references, credential-persisting
+checkout, `pull_request_target`/`workflow_run` handoffs, scalar permission
+shortcuts, missing job timeouts, and missing permission declarations. Every
+checkout sets `persist-credentials: false`; release creation receives
+`GH_TOKEN` only in its final publish step, and registry publication uses the
+explicit login action rather than checkout's Git credential helper.
 
 The Dockerfile frontend, release bases, CI service containers, and
 Compose-owned third-party images retain a readable version tag but are pinned

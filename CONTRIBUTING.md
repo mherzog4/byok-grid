@@ -14,13 +14,18 @@ adding branding or copy that implies affiliation with Clay.
    connector behavior in `packages/connectors`, and cryptography in
    `packages/security`.
 4. Generate a committed migration after changing the Drizzle schema.
-5. Run formatting, linting, type checks, tests, the production build, and the
-   dependency audit before opening a pull request.
+5. Run the workflow policy verifier, formatting, linting, type checks, tests,
+   the production build, and the dependency audit before opening a pull
+   request.
 
 ## Architectural guardrails
 
 - Never place connector secrets in browser state, API responses, workflow
   payloads, logs, or traces.
+- Keep every external GitHub Action on a full commit SHA, disable checkout
+  credential persistence, declare job permissions and timeouts, and run
+  `npm run ci:verify-workflows` after workflow changes. Privileged trigger
+  handoffs are outside this repository's CI trust model.
 - Never persist or log a raw workspace invitation token. Role checks and role
   transitions must use the shared workspace policy rather than route-local
   comparisons.

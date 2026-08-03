@@ -11,6 +11,7 @@
   "scripts": {
     "benchmark:grid": "npm run benchmark:grid --workspace=@byok-grid/db",
     "build": "turbo run build",
+    "ci:verify-workflows": "node scripts/verify-workflows.mjs",
     "connector:keygen": "tsx packages/connectors/src/registry-signing-cli.ts keygen",
     "connector:sign-registry": "tsx packages/connectors/src/registry-signing-cli.ts sign",
     "db:backup": "npm run db:backup --workspace=@byok-grid/db --",

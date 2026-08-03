@@ -12,6 +12,9 @@ The following gates have current passing evidence on the release-candidate
 working tree:
 
 - locked npm installation with the reviewed lifecycle-script allowlist;
+- dependency-free GitHub Actions policy verification before package install,
+  covering full action SHA pins, checkout credential non-persistence, explicit
+  permissions, job timeouts, concurrency, and privileged-trigger rejection;
 - formatting, linting, TypeScript checks, unit and SQLite integration tests;
 - production Next.js build and compiled standalone application E2E covering
   signup, personal workspace provisioning, authenticated grid operations,

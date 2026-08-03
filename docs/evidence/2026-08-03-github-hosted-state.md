@@ -26,8 +26,11 @@ commit. The audited remote default branch was `main` at
   security updates, and automated security fixes were disabled.
 - No repository ruleset or `main` branch protection was configured.
 - Actions allowed all actions and did not require SHA pinning at the repository
-  policy layer. The local workflow sources pin third-party actions by full
-  commit SHA, but the host did not enforce that invariant.
+  policy layer. The local candidate pins third-party actions by full commit SHA,
+  disables checkout credential persistence, and includes a dependency-free
+  source gate for pins, triggers, permissions, timeouts, and concurrency. Those
+  repository controls have not been promoted or exercised by the host and do
+  not replace a GitHub ruleset or Actions policy.
 - The repository had no GitHub Releases. No seven-image release matrix,
   checksums, SBOM/provenance, or attestations had been published and verified.
 - GitHub classified the remote root license as `Other`. The local candidate
