@@ -1,5 +1,6 @@
 app:
   publicUrl: https://grid.test.example
+  signupMode: allowlist
 web:
   image:
     digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
@@ -16,6 +17,7 @@ secrets:
     sqliteDatabaseUrl: libsql://byok-grid-ci.example.turso.io
     sqliteAuthToken: ci-only-libsql-token
     betterAuthSecret: ci-only-better-auth-secret-000000000
+    signupAllowedEmails: release-owner@example.test
     masterKey: Y2ktb25seS1mb3ItdGVtcGxhdGUtcmVuZGVyaW5n
     hatchetClientToken: ci-only-token
     connectorRunnerSharedSecret: ci-only-runner-secret-0000000000000000

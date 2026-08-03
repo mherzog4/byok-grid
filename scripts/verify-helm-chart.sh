@@ -39,6 +39,8 @@ grep -q 'kind: Deployment' "$default_render"
 grep -q 'path: /api/live' "$default_render"
 grep -q 'helm.sh/hook: pre-install,pre-upgrade' "$default_render"
 grep -q 'key: sqlite-database-url' "$default_render"
+grep -q 'BYOK_GRID_SIGNUP_MODE: "disabled"' "$default_render"
+grep -q 'key: signup-allowed-emails' "$default_render"
 test "$(grep -c 'name: BYOK_GRID_MASTER_KEY' "$default_render")" -eq 2
 grep -q "HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED: 'true'" "$default_render"
 grep -q 'HATCHET_CLIENT_API_URL: "https://hatchet.example.com"' "$default_render"
@@ -63,6 +65,8 @@ grep -q 'cidr: 192.0.2.0/24' "$egress_render"
 grep -q 'cidr: 198.51.100.0/24' "$egress_render"
 grep -q 'cidr: 203.0.113.0/24' "$egress_render"
 grep -q 'value: "10000000"' "$full_render"
+grep -q 'BYOK_GRID_SIGNUP_MODE: "allowlist"' "$full_render"
+grep -q 'signup-allowed-emails: "release-owner@example.test"' "$full_render"
 grep -q 'name: SQLITE_DATABASE_URL' "$full_render"
 grep -q 'app.kubernetes.io/component: analytics-projector' "$full_render"
 grep -q 'app.kubernetes.io/component: connector-runner' "$full_render"
@@ -87,6 +91,12 @@ fi
 if helm template invalid-hatchet-api "$chart_dir" \
   --set worker.hatchet.apiUrl=http://hatchet.example.com >/dev/null 2>&1; then
   echo 'expected a plaintext production Hatchet API URL to fail chart validation' >&2
+  exit 1
+fi
+
+if helm template invalid-public-signup "$chart_dir" \
+  --set app.signupMode=open >/dev/null 2>&1; then
+  echo 'expected public open signup to fail chart validation' >&2
   exit 1
 fi
 

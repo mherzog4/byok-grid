@@ -1,5 +1,9 @@
 import { sqliteDatabaseConfigSchema } from '@byok-grid/db';
 import { parseMasterKey } from '@byok-grid/security';
+import {
+  resolveSignupPolicy,
+  SignupPolicyConfigurationError,
+} from './signup-policy';
 
 const BETTER_AUTH_MINIMUM_SECRET_LENGTH = 32;
 const BUILD_ONLY_SECRET_PREFIX = 'build-only-placeholder';
@@ -35,6 +39,16 @@ export function assertWebRuntimeConfiguration(
     issues.push('BETTER_AUTH_URL is required.');
   } else {
     validateAuthUrl(authUrl, issues);
+  }
+
+  try {
+    resolveSignupPolicy(environment);
+  } catch (error) {
+    if (error instanceof SignupPolicyConfigurationError) {
+      issues.push(...error.issues);
+    } else {
+      throw error;
+    }
   }
 
   const databaseResult = sqliteDatabaseConfigSchema.safeParse({

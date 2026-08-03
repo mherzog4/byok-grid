@@ -56,6 +56,7 @@ The secure default is `secrets.create=false`. Create a Secret such as
 | `sqlite-database-url`            | all product workloads | yes                    |
 | `sqlite-auth-token`              | all product workloads | when service requires  |
 | `better-auth-secret`             | web                   | yes                    |
+| `signup-allowed-emails`          | web                   | when allowlist enabled |
 | `byok-grid-master-key`           | web and worker        | yes                    |
 | `hatchet-client-token`           | worker                | yes                    |
 | `connector-runner-shared-secret` | worker and runner     | when runner enabled    |
@@ -77,9 +78,12 @@ input.
 ## Install
 
 Create an operator values file containing image locations, the public URL,
-Hatchet endpoint, ingress/TLS settings, and the existing Secret name. The chart
-supplies the public URL to Better Auth at runtime; the same attested web image
-digest can therefore be reused across origins.
+account-provisioning mode, Hatchet endpoint, ingress/TLS settings, and the
+existing Secret name. The chart supplies the public URL to Better Auth at
+runtime; the same attested web image digest can therefore be reused across
+origins. `app.signupMode` accepts `disabled` or `allowlist`; the latter requires
+the external Secret's `signup-allowed-emails` key to contain at least one
+comma-separated address.
 
 Validate before changing the cluster:
 

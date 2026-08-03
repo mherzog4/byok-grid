@@ -9,7 +9,8 @@ workflows with credentials supplied by each workspace.
 This is a release-candidate hardening build, not yet a stable production
 release. It currently includes:
 
-- email/password authentication and database-backed sessions;
+- email/password authentication, database-backed sessions, and fail-closed
+  public account provisioning with disabled or email-allowlisted signup;
 - a React Flow node editor with typed ports, structurally safe incomplete
   drafts, strict publish validation, immutable graph versions, deterministic
   compiled plans, and revision-conflict protection;
@@ -359,6 +360,7 @@ npm run typecheck
 npm test
 npm run test:connector-runner
 npm run build
+npm run drill:signup-policy
 npm run helm:verify
 npm run release:verify-version
 npm run pack:connector-sdk

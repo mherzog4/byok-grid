@@ -13,13 +13,14 @@
   "properties": {
     "app": {
       "type": "object",
-      "required": ["publicUrl"],
+      "required": ["publicUrl", "signupMode"],
       "properties": {
         "publicUrl": {
           "type": "string",
           "format": "uri",
           "pattern": "^https://"
-        }
+        },
+        "signupMode": { "enum": ["disabled", "allowlist"] }
       }
     },
     "secrets": {
@@ -34,6 +35,7 @@
             "sqliteDatabaseUrl": { "type": "string" },
             "sqliteAuthToken": { "type": "string" },
             "betterAuthSecret": { "type": "string" },
+            "signupAllowedEmails": { "type": "string" },
             "masterKey": { "type": "string" },
             "hatchetClientToken": { "type": "string" },
             "connectorRunnerSharedSecret": { "type": "string" },

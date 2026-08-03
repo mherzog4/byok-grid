@@ -26,6 +26,7 @@
     "dev:all": "turbo run dev",
     "dev:workflows": "turbo run dev --filter=@byok-grid/web --filter=@byok-grid/workflow-worker",
     "drill:workflow-drain": "node scripts/drill-workflow-drain.mjs",
+    "drill:signup-policy": "node scripts/drill-signup-policy.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "helm:verify": "./scripts/verify-helm-chart.sh",

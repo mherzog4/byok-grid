@@ -16,6 +16,10 @@ working tree:
 - production Next.js build and compiled standalone application E2E covering
   signup, personal workspace provisioning, authenticated grid operations,
   workflow publication, and durable run creation;
+- fail-closed public registration with disabled and secret-backed allowlist
+  modes, loopback-only open signup, startup validation, Better Auth hook-level
+  enforcement, UI reflection, temporary SQLite integration coverage, and a
+  two-process compiled-standalone HTTP drill;
 - bounded incremental reads across Better Auth POST requests and every product
   Route Handler, with declared and observed 64-KiB/five-MiB enforcement,
   compressed-body rejection, transport-specific responses, and source contracts

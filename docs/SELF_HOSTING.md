@@ -94,6 +94,27 @@ derive Better Auth's base URL. Database URLs, auth secrets, provider keys,
 encryption keys, Hatchet tokens, and operator origins must never be passed as
 image build arguments.
 
+## Account provisioning
+
+Loopback evaluation defaults to `BYOK_GRID_SIGNUP_MODE=open`. A public origin
+defaults to `disabled`, and explicitly setting `open` on a non-loopback origin
+causes web startup and readiness to fail. This prevents an omitted deployment
+setting from exposing registration.
+
+For controlled production provisioning, set
+`BYOK_GRID_SIGNUP_MODE=allowlist` and supply a comma-separated
+`BYOK_GRID_SIGNUP_ALLOWED_EMAILS` through the secret manager. Comparisons are
+case-insensitive. Remove an address after its account is created, then switch to
+`disabled` when provisioning is complete. The Helm chart exposes
+`app.signupMode` and reads the allowlist from the `signup-allowed-emails` Secret
+key by default. The chart schema intentionally permits only `disabled` and
+`allowlist` for public Kubernetes releases.
+
+This mechanism limits account creation; it does not verify control of an email
+inbox and does not provide password-reset delivery. Do not enable public open
+signup until a reviewed transactional-email implementation and Better Auth
+verified-email enforcement are configured.
+
 ## Production boundary
 
 A production operator must supply infrastructure outside the local Compose
@@ -107,6 +128,8 @@ defaults:
 - unique `BETTER_AUTH_SECRET`, `BYOK_GRID_MASTER_KEY`, and
   `BYOK_GRID_MASTER_KEY_ID` values from a secret manager;
 - HTTPS termination with the canonical public URL configured consistently;
+- disabled or secret-backed allowlisted account provisioning, with approved
+  addresses removed after use;
 - preservation of the application's request-scoped nonce CSP, HSTS,
   no-referrer, anti-framing, MIME-sniffing, browser-capability, and cache-control
   response headers plus the browser's `Origin`, `Referer`, and `Sec-Fetch-*`

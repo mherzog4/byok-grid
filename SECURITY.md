@@ -61,6 +61,16 @@ nonce-bearing HTML for reuse across requests or rewrite, merge, or strip its CSP
 Domain owners may add HSTS subdomain coverage or preload only after reviewing
 every affected hostname.
 
+Public account provisioning fails closed. A non-loopback deployment defaults to
+`BYOK_GRID_SIGNUP_MODE=disabled`; it may use `allowlist` with a comma-separated
+`BYOK_GRID_SIGNUP_ALLOWED_EMAILS` secret. Fully open signup is accepted only on
+loopback until verified-email delivery exists. The server enforces this policy
+inside Better Auth's user-creation hook, while the sign-in page merely reflects
+it. Allowlisted addresses are normalized case-insensitively, configuration
+errors do not echo addresses, and approved entries should be removed after the
+intended account is provisioned. Allowlisting is not proof of email ownership,
+password recovery, or a substitute for verified public signup.
+
 npm installs run with strict lifecycle-script review. The root `allowScripts`
 policy permits only esbuild's platform-binary validation and unrs-resolver's
 native-package preparation; Hatchet's informational version warning and

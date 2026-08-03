@@ -37,7 +37,7 @@ cross-origin response received a different nonce. It then sent Compose
 
 ```text
 {"marker":"BYOK_GRID_DRAIN_DRILL_IN_FLIGHT","rowCount":500,...}
-{"drainMs":1826,"marker":"BYOK_GRID_DRAIN_SIGNAL_COMPLETE"}
+{"drainMs":2228,"marker":"BYOK_GRID_DRAIN_SIGNAL_COMPLETE"}
 {"marker":"BYOK_GRID_DRAIN_DRILL_PASSED","rows":500,"steps":100}
 ```
 
@@ -76,6 +76,38 @@ of this gate.
 The local Hatchet image has authentication disabled. This result therefore
 does not close the authenticated production-Hatchet gate in the production
 readiness ledger.
+
+## Public account provisioning
+
+After a production build, the following repository command launched three
+independent standalone Next.js processes against fresh migrated SQLite files:
+
+```text
+npm run drill:signup-policy
+```
+
+The first process proved that public open signup exits before readiness. The
+second used a public HTTPS canonical origin with signup disabled. It returned
+`400` for account creation and omitted the Create account control from
+server-rendered HTML. The third used the same public-origin posture with a
+secret-backed allowlist. It returned the stable `SIGNUP_NOT_ALLOWED` code for a
+different address, accepted a case-varied approved address, and issued a Better
+Auth session cookie. The valid processes reached readiness before testing and
+were terminated before their temporary databases were removed. Evidence
+emitted by the command:
+
+```text
+{"marker":"BYOK_GRID_PUBLIC_OPEN_SIGNUP_REJECTED"}
+{"marker":"BYOK_GRID_SIGNUP_DISABLED_VERIFIED"}
+{"marker":"BYOK_GRID_SIGNUP_ALLOWLIST_VERIFIED"}
+{"marker":"BYOK_GRID_SIGNUP_POLICY_DRILL_PASSED"}
+```
+
+Separate file-backed SQLite integration tests additionally proved that rejected
+requests created no users and an approved signup created exactly one user,
+personal workspace, and membership. This is controlled provisioning evidence,
+not verified-email or password-recovery evidence; public open signup remains
+rejected outside loopback.
 
 ## SQLite recovery
 

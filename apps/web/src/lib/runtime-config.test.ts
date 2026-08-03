@@ -18,6 +18,23 @@ describe('web runtime configuration', () => {
     expect(() => assertWebRuntimeConfiguration(validEnvironment)).not.toThrow();
   });
 
+  it('supports allowlisted public provisioning and rejects public open signup', () => {
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_SIGNUP_ALLOWED_EMAILS: 'owner@example.com',
+        BYOK_GRID_SIGNUP_MODE: 'allowlist',
+      })
+    ).not.toThrow();
+
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_SIGNUP_MODE: 'open',
+      })
+    ).toThrow('open is allowed only for loopback');
+  });
+
   it('allows HTTP only for loopback evaluation', () => {
     expect(() =>
       assertWebRuntimeConfiguration({

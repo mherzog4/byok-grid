@@ -1,12 +1,19 @@
 'use client';
 
 import { authClient } from '@/lib/auth-client';
+import type { SignupMode } from '@/lib/signup-policy';
 import { useRouter } from 'next/navigation';
 import { type FormEvent, useState } from 'react';
 
 type Mode = 'sign-in' | 'sign-up';
 
-export function AuthForm({ nextPath = '/app' }: { nextPath?: string }) {
+export function AuthForm({
+  nextPath = '/app',
+  signupMode,
+}: {
+  nextPath?: string;
+  signupMode: SignupMode;
+}) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>('sign-in');
   const [error, setError] = useState<string>();
@@ -51,15 +58,23 @@ export function AuthForm({ nextPath = '/app' }: { nextPath?: string }) {
         >
           Sign in
         </button>
-        <button
-          aria-pressed={mode === 'sign-up'}
-          className={mode === 'sign-up' ? 'active' : undefined}
-          onClick={() => setMode('sign-up')}
-          type="button"
-        >
-          Create account
-        </button>
+        {signupMode !== 'disabled' ? (
+          <button
+            aria-pressed={mode === 'sign-up'}
+            className={mode === 'sign-up' ? 'active' : undefined}
+            onClick={() => setMode('sign-up')}
+            type="button"
+          >
+            Create account
+          </button>
+        ) : null}
       </div>
+
+      {signupMode === 'allowlist' ? (
+        <p className="auth-policy-note">
+          Account creation is limited to operator-approved email addresses.
+        </p>
+      ) : null}
 
       <form method="post" onSubmit={submit}>
         {mode === 'sign-up' ? (
