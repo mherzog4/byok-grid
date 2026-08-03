@@ -1,4 +1,10 @@
+import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
+import {
+  ProductionEvidenceError,
+  assertStablePromotionPaths,
+  verifyProductionEvidenceFile,
+} from './verify-production-evidence-lib.mjs';
 
 const releaseImages = readJson('release-images.json');
 const rootPackage = readJson('package.json');
@@ -51,6 +57,10 @@ assertEqual(
   prereleaseAnnotation,
   expectedPrerelease
 );
+
+if (expectedPrerelease === 'false') {
+  verifyStableProductionEvidence(requestedVersion);
+}
 
 if (releaseImages.schemaVersion !== 1 || !Array.isArray(releaseImages.images)) {
   fail('release-images.json must contain schemaVersion 1 and an images array.');
@@ -204,4 +214,49 @@ function assertEqual(label, actual, expected) {
 function fail(message) {
   console.error(`Release verification failed: ${message}`);
   process.exit(1);
+}
+
+function currentCommit() {
+  try {
+    return execFileSync('git', ['rev-parse', 'HEAD'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    fail('The stable release commit could not be resolved.');
+  }
+}
+
+function verifyStableProductionEvidence(version) {
+  try {
+    const verified = verifyProductionEvidenceFile(
+      `docs/evidence/${version}-production.json`,
+      { expectedReleaseVersion: version }
+    );
+    const releaseCommit = currentCommit();
+    execFileSync(
+      'git',
+      ['merge-base', '--is-ancestor', verified.candidateCommit, releaseCommit],
+      { stdio: 'ignore' }
+    );
+    const changedPaths = execFileSync(
+      'git',
+      [
+        'diff',
+        '--name-only',
+        '--no-renames',
+        verified.candidateCommit,
+        releaseCommit,
+      ],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+    )
+      .split('\n')
+      .filter(Boolean);
+    assertStablePromotionPaths(changedPaths, version);
+  } catch (error) {
+    if (error instanceof ProductionEvidenceError) fail(error.message);
+    fail(
+      'The observed candidate must be an available ancestor of the stable release.'
+    );
+  }
 }

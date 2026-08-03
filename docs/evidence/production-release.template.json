@@ -1,0 +1,114 @@
+{
+  "acceptance": {
+    "acceptedAt": "<canonical-millisecond-UTC-timestamp>",
+    "operatorId": "github:<lowercase-login>",
+    "reference": "https://evidence.example.com/releases/<version>/operator-acceptance"
+  },
+  "candidate": {
+    "commit": "<40-character-lowercase-RC-commit-SHA>",
+    "digestManifestSha256": "<64-character-lowercase-SHA-256>",
+    "version": "<matching-prerelease-version>"
+  },
+  "evidence": [
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "authenticated-worker-drain",
+      "markers": ["BYOK_GRID_KUBERNETES_WORKER_DRAIN_VERIFIED"],
+      "reference": "https://evidence.example.com/releases/<version>/authenticated-worker-drain",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "candidate-source-equivalence",
+      "markers": [],
+      "reference": "https://evidence.example.com/releases/<version>/candidate-source-equivalence",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "code-security",
+      "markers": [],
+      "reference": "https://evidence.example.com/releases/<version>/code-security",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "multi-architecture-smoke",
+      "markers": [],
+      "reference": "https://evidence.example.com/releases/<version>/multi-architecture-smoke",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "observation-window",
+      "markers": [],
+      "reference": "https://evidence.example.com/releases/<version>/observation-window",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp-at-or-after-window-end>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "production-capacity",
+      "markers": ["BYOK_GRID_PRODUCTION_CAPACITY_VERIFIED"],
+      "reference": "https://evidence.example.com/releases/<version>/production-capacity",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "public-ingress-and-proxy",
+      "markers": ["BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED"],
+      "reference": "https://evidence.example.com/releases/<version>/public-ingress-and-proxy",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "reference-deployment",
+      "markers": [],
+      "reference": "https://evidence.example.com/releases/<version>/reference-deployment",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "release-assets",
+      "markers": [],
+      "reference": "https://evidence.example.com/releases/<version>/release-assets",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "release-tag-protection",
+      "markers": [],
+      "reference": "https://evidence.example.com/releases/<version>/release-tag-protection",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "remote-libsql-recovery",
+      "markers": [
+        "BYOK_GRID_REMOTE_LIBSQL_DRILL_PREPARED",
+        "BYOK_GRID_REMOTE_LIBSQL_RESTORE_VERIFIED"
+      ],
+      "reference": "https://evidence.example.com/releases/<version>/remote-libsql-recovery",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    },
+    {
+      "artifactSha256": "<64-character-lowercase-SHA-256>",
+      "id": "smtp-delivery",
+      "markers": [],
+      "reference": "https://evidence.example.com/releases/<version>/smtp-delivery",
+      "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
+    }
+  ],
+  "observationWindow": {
+    "endedAt": "<canonical-millisecond-UTC-timestamp>",
+    "startedAt": "<canonical-millisecond-UTC-timestamp-at-least-24-hours-earlier>",
+    "unresolvedBlockers": 0
+  },
+  "releaseVersion": "<stable-version>",
+  "rollback": {
+    "artifactSha256": "<64-character-lowercase-SHA-256>",
+    "reference": "https://evidence.example.com/releases/<version>/rollback",
+    "testedAt": "<canonical-millisecond-UTC-timestamp-inside-observation-window>"
+  },
+  "schemaVersion": 1,
+  "supportedOptionalAdapters": []
+}

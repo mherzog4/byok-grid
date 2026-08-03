@@ -93,3 +93,13 @@ Remove the Artifact Hub prerelease annotation only when all production drills
 have current evidence, supported upgrade and rollback paths are documented, the
 security policy names supported versions, and the release candidate has run
 through its observation window without an unresolved release blocker.
+
+Stable versions additionally require the closed, versioned manifest described
+in `docs/PRODUCTION_EVIDENCE.md`. Commit the manifest and only the allowed
+version/readiness/security metadata after the observed RC. Then run
+`npm run release:verify-production-evidence` and
+`npm run release:verify-version -- <stable-version>` from that committed state.
+The latter proves candidate ancestry and rejects any runtime, dependency,
+workflow, deployment, or verifier change after observation. Prerelease tags do
+not require this manifest; a code change discovered during promotion requires a
+new RC rather than an expanded allowlist.

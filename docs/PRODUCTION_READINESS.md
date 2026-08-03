@@ -137,6 +137,11 @@ working tree:
   FTS, optimistic-write, workflow-enqueue, and durable-completion paths through
   HTTPS and remote libSQL, rejects mutable images or worker churn, and proves
   exact isolated-fixture cleanup;
+- a dependency-free stable-promotion evidence verifier with a closed external
+  gate set, exact drill markers, retained-artifact hashes, canonical timing,
+  blocker-free 24-hour observation, rollback and operator acceptance ordering,
+  optional-adapter support binding, candidate ancestry, and a release-only Git
+  path allowlist that forces a new RC after any runtime or verifier change;
 - full-digest pins for release bases, CI services, and Compose third-party
   images, with registry evidence that each referenced manifest supports both
   `linux/amd64` and `linux/arm64`.
@@ -209,5 +214,7 @@ dated evidence linked from a release issue or runbook record:
 
 An RC can be published after its commit is reviewed, ordinary CI is green, and
 the tag workflow passes. Stable promotion additionally requires every external
-gate above, a documented rollback point, and named operator acceptance. Never
-move or reuse a failed tag; fix the cause and issue a new prerelease version.
+gate above, a documented rollback point, named operator acceptance, and a
+passing versioned manifest under the contract in `PRODUCTION_EVIDENCE.md`.
+Never move or reuse a failed tag; fix the cause and issue a new prerelease
+version.

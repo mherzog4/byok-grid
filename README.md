@@ -302,6 +302,9 @@ durable workflow-completion evidence.
 See [the production capacity drill](docs/PRODUCTION_CAPACITY_DRILL.md) for a
 declared HTTPS, remote-libSQL, and workflow concurrency envelope with
 operator-owned latency and contention thresholds.
+See [the stable production evidence contract](docs/PRODUCTION_EVIDENCE.md) for
+the versioned external-gate manifest, candidate-source binding, observation
+window, rollback proof, and named operator acceptance required by stable tags.
 See [the release process](docs/RELEASING.md) and
 [release verification guide](docs/VERIFY_RELEASE.md) for version gates, image
 digests, generated digest-pinned Helm values, checksums, SBOM/provenance, and
