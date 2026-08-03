@@ -1,9 +1,36 @@
 # Local runtime evidence — 2026-08-03
 
-Scope: the release-candidate working tree for `0.1.0-rc.1`, exercised on the
-local Docker Compose evaluation topology. This record is reproducible
-repository evidence; it is not a substitute for an authenticated production
-Hatchet, remote libSQL, or reference Kubernetes deployment.
+Scope: the release-candidate working tree for `0.1.0-rc.1`, exercised through
+the compiled standalone runtime and local Docker Compose evaluation topology.
+This record is reproducible repository evidence; it is not a substitute for an
+authenticated production Hatchet, remote libSQL, or reference Kubernetes
+deployment.
+
+## Standalone web signal drain
+
+After the production build, this command started the compiled standalone
+Next.js server against a freshly migrated temporary SQLite database:
+
+```text
+npm run drill:web-drain
+```
+
+The drill sent a complete password-recovery request and held it inside the
+application's real 500-millisecond anti-enumeration response floor. It then sent
+`SIGTERM`, required the process to remain alive, and proved the listener refused
+new connections before the original request completed with its normal
+server-generated request ID. The captured result was:
+
+```text
+{"exitCode":143,"listenerCloseMilliseconds":252,"marker":"BYOK_GRID_WEB_DRAIN_DRILL_PASSED","newConnectionsRejectedBeforeCompletion":true,"responseStatus":400}
+```
+
+Exit code 143 proves the compiled Next.js handler completed its graceful
+SIGTERM path. Helm lint and render checks separately prove a process-only
+60-second startup window, database-aware readiness, a 10-second endpoint
+withdrawal delay, and a 45-second total grace period. This local drill does not
+prove the chosen production ingress consumes terminating endpoints within that
+delay; that remains part of the reference deployment rollout gate.
 
 ## Full workflow and graceful drain
 

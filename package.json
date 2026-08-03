@@ -29,6 +29,7 @@
     "dev:all": "turbo run dev",
     "dev:workflows": "turbo run dev --filter=@byok-grid/web --filter=@byok-grid/workflow-worker",
     "drill:workflow-drain": "node scripts/drill-workflow-drain.mjs",
+    "drill:web-drain": "node scripts/drill-web-drain.mjs",
     "drill:signup-policy": "node scripts/drill-signup-policy.mjs",
     "email:verify": "tsx apps/web/src/email-verify-cli.ts",
     "format": "prettier --write .",

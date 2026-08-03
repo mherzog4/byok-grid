@@ -169,7 +169,27 @@
         }
       ]
     },
-    "web": { "$ref": "#/definitions/workload" },
+    "web": {
+      "allOf": [
+        { "$ref": "#/definitions/workload" },
+        {
+          "type": "object",
+          "required": ["terminationGracePeriodSeconds", "preStopSleepSeconds"],
+          "properties": {
+            "terminationGracePeriodSeconds": {
+              "type": "integer",
+              "minimum": 15,
+              "maximum": 300
+            },
+            "preStopSleepSeconds": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60
+            }
+          }
+        }
+      ]
+    },
     "worker": {
       "allOf": [
         { "$ref": "#/definitions/workload" },

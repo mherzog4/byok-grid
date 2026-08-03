@@ -143,11 +143,26 @@ new application images.
 
 ## Probes and runtime isolation
 
-The web readiness probe calls `/api/health`, which checks runtime configuration
-and the complete ordered SQLite/libSQL migration prefix and removes an unready
-pod from the Service. Its liveness probe
-calls `/api/live`, which checks only the Next.js process; a database outage
-therefore does not cause a restart storm. The worker enables Hatchet's native
+The web startup probe calls `/api/live` and permits up to 60 seconds for the
+standalone process to bind. After startup succeeds, readiness calls
+`/api/health`, which checks runtime configuration and the complete ordered
+SQLite/libSQL migration prefix and removes an unready pod from the Service.
+Liveness calls only `/api/live`; a database outage therefore does not cause a
+restart storm.
+
+On web termination, Kubernetes first marks the endpoint unready. The default
+10-second `preStop` delay lets that state propagate before `SIGTERM` reaches the
+standalone Node process. Next.js then closes its listener and completes pending
+requests inside the remaining 35 seconds of the default 45-second grace period.
+Tune `web.preStopSleepSeconds` and `web.terminationGracePeriodSeconds` from the
+observed ingress convergence and request-duration envelope; the chart rejects a
+delay that consumes the entire grace period. Do not set
+`NEXT_MANUAL_SIG_HANDLE`, because the deployment relies on Next.js's built-in
+signal handler. The compiled behavior is reproducible with
+`npm run drill:web-drain` after a production build. See
+[ADR 0046](adr/0046-web-rollout-draining.md).
+
+The worker enables Hatchet's native
 health server, and its readiness probe parses the response status rather than
 accepting every HTTP 200. On termination, it stops local dispatchers, asks
 Hatchet to pause new assignments and drain tracked tasks, then closes SQLite.

@@ -69,6 +69,11 @@ serviceAccount:
 
 web:
   replicaCount: 2
+  # Kubernetes removes a terminating endpoint before preStop runs. Reserve a
+  # short propagation window, then leave the remaining grace period for
+  # Next.js to close its listener and finish in-flight requests.
+  terminationGracePeriodSeconds: 45
+  preStopSleepSeconds: 10
   image:
     repository: ghcr.io/mherzog4/byok-grid-web
     pullPolicy: IfNotPresent

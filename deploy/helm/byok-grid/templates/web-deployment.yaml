@@ -1,3 +1,6 @@
+{{- if ge (int .Values.web.preStopSleepSeconds) (int .Values.web.terminationGracePeriodSeconds) }}
+{{- fail "web.preStopSleepSeconds must be less than web.terminationGracePeriodSeconds" }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,6 +30,7 @@ spec:
     spec:
       serviceAccountName: {{ include "byok-grid.serviceAccountName" (list . "web") }}
       automountServiceAccountToken: false
+      terminationGracePeriodSeconds: {{ .Values.web.terminationGracePeriodSeconds }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -42,6 +46,13 @@ spec:
         - name: web
           image: {{ include "byok-grid.image" (list . "web") | quote }}
           imagePullPolicy: {{ .Values.web.image.pullPolicy }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -ec
+                  - sleep {{ .Values.web.preStopSleepSeconds }}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -104,15 +115,20 @@ spec:
             httpGet:
               path: /api/health
               port: http
-            initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /api/live
+              port: http
+            periodSeconds: 2
+            timeoutSeconds: 1
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /api/live
               port: http
-            initialDelaySeconds: 15
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 3

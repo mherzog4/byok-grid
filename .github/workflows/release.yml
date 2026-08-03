@@ -95,6 +95,7 @@ jobs:
           npm test
           npm run test:connector-runner
           npm run build
+          npm run drill:web-drain
           npm run pack:connector-sdk
           npm run helm:verify
           docker compose config --quiet

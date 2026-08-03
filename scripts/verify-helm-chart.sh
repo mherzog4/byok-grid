@@ -37,6 +37,14 @@ helm template byok-grid-digests "$chart_dir" \
 
 grep -q 'kind: Deployment' "$default_render"
 grep -q 'path: /api/live' "$default_render"
+grep -q 'terminationGracePeriodSeconds: 45' "$default_render"
+grep -q -- '- sleep 10' "$default_render"
+if grep -q 'NEXT_MANUAL_SIG_HANDLE' "$default_render"; then
+  echo 'expected the chart to preserve the built-in Next.js signal handler' >&2
+  exit 1
+fi
+test "$(grep -c 'startupProbe:' "$default_render")" -eq 1
+grep -A4 'startupProbe:' "$default_render" | grep -q 'path: /api/live'
 grep -q 'helm.sh/hook: pre-install,pre-upgrade' "$default_render"
 grep -q 'key: sqlite-database-url' "$default_render"
 grep -q 'BYOK_GRID_SIGNUP_MODE: "disabled"' "$default_render"
@@ -149,6 +157,19 @@ fi
 if helm template conflicting-worker-ports "$chart_dir" \
   --set worker.metrics.port=8001 >/dev/null 2>&1; then
   echo 'expected conflicting worker health and application metrics ports to fail' >&2
+  exit 1
+fi
+
+if helm template invalid-web-drain "$chart_dir" \
+  --set web.terminationGracePeriodSeconds=30 \
+  --set web.preStopSleepSeconds=30 >/dev/null 2>&1; then
+  echo 'expected a web preStop delay consuming the full grace period to fail' >&2
+  exit 1
+fi
+
+if helm template invalid-web-grace "$chart_dir" \
+  --set web.terminationGracePeriodSeconds=14 >/dev/null 2>&1; then
+  echo 'expected a web termination grace period below 15 seconds to fail' >&2
   exit 1
 fi
 

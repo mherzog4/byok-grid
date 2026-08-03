@@ -109,6 +109,9 @@ jobs:
       - name: Build production artifacts
         run: npm run build
 
+      - name: Verify standalone web signal drain
+        run: npm run drill:web-drain
+
       - name: Build production container targets
         run: |
           docker build --target web --tag byok-grid-web:ci .

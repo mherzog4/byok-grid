@@ -51,7 +51,11 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    rollback-compatibility, signal-drain, and external-service failure drills.
    For the local Compose drain gate, start the app profile and run
    `npm run drill:workflow-drain`; retain its three structured marker lines in
-   the dated release evidence.
+   the dated release evidence. After the production web build, also run
+   `npm run drill:web-drain` and retain its
+   `BYOK_GRID_WEB_DRAIN_DRILL_PASSED` record; this separately proves the
+   standalone Next.js listener and in-flight request behavior used by the Helm
+   rollout contract.
 4. Create and push a signed annotated tag such as `v0.1.0-rc.1`.
 5. Let `.github/workflows/release.yml` verify source, build images, publish
    attestations, and create the GitHub Release. Do not manually replace failed

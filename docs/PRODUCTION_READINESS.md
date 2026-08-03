@@ -73,6 +73,10 @@ working tree:
   process evidence, and Compose/Helm Secret contracts;
 - web startup rejection for absent or malformed runtime secrets and healthy
   startup with canonical runtime configuration;
+- an explicit Helm web rollout contract with a process-only startup probe,
+  database-aware readiness, endpoint-withdrawal pre-stop delay, bounded total
+  grace period, invalid-value rejection, and a compiled standalone `SIGTERM`
+  drill proving listener closure before an in-flight response completes;
 - worker startup rejection before Hatchet connection when its master key is
   malformed;
 - deterministic lifecycle tests plus a real child-process `SIGTERM` proving
