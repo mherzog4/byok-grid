@@ -249,7 +249,13 @@ connector duration. See
 For analytics, set `analyticsProjector.enabled=true` and point it at an
 independently secured HTTPS ClickHouse endpoint. The projector uses SQLite's
 independent analytics lease fields to claim allowlisted outbox events. It does
-not become part of web availability or product authorization.
+not become part of web availability or product authorization. Its process-only
+`/live` probe remains healthy during an upstream initialization outage, while
+`/ready` stays unavailable until SQLite opens and ClickHouse schema setup
+succeeds. Initialization retries without crash-looping. `SIGTERM` withdraws
+readiness, cancels active ClickHouse transport, closes health, and closes SQLite
+inside the explicit 60-second grace period. See
+[ADR 0050](adr/0050-analytics-projector-lifecycle.md).
 
 See `docs/COMMUNITY_CONNECTORS.md` and `docs/CLICKHOUSE_ANALYTICS.md` for the
 security and data contracts behind those flags.

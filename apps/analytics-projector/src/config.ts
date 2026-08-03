@@ -31,6 +31,12 @@ const schema = z
       .min(1)
       .max(1_000)
       .default(100),
+    ANALYTICS_HEALTH_PORT: z.coerce
+      .number()
+      .int()
+      .min(1_024)
+      .max(65_535)
+      .default(8_003),
     ANALYTICS_PROJECTION_LEASE_SECONDS: z.coerce
       .number()
       .int()

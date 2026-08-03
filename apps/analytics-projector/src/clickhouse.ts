@@ -3,7 +3,12 @@ import type { AnalyticsProjectorConfig } from './config';
 
 const maximumResponseBytes = 64 * 1_024;
 
-export class ClickHouseProjectionError extends Error {}
+export class ClickHouseProjectionError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = 'ClickHouseProjectionError';
+  }
+}
 
 export interface ClickHouseRuntime {
   fetch(input: string, init: RequestInit): Promise<Response>;
@@ -21,9 +26,10 @@ export class ClickHouseProjectionClient {
     this.#runtime = runtime;
   }
 
-  async ensureSchema(): Promise<void> {
+  async ensureSchema(signal?: AbortSignal): Promise<void> {
     const table = qualifiedTable(this.#config);
-    await this.#execute(`
+    await this.#execute(
+      `
 CREATE TABLE IF NOT EXISTS ${table}
 (
   event_id UUID,
@@ -47,42 +53,65 @@ CREATE TABLE IF NOT EXISTS ${table}
 ENGINE = ReplacingMergeTree(projected_at)
 PARTITION BY toYYYYMM(occurred_at)
 ORDER BY (workspace_id, event_id)
-`);
-    await this.#execute(`
+`,
+      undefined,
+      signal
+    );
+    await this.#execute(
+      `
 ALTER TABLE ${table}
   ADD COLUMN IF NOT EXISTS archived_row_count UInt64 AFTER updated_row_count,
   ADD COLUMN IF NOT EXISTS restored_row_count UInt64 AFTER archived_row_count
-`);
+`,
+      undefined,
+      signal
+    );
   }
 
-  async insert(rows: readonly AnalyticsProjectionRow[]): Promise<void> {
+  async insert(
+    rows: readonly AnalyticsProjectionRow[],
+    signal?: AbortSignal
+  ): Promise<void> {
     if (rows.length === 0) return;
     const url = this.#requestUrl(
       `INSERT INTO ${qualifiedTable(this.#config)} FORMAT JSONEachRow`
     );
-    await this.#request(url, {
-      body: `${rows.map((row) => JSON.stringify(row)).join('\n')}\n`,
-      headers: { 'content-type': 'application/x-ndjson' },
-      method: 'POST',
-    });
+    await this.#request(
+      url,
+      {
+        body: `${rows.map((row) => JSON.stringify(row)).join('\n')}\n`,
+        headers: { 'content-type': 'application/x-ndjson' },
+        method: 'POST',
+      },
+      signal
+    );
   }
 
-  async eraseWorkspace(workspaceId: string): Promise<void> {
+  async eraseWorkspace(
+    workspaceId: string,
+    signal?: AbortSignal
+  ): Promise<void> {
     await this.#execute(
       `DELETE FROM ${qualifiedTable(this.#config)} WHERE workspace_id = {workspace_id:UUID}`,
-      { workspace_id: workspaceId }
+      { workspace_id: workspaceId },
+      signal
     );
   }
 
   async #execute(
     query: string,
-    parameters: Readonly<Record<string, string>> = {}
+    parameters: Readonly<Record<string, string>> = {},
+    signal?: AbortSignal
   ): Promise<void> {
-    await this.#request(this.#requestUrl(undefined, parameters), {
-      body: query.trim(),
-      headers: { 'content-type': 'text/plain; charset=utf-8' },
-      method: 'POST',
-    });
+    await this.#request(
+      this.#requestUrl(undefined, parameters),
+      {
+        body: query.trim(),
+        headers: { 'content-type': 'text/plain; charset=utf-8' },
+        method: 'POST',
+      },
+      signal
+    );
   }
 
   #requestUrl(
@@ -98,7 +127,11 @@ ALTER TABLE ${table}
     return url.toString();
   }
 
-  async #request(url: string, init: RequestInit): Promise<void> {
+  async #request(
+    url: string,
+    init: RequestInit,
+    signal?: AbortSignal
+  ): Promise<void> {
     let response: Response;
     try {
       response = await this.#runtime.fetch(url, {
@@ -110,7 +143,9 @@ ALTER TABLE ${table}
           ...(init.headers ?? {}),
         },
         redirect: 'manual',
-        signal: AbortSignal.timeout(30_000),
+        signal: signal
+          ? AbortSignal.any([signal, AbortSignal.timeout(30_000)])
+          : AbortSignal.timeout(30_000),
       });
     } catch (error) {
       throw new ClickHouseProjectionError('ClickHouse could not be reached.', {

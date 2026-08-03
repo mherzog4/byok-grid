@@ -87,4 +87,31 @@ describe('ClickHouse HTTP projection boundary', () => {
     });
     await expect(client.ensureSchema()).rejects.toThrow(/must not redirect/i);
   });
+
+  it('propagates shutdown cancellation into the active request', async () => {
+    let resolveRequestStarted!: (signal: AbortSignal) => void;
+    const requestStarted = new Promise<AbortSignal>((resolve) => {
+      resolveRequestStarted = resolve;
+    });
+    const client = new ClickHouseProjectionClient(config, {
+      fetch: async (_url, init) => {
+        resolveRequestStarted(init.signal!);
+        return new Promise<Response>((_resolve, reject) => {
+          init.signal!.addEventListener(
+            'abort',
+            () => reject(new Error('request aborted')),
+            { once: true }
+          );
+        });
+      },
+    });
+    const controller = new AbortController();
+    const schema = client.ensureSchema(controller.signal);
+
+    const requestSignal = await requestStarted;
+    controller.abort();
+
+    await expect(schema).rejects.toThrow('ClickHouse could not be reached.');
+    expect(requestSignal.aborted).toBe(true);
+  });
 });

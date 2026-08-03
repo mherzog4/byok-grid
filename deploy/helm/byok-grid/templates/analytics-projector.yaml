@@ -22,6 +22,7 @@ spec:
     spec:
       serviceAccountName: {{ include "byok-grid.serviceAccountName" (list . "analyticsProjector") }}
       automountServiceAccountToken: false
+      terminationGracePeriodSeconds: {{ .Values.analyticsProjector.terminationGracePeriodSeconds }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -77,6 +78,33 @@ spec:
               value: {{ .Values.analyticsProjector.projection.leaseSeconds | quote }}
             - name: ANALYTICS_PROJECTION_POLL_SECONDS
               value: {{ .Values.analyticsProjector.projection.pollSeconds | quote }}
+            - name: ANALYTICS_HEALTH_PORT
+              value: {{ .Values.analyticsProjector.health.port | quote }}
+          ports:
+            - name: projector-health
+              containerPort: {{ .Values.analyticsProjector.health.port }}
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /live
+              port: projector-health
+            periodSeconds: 2
+            timeoutSeconds: 1
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: projector-health
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: projector-health
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
           resources:
             {{- toYaml .Values.analyticsProjector.resources | nindent 12 }}
           volumeMounts:

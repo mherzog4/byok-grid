@@ -16,6 +16,11 @@ This starts SQLite migrations, ClickHouse, and the non-root analytics
 projector. ClickHouse's HTTP port is exposed locally at `58123`; do not expose
 that evaluation credential or port on an untrusted network.
 
+The projector health server remains container-internal on port `8003` by
+default. `/live` reports local process health. `/ready` remains unavailable
+until ClickHouse schema initialization succeeds; Compose uses it for service
+health.
+
 The profile uses the current pinned ClickHouse LTS line and a persistent
 `clickhouse_data` volume. The application and main worker continue to operate if
 the projector or ClickHouse is stopped.
@@ -77,6 +82,9 @@ deleted and available even if ClickHouse is offline. See the
   analytics outbox, and never give ClickHouse application-database credentials.
 - Monitor unprojected event age, retry counts, projector errors, ClickHouse disk
   use, merge backlog, and query latency independently.
+- Keep liveness process-only. Use readiness and the projection backlog for
+  dependency health; restarting on a ClickHouse outage creates churn without
+  restoring service.
 - Define retention and backups explicitly. The repository applies no automatic
   TTL because community deployments have different audit requirements.
 - Treat the Compose profile as an evaluation topology, not a production
@@ -84,5 +92,9 @@ deleted and available even if ClickHouse is offline. See the
 
 The projector is at-least-once. A crash in the acceptance/checkpoint window can
 insert a duplicate version, but it cannot lose or mutate authoritative product
-state. See [ADR 0024](adr/0024-optional-clickhouse-analytics-projection.md) for
-the delivery and ownership model.
+state. Shutdown-aborted claims remain leased and recover after expiry rather
+than being marked complete. See
+[ADR 0024](adr/0024-optional-clickhouse-analytics-projection.md) for the
+delivery and ownership model and
+[ADR 0050](adr/0050-analytics-projector-lifecycle.md) for runtime health and
+shutdown.

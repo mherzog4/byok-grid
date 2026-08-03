@@ -282,11 +282,28 @@
     },
     "analyticsProjector": {
       "allOf": [
-        { "$ref": "#/definitions/imageWorkload" },
+        { "$ref": "#/definitions/workload" },
         {
           "type": "object",
+          "required": ["enabled", "terminationGracePeriodSeconds", "health"],
           "properties": {
             "enabled": { "type": "boolean" },
+            "terminationGracePeriodSeconds": {
+              "type": "integer",
+              "minimum": 15,
+              "maximum": 300
+            },
+            "health": {
+              "type": "object",
+              "required": ["port"],
+              "properties": {
+                "port": {
+                  "type": "integer",
+                  "minimum": 1024,
+                  "maximum": 65535
+                }
+              }
+            },
             "clickhouse": {
               "type": "object",
               "properties": {

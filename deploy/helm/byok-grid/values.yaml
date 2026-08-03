@@ -180,6 +180,7 @@ connectorRunner:
 analyticsProjector:
   enabled: false
   replicaCount: 1
+  terminationGracePeriodSeconds: 60
   image:
     repository: ghcr.io/mherzog4/byok-grid-analytics-projector
     pullPolicy: IfNotPresent
@@ -195,6 +196,8 @@ analyticsProjector:
     batchSize: 100
     leaseSeconds: 300
     pollSeconds: 2
+  health:
+    port: 8003
   resources:
     requests:
       cpu: 100m

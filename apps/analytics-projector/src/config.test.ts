@@ -17,6 +17,7 @@ describe('analytics projector configuration', () => {
         PATH: '/usr/local/bin:/usr/bin',
       })
     ).toMatchObject({
+      ANALYTICS_HEALTH_PORT: 8003,
       ANALYTICS_PROJECTION_BATCH_SIZE: 100,
       ANALYTICS_PROJECTION_LEASE_SECONDS: 300,
       ANALYTICS_PROJECTION_POLL_SECONDS: 2,
@@ -26,6 +27,15 @@ describe('analytics projector configuration', () => {
       BYOK_GRID_DATABASE_MODE: 'local',
       SQLITE_DATABASE_URL: 'file:./data/byok-grid.sqlite',
     });
+  });
+
+  it('requires a non-privileged health port', () => {
+    expect(() =>
+      parseAnalyticsProjectorConfig({
+        ...base,
+        ANALYTICS_HEALTH_PORT: '1023',
+      })
+    ).toThrow(/>=1024/u);
   });
 
   it('requires libSQL when remote database mode is selected', () => {

@@ -78,7 +78,7 @@ grep -q 'name: byok-grid-byok-grid-worker-monitoring-ingress' "$default_render"
 grep -q 'name: byok-grid-full-byok-grid-connector-runner' "$full_render"
 grep -q 'terminationGracePeriodSeconds: 60' "$full_render"
 grep -q -- '- sleep 5' "$full_render"
-test "$(grep -c 'startupProbe:' "$full_render")" -eq 3
+test "$(grep -c 'startupProbe:' "$full_render")" -eq 4
 grep -q 'kubernetes.io/metadata.name: ingress-nginx' "$full_render"
 grep -q 'kubernetes.io/metadata.name: monitoring' "$full_render"
 grep -q 'name: byok-grid-egress-byok-grid-default-deny-runtime-egress' "$egress_render"
@@ -104,6 +104,11 @@ grep -q 'name: SQLITE_DATABASE_URL' "$full_render"
 test "$(grep -c 'name: BYOK_GRID_DATABASE_MODE' "$full_render")" -eq 4
 test "$(grep -A1 'name: BYOK_GRID_DATABASE_MODE' "$full_render" | grep -c 'value: remote')" -eq 4
 grep -q 'app.kubernetes.io/component: analytics-projector' "$full_render"
+grep -q 'name: projector-health' "$full_render"
+grep -q 'containerPort: 8003' "$full_render"
+test "$(grep -c 'path: /ready' "$full_render")" -eq 1
+test "$(grep -c 'path: /live' "$full_render")" -eq 2
+test "$(grep -c 'terminationGracePeriodSeconds: 60' "$full_render")" -eq 2
 grep -q 'app.kubernetes.io/component: connector-runner' "$full_render"
 test "$(grep -c 'image: \"ghcr.io/mherzog4/byok-grid-.*@sha256:' "$full_render")" -eq 5
 test "$(grep -c 'image: \"ghcr.io/mherzog4/byok-grid-.*@sha256:' "$digest_render")" -eq 5
@@ -194,6 +199,20 @@ fi
 if helm template invalid-runner-grace "$chart_dir" \
   --set connectorRunner.terminationGracePeriodSeconds=14 >/dev/null 2>&1; then
   echo 'expected a connector-runner termination grace period below 15 seconds to fail' >&2
+  exit 1
+fi
+
+if helm template invalid-projector-health "$chart_dir" \
+  --values "$chart_dir/ci-values.yaml" \
+  --set analyticsProjector.health.port=1023 >/dev/null 2>&1; then
+  echo 'expected a privileged analytics-projector health port to fail' >&2
+  exit 1
+fi
+
+if helm template invalid-projector-replicas "$chart_dir" \
+  --values "$chart_dir/ci-values.yaml" \
+  --set analyticsProjector.replicaCount=0 >/dev/null 2>&1; then
+  echo 'expected zero analytics-projector replicas to fail' >&2
   exit 1
 fi
 

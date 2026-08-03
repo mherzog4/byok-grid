@@ -28,7 +28,9 @@ export async function projectAnalyticsBatch(input: {
   config: AnalyticsProjectorConfig;
   db: SqliteDatabase;
   runtime?: ProjectorRuntime;
+  signal?: AbortSignal;
 }): Promise<number> {
+  if (input.signal?.aborted) return 0;
   const runtime = input.runtime ?? {
     now: () => new Date(),
     randomId: () => crypto.randomUUID(),
@@ -41,6 +43,7 @@ export async function projectAnalyticsBatch(input: {
     now: runtime.now(),
   });
   if (claimed.length === 0) return 0;
+  if (input.signal?.aborted) return 0;
 
   const purgedWorkspaceIds = await listSqlitePurgedAnalyticsWorkspaceIds(
     input.db,
@@ -50,6 +53,7 @@ export async function projectAnalyticsBatch(input: {
     (event) => !purgedWorkspaceIds.has(event.workspaceId)
   );
   if (eligible.length === 0) return 0;
+  if (input.signal?.aborted) return 0;
 
   const projectedAt = runtime.now();
   const valid = [];
@@ -69,9 +73,13 @@ export async function projectAnalyticsBatch(input: {
     }
   }
   if (valid.length === 0) return 0;
+  if (input.signal?.aborted) return 0;
 
   try {
-    await input.clickhouse.insert(valid.map(({ row }) => row));
+    await input.clickhouse.insert(
+      valid.map(({ row }) => row),
+      input.signal
+    );
     await completeSqliteAnalyticsEvents(input.db, {
       claimId,
       eventIds: valid.map(({ event }) => event.id),
@@ -79,6 +87,7 @@ export async function projectAnalyticsBatch(input: {
     });
     return valid.length;
   } catch (error) {
+    if (input.signal?.aborted) return 0;
     const latestAttempt = Math.max(...valid.map(({ event }) => event.attempt));
     await retrySqliteAnalyticsEvents(input.db, {
       claimId,
@@ -95,7 +104,9 @@ export async function eraseWorkspaceAnalyticsBatch(input: {
   config: AnalyticsProjectorConfig;
   db: SqliteDatabase;
   runtime?: ProjectorRuntime;
+  signal?: AbortSignal;
 }): Promise<number> {
+  if (input.signal?.aborted) return 0;
   const runtime = input.runtime ?? {
     now: () => new Date(),
     randomId: () => crypto.randomUUID(),
@@ -109,9 +120,10 @@ export async function eraseWorkspaceAnalyticsBatch(input: {
   });
   let erased = 0;
   for (const receipt of claimed) {
+    if (input.signal?.aborted) break;
     const attemptedAt = runtime.now();
     try {
-      await input.clickhouse.eraseWorkspace(receipt.workspaceId);
+      await input.clickhouse.eraseWorkspace(receipt.workspaceId, input.signal);
       await completeSqliteWorkspaceAnalyticsErasure(input.db, {
         claimId,
         erasedAt: attemptedAt,
@@ -119,6 +131,7 @@ export async function eraseWorkspaceAnalyticsBatch(input: {
       });
       erased += 1;
     } catch (error) {
+      if (input.signal?.aborted) break;
       await retrySqliteWorkspaceAnalyticsErasure(input.db, {
         claimId,
         errorMessage: safeProjectionError(error),

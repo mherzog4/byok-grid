@@ -1,9 +1,10 @@
 import { openSqliteDatabase } from '@byok-grid/db';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { setTimeout as delay } from 'node:timers/promises';
 import { ClickHouseProjectionClient } from './clickhouse';
 import { loadAnalyticsProjectorConfig } from './config';
+import { AnalyticsProjectorHealthServer } from './health-server';
+import { runAnalyticsProjectorLifecycle } from './lifecycle';
 import {
   eraseWorkspaceAnalyticsBatch,
   projectAnalyticsBatch,
@@ -22,42 +23,34 @@ const database = await openSqliteDatabase({
   url: config.SQLITE_DATABASE_URL,
 });
 const clickhouse = new ClickHouseProjectionClient(config);
-const controller = new AbortController();
+const health = new AnalyticsProjectorHealthServer({
+  port: config.ANALYTICS_HEALTH_PORT,
+});
 
-process.once('SIGINT', () => controller.abort());
-process.once('SIGTERM', () => controller.abort());
-
-try {
-  await clickhouse.ensureSchema();
-  while (!controller.signal.aborted) {
-    try {
-      const erased = await eraseWorkspaceAnalyticsBatch({
-        clickhouse,
-        config,
-        db: database.db,
-      });
-      const projected = await projectAnalyticsBatch({
-        clickhouse,
-        config,
-        db: database.db,
-      });
-      if (erased + projected === 0) {
-        await delay(
-          config.ANALYTICS_PROJECTION_POLL_SECONDS * 1_000,
-          undefined,
-          { signal: controller.signal }
-        );
-      }
-    } catch (error) {
-      if (controller.signal.aborted) break;
-      console.error('Analytics projection cycle failed', {
-        errorName: error instanceof Error ? error.name : 'UnknownError',
-      });
-      await delay(config.ANALYTICS_PROJECTION_POLL_SECONDS * 1_000, undefined, {
-        signal: controller.signal,
-      }).catch(() => undefined);
-    }
-  }
-} finally {
-  database.close();
-}
+await runAnalyticsProjectorLifecycle({
+  closeDatabase: () => database.close(),
+  ensureSchema: (signal) => clickhouse.ensureSchema(signal),
+  eraseBatch: (signal) =>
+    eraseWorkspaceAnalyticsBatch({
+      clickhouse,
+      config,
+      db: database.db,
+      signal,
+    }),
+  health,
+  pollMilliseconds: config.ANALYTICS_PROJECTION_POLL_SECONDS * 1_000,
+  projectBatch: (signal) =>
+    projectAnalyticsBatch({
+      clickhouse,
+      config,
+      db: database.db,
+      signal,
+    }),
+  reportFailure: (phase, error) => {
+    console.error('Analytics projector operation failed', {
+      errorName: error instanceof Error ? error.name : 'UnknownError',
+      phase,
+    });
+  },
+  signalSource: process,
+});

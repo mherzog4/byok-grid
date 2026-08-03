@@ -107,6 +107,10 @@ working tree:
   contracts, permanent connector-runner egress denial, opt-in component-scoped
   runtime egress isolation, bounded connector-runner startup and termination,
   and render-time rejection of an exposed Ingress without a trusted peer;
+- an optional analytics-projector lifecycle with owned live/ready state,
+  retrying dependency initialization, signal-cancelled ClickHouse transport,
+  lease-safe shutdown, real child-process `SIGTERM`, bounded Helm probes and
+  grace period, invalid topology rejection, and production-image health proof;
 - local builds of the web, worker, migration, and maintenance image targets;
 - release metadata, Helm chart, connector SDK package, and checksum dry run;
 - digest-aware Helm rendering plus a tested release-asset generator that

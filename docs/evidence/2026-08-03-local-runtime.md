@@ -6,6 +6,39 @@ This record is reproducible repository evidence; it is not a substitute for an
 authenticated production Hatchet, remote libSQL, or reference Kubernetes
 deployment.
 
+## Analytics-projector rollout health and shutdown
+
+The health-server tests bound a real loopback listener and proved `/live`
+returned 200, `/ready` returned 503 before initialization and 200 afterward,
+responses disabled caching, unsupported methods and paths returned 404, and the
+listener refused connections after close. Lifecycle tests proved failed
+ClickHouse initialization remained live but unready and retried, `SIGTERM`
+withdrew readiness before aborting projection, health closed before SQLite, and
+health-listener failure still cleaned up and propagated.
+
+A real child process received operating-system `SIGTERM` while its projection
+was active. It observed readiness withdrawal, projection abort, repeated
+fail-closed readiness during finalization, health close, and database close in
+that order, then exited with code 0. A separate transport test proved the same
+abort reached the active ClickHouse fetch signal.
+
+Helm lint and default/full/digest renders proved the optional projector's
+process-only startup/liveness, initialization-aware readiness, non-privileged
+health port, positive replica count, and explicit 60-second grace period.
+Compose rendered the same `/ready` service-health contract.
+
+The production analytics-projector target was built and inspected as runtime
+user `node` with the expected Node/tsx entrypoint. A disposable container
+loaded the packaged TypeScript health server and emitted:
+
+```text
+{"marker":"BYOK_GRID_ANALYTICS_HEALTH_IMAGE_PASSED","live":200,"initializing":503,"ready":200}
+```
+
+The disposable image was removed afterward. This repository and image evidence
+does not replace the external secured-ClickHouse E2E, capacity, alerting, or
+observation gates.
+
 ## Workflow-worker startup, readiness, and liveness
 
 The packaged worker probe tests exercised all four Hatchet lifecycle states,
