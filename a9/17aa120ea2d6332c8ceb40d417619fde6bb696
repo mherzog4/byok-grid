@@ -1,0 +1,70 @@
+apps/web/src/lib/client-ip-policy.test.ts
+  s_28ae7db8033464::t_a53348e7b23ac9 1-48
+apps/web/src/lib/auth-factory.integration.test.ts
+  s_28ae7db8033464::t_a53348e7b23ac9 11,42,66,149
+docker-compose.yml
+  s_28ae7db8033464::t_b32c6ba4ec0459 79
+deploy/helm/byok-grid/templates/configmap.yaml
+  s_28ae7db8033464::t_b32c6ba4ec0459 9
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_beb107eb0ac7b3 97-120
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_beb107eb0ac7b3 174-184
+.env.example
+  s_28ae7db8033464::t_b32c6ba4ec0459 70-72
+apps/web/src/lib/runtime-config.ts
+  s_28ae7db8033464::t_a53348e7b23ac9 4-6,57-64
+  s_28ae7db8033464::t_1072bec5c6dcb8 3
+  s_28ae7db8033464::t_c0e45bca1681c6 65-66
+docs/API_SECURITY.md
+  s_28ae7db8033464::t_beb107eb0ac7b3 71-82
+deploy/helm/byok-grid/values.schema.json
+  s_28ae7db8033464::t_b32c6ba4ec0459 16,23-39
+  s_28ae7db8033464::t_92dfdceac31722 40
+deploy/helm/byok-grid/ci-values.yaml
+  s_28ae7db8033464::t_b32c6ba4ec0459 3-5
+apps/web/src/lib/auth-factory.ts
+  s_28ae7db8033464::t_a53348e7b23ac9 9-12,24,33,104
+apps/web/src/lib/auth-rate-limit.integration.test.ts
+  s_28ae7db8033464::t_9f36e118418f64 1-127
+apps/web/src/lib/client-ip-policy.ts
+  s_28ae7db8033464::t_a53348e7b23ac9 1-78
+apps/web/src/lib/runtime-config.test.ts
+  s_28ae7db8033464::t_a53348e7b23ac9 56-77
+deploy/helm/byok-grid/values.yaml
+  s_28ae7db8033464::t_b32c6ba4ec0459 10-13
+scripts/verify-helm-chart.sh
+  s_28ae7db8033464::t_7f4b4ffe0ce80a 43,74,117-119
+  s_28ae7db8033464::t_c68660f4f53023 120-122
+scripts/drill-signup-policy.mjs
+  s_28ae7db8033464::t_7f4b4ffe0ce80a 82-103,430-431,441
+  s_28ae7db8033464::t_b3905ea3ad3fc5 38,40-42,44-46,48-53,60-61
+  s_28ae7db8033464::t_e66415799fef82 62
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_ec02b813cd0296 94-98,112
+  s_28ae7db8033464::t_b3905ea3ad3fc5 89-92,111
+apps/web/src/lib/auth.ts
+  s_28ae7db8033464::t_a53348e7b23ac9 2,24,32
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_b3905ea3ad3fc5 37-39
+  s_28ae7db8033464::t_beb107eb0ac7b3 34-36,127-130
+docs/adr/0041-explicit-authentication-proxy-trust.md
+  s_28ae7db8033464::t_ec02b813cd0296 1-60
+  s_28ae7db8033464::t_b3905ea3ad3fc5 61-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "a917aa120ea2d6332c8ceb40d417619fde6bb696",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
