@@ -12,9 +12,12 @@
   "scripts": {
     "benchmark:grid": "vitest bench src/grid.bench.ts --run",
     "build": "tsc --noEmit",
+    "db:backup": "tsx src/sqlite/backup-cli.ts backup",
+    "db:backup:verify": "tsx src/sqlite/backup-cli.ts verify",
     "db:generate": "drizzle-kit generate",
     "db:sqlite:generate": "drizzle-kit generate --config=drizzle.sqlite.config.ts",
     "db:sqlite:migrate": "tsx src/sqlite/migrate-cli.ts",
+    "db:restore": "tsx src/sqlite/backup-cli.ts restore",
     "db:migrate": "tsx src/migrate.ts",
     "lint": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",

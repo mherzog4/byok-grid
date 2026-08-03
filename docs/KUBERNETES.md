@@ -18,13 +18,16 @@ at the public push-ingestion API.
 
 ## Prerequisites
 
-Build and publish each Dockerfile target under an immutable shared release tag:
+Use a tagged BYOK Grid release that publishes each Dockerfile target as a
+multi-platform manifest plus an immutable digest:
 
 ```text
 web
 workflow-worker
 migration
+maintenance              # backup/restore jobs
 connector-runner          # only if enabled
+airbyte-destination       # only if used
 analytics-projector       # only if enabled
 ```
 
@@ -37,6 +40,12 @@ share one authoritative file.
 Provision authenticated Hatchet separately. Its development `hatchet-lite-dev`
 image from Compose is not suitable for this chart.
 
+Download and verify the release's `values.digests.yaml`. It contains the exact
+web, worker, migration, connector-runner, and analytics-projector digests that
+passed the release scan and attestation gate. A chart image accepts either a
+tag or a `sha256:` digest, never both; a digest takes precedence over the chart
+version fallback.
+
 ## Secret contract
 
 The secure default is `secrets.create=false`. Create a Secret such as
@@ -47,13 +56,15 @@ The secure default is `secrets.create=false`. Create a Secret such as
 | `sqlite-database-url`            | all product workloads | yes                    |
 | `sqlite-auth-token`              | all product workloads | when service requires  |
 | `better-auth-secret`             | web                   | yes                    |
-| `byok-grid-master-key`           | worker                | yes                    |
+| `byok-grid-master-key`           | web and worker        | yes                    |
 | `hatchet-client-token`           | worker                | yes                    |
 | `connector-runner-shared-secret` | worker and runner     | when runner enabled    |
 | `clickhouse-password`            | projector             | when projector enabled |
 
 Use External Secrets, Secrets Store CSI, Sealed Secrets, SOPS, or the cluster's
-equivalent to materialize that object. Do not pass production secrets through
+equivalent to materialize that object. The web encrypts credentials and the
+worker decrypts them, so both deployments must receive the same master-key
+version. Do not pass production secrets through
 `--set` or a committed values file: Helm release state can retain supplied
 values. If an external controller changes the Secret, use its rollout/reloader
 integration or restart the affected Deployment; Helm can checksum only the
@@ -66,9 +77,9 @@ input.
 ## Install
 
 Create an operator values file containing image locations, the public URL,
-Hatchet endpoint, ingress/TLS settings, and the existing Secret name. The public
-URL must exactly match the `NEXT_PUBLIC_APP_URL` used to build the web image,
-because Next.js embeds public values into browser assets.
+Hatchet endpoint, ingress/TLS settings, and the existing Secret name. The chart
+supplies the public URL to Better Auth at runtime; the same attested web image
+digest can therefore be reused across origins.
 
 Validate before changing the cluster:
 
@@ -77,7 +88,8 @@ npm run helm:verify
 helm lint --strict deploy/helm/byok-grid -f values.production.yaml
 helm template byok-grid deploy/helm/byok-grid \
   --namespace byok-grid \
-  --values values.production.yaml
+  --values values.production.yaml \
+  --values values.digests.yaml
 ```
 
 Then install atomically:
@@ -88,8 +100,13 @@ helm upgrade --install byok-grid deploy/helm/byok-grid \
   --create-namespace \
   --atomic \
   --timeout 15m \
-  --values values.production.yaml
+  --values values.production.yaml \
+  --values values.digests.yaml
 ```
+
+Pass the verified digest file last. Before installation, inspect the render and
+confirm every enabled workload image uses `repository@sha256:...`; do not
+convert those references back to tags for convenience.
 
 The migration Job runs at hook weight `-10`. A failed Job stops the release
 before either runtime changes. Its pod does not mount a Kubernetes API token. If
@@ -103,11 +120,27 @@ new application images.
 
 ## Probes and runtime isolation
 
-The web readiness probe calls `/api/health`, which checks SQLite/libSQL and removes
-an unready pod from the Service. Its liveness probe calls `/api/live`, which
-checks only the Next.js process; a database outage therefore does not cause a
-restart storm. Worker health is observed through process exit and Hatchet queue
-age rather than a fake HTTP endpoint.
+The web readiness probe calls `/api/health`, which checks runtime configuration
+and the complete ordered SQLite/libSQL migration prefix and removes an unready
+pod from the Service. Its liveness probe
+calls `/api/live`, which checks only the Next.js process; a database outage
+therefore does not cause a restart storm. The worker enables Hatchet's native
+health server, and its readiness probe parses the response status rather than
+accepting every HTTP 200. On termination, it stops local dispatchers, asks
+Hatchet to pause new assignments and drain tracked tasks, then closes SQLite.
+Configure both `worker.hatchet.hostPort` (gRPC) and
+`worker.hatchet.apiUrl` (HTTPS REST). The chart passes each endpoint explicitly
+so shutdown control does not inherit a machine-local URL from the client token.
+The default 90-second grace period exceeds the longest built-in provider timeout
+and is configurable up to ten minutes. Monitor Hatchet queue age separately.
+
+The same worker port exposes `/metrics` with Hatchet health, slot, and action
+gauges plus Node.js process, memory, garbage-collection, and event-loop metrics.
+The image includes Hatchet's optional `prom-client` peer so this endpoint is not
+a 503 placeholder. Discover pods with your monitoring stack's PodMonitor or set
+`worker.podAnnotations`, for example `prometheus.io/scrape: "true"`,
+`prometheus.io/port: "8001"`, and `prometheus.io/path: "/metrics"`. Keep the
+port cluster-internal and restrict ingress to the monitoring namespace.
 
 All chart-owned pods run as non-root, drop capabilities, disable privilege
 escalation and service-account token mounts, use the runtime-default seccomp

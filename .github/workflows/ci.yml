@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 20
     services:
       postgres:
-        image: postgres:17-alpine
+        image: postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
         env:
           POSTGRES_DB: byok_grid
           POSTGRES_PASSWORD: postgres
@@ -34,26 +34,26 @@ jobs:
     env:
       BETTER_AUTH_SECRET: ci-only-secret-not-for-production-123456
       BETTER_AUTH_URL: http://localhost:3000
-      BYOK_GRID_MASTER_KEY: Y2ktb25seS1ub3QtYS1wcm9kdWN0aW9uLWtleQ==
+      BYOK_GRID_MASTER_KEY: Y2ktb25seS1ub3QtYS1wcm9kLWtleS0xMjM0NTY3ODk=
       BYOK_GRID_MASTER_KEY_ID: ci-v1
       HATCHET_CLIENT_TOKEN: ci-compose-validation-only
       SQLITE_DATABASE_URL: file:./data/byok-grid-ci.sqlite
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 24
           cache: npm
 
       - name: Install locked dependencies
-        run: npm ci
+        run: npm ci --strict-allow-scripts
 
       - name: Set up Helm
-        uses: azure/setup-helm@v5.0.1
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
           version: v4.2.3
 
@@ -75,6 +75,9 @@ jobs:
 
       - name: Check formatting
         run: npm run format:check
+
+      - name: Verify release metadata
+        run: npm run release:verify-version
 
       - name: Lint
         run: npm run lint
@@ -106,15 +109,25 @@ jobs:
           docker build --target web --tag byok-grid-web:ci .
           docker build --target workflow-worker --tag byok-grid-workflow-worker:ci .
           docker build --target migration --tag byok-grid-migration:ci .
+          docker build --target maintenance --tag byok-grid-maintenance:ci .
           docker build --target connector-runner --tag byok-grid-connector-runner:ci .
           docker build --target airbyte-destination --tag byok-grid-airbyte-destination:ci .
           docker build --target analytics-projector --tag byok-grid-analytics-projector:ci .
 
       - name: Assert SQLite-only Node runtime images
         run: |
+          set -euo pipefail
+          maintenance_volume="byok-grid-ci-maintenance-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          trap 'docker volume rm --force "$maintenance_volume" >/dev/null' EXIT
           docker run --rm --entrypoint node byok-grid-workflow-worker:ci -e "let leaked=false; try { require.resolve('postgres'); leaked=true } catch {} if (leaked) process.exit(1)"
           docker run --rm --entrypoint node byok-grid-analytics-projector:ci -e "let leaked=false; try { require.resolve('postgres'); leaked=true } catch {} if (leaked) process.exit(1)"
-          docker run --rm -e SQLITE_DATABASE_URL=file:/data/ci.sqlite byok-grid-migration:ci
+          docker run --rm --entrypoint node byok-grid-workflow-worker:ci --import tsx --input-type=module -e "await import('./packages/connectors/src/sandbox-schema.ts')"
+          docker run --rm --entrypoint node byok-grid-workflow-worker:ci -e "require.resolve('prom-client')"
+          docker volume create "$maintenance_volume"
+          docker run --rm --volume "$maintenance_volume:/data" -e SQLITE_DATABASE_URL=file:/data/ci.sqlite byok-grid-migration:ci
+          docker run --rm --volume "$maintenance_volume:/data" -e SQLITE_DATABASE_URL=file:/data/ci.sqlite byok-grid-maintenance:ci backup /data/backups/ci.sqlite
+          docker run --rm --volume "$maintenance_volume:/data" byok-grid-maintenance:ci verify /data/backups/ci.sqlite
+          docker run --rm --volume "$maintenance_volume:/data" byok-grid-maintenance:ci restore /data/backups/ci.sqlite /data/restored/ci.sqlite
 
       - name: Verify connector SDK package contents
         run: npm run pack:connector-sdk

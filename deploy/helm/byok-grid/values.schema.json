@@ -74,7 +74,46 @@
       ]
     },
     "web": { "$ref": "#/definitions/workload" },
-    "worker": { "$ref": "#/definitions/workload" },
+    "worker": {
+      "allOf": [
+        { "$ref": "#/definitions/workload" },
+        {
+          "type": "object",
+          "required": ["terminationGracePeriodSeconds", "hatchet", "health"],
+          "properties": {
+            "terminationGracePeriodSeconds": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 600
+            },
+            "hatchet": {
+              "type": "object",
+              "required": ["apiUrl", "hostPort", "tlsStrategy"],
+              "properties": {
+                "apiUrl": {
+                  "type": "string",
+                  "format": "uri",
+                  "pattern": "^https://"
+                },
+                "hostPort": { "type": "string", "minLength": 1 },
+                "tlsStrategy": { "const": "tls" }
+              }
+            },
+            "health": {
+              "type": "object",
+              "required": ["port"],
+              "properties": {
+                "port": {
+                  "type": "integer",
+                  "minimum": 1024,
+                  "maximum": 65535
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "migration": { "$ref": "#/definitions/imageWorkload" },
     "connectorRunner": {
       "allOf": [
@@ -124,11 +163,22 @@
   "definitions": {
     "image": {
       "type": "object",
-      "required": ["repository", "pullPolicy", "tag"],
+      "required": ["repository", "pullPolicy", "tag", "digest"],
       "properties": {
         "repository": { "type": "string", "minLength": 1 },
         "pullPolicy": { "enum": ["Always", "IfNotPresent", "Never"] },
-        "tag": { "type": "string" }
+        "tag": { "type": "string" },
+        "digest": {
+          "type": "string",
+          "pattern": "^(|sha256:[0-9a-f]{64})$"
+        }
+      },
+      "not": {
+        "required": ["tag", "digest"],
+        "properties": {
+          "tag": { "minLength": 1 },
+          "digest": { "minLength": 1 }
+        }
       }
     },
     "imageWorkload": {

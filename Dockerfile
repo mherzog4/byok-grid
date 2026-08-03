@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
 
 ARG NODE_IMAGE=node:24.14.0-slim@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8
 ARG RUST_IMAGE=rust:1.94.0-slim-bookworm@sha256:a86cada82e36ebd7a9bffed7548792c55a952fdb20718eea9278a936bcb76e62
@@ -42,7 +42,7 @@ COPY packages/security/package.json packages/security/package.json
 
 RUN --mount=type=cache,target=/root/.npm \
   npm install --global npm@${NPM_VERSION} --no-audit --no-fund && \
-  npm ci --no-audit --no-fund
+  npm ci --strict-allow-scripts --no-audit --no-fund
 
 FROM dependencies AS sdk-builder
 COPY tsconfig.base.json ./
@@ -76,11 +76,9 @@ ENTRYPOINT ["node", "/airbyte/dist/cli.js"]
 FROM sdk-builder AS web-builder
 COPY . .
 
-# Only public, non-secret values belong in build arguments. Server credentials
-# remain runtime-only. Next.js evaluates server modules while collecting routes,
-# so the build uses a throwaway migrated SQLite database.
-ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
-ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+# Next.js evaluates server modules while collecting routes, so the build uses a
+# throwaway migrated SQLite database. All deployment configuration remains
+# runtime-only, allowing one attested image digest to serve any operator origin.
 ENV SQLITE_DATABASE_URL=file:/tmp/byok-grid-build.sqlite
 ENV BETTER_AUTH_SECRET=build-only-placeholder-not-for-runtime
 ENV BETTER_AUTH_URL=http://localhost:3000
@@ -123,6 +121,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY --from=worker-dependencies --chown=node:node /app/node_modules ./node_modules
+# npm nests Ajv 8 under the connectors workspace because the root development
+# graph also contains Ajv 6. Preserve that pruned production subtree explicitly.
+COPY --from=worker-dependencies --chown=node:node /app/packages/connectors/node_modules ./packages/connectors/node_modules
 COPY --chown=node:node package.json package-lock.json tsconfig.base.json ./
 COPY --chown=node:node apps/workflow-worker/package.json apps/workflow-worker/package.json
 COPY --chown=node:node apps/workflow-worker/src apps/workflow-worker/src
@@ -147,13 +148,16 @@ USER node
 
 FROM worker-runtime AS workflow-worker
 ENTRYPOINT ["./scripts/container/workflow-worker-entrypoint.sh"]
-CMD ["./node_modules/.bin/tsx", "apps/workflow-worker/src/index.ts"]
+CMD ["node", "--import", "tsx", "apps/workflow-worker/src/index.ts"]
 
 FROM worker-runtime AS analytics-projector
 COPY --chown=node:node apps/analytics-projector/package.json apps/analytics-projector/package.json
 COPY --chown=node:node apps/analytics-projector/src apps/analytics-projector/src
-ENTRYPOINT ["./node_modules/.bin/tsx", "apps/analytics-projector/src/index.ts"]
+ENTRYPOINT ["node", "--import", "tsx", "apps/analytics-projector/src/index.ts"]
 
 FROM worker-runtime AS migration
 ENTRYPOINT ["./scripts/container/migration-entrypoint.sh"]
-CMD ["./node_modules/.bin/tsx", "packages/db/src/sqlite/migrate-cli.ts"]
+CMD ["node", "--import", "tsx", "packages/db/src/sqlite/migrate-cli.ts"]
+
+FROM worker-runtime AS maintenance
+ENTRYPOINT ["node", "--import", "tsx", "packages/db/src/sqlite/backup-cli.ts"]

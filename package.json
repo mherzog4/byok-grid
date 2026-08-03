@@ -1,6 +1,6 @@
 {
   "name": "byok-grid",
-  "version": "0.0.0",
+  "version": "0.1.0-rc.1",
   "private": true,
   "description": "Open-source, BYOK data enrichment workflows in a collaborative grid.",
   "license": "AGPL-3.0-only",
@@ -13,15 +13,19 @@
     "build": "turbo run build",
     "connector:keygen": "tsx packages/connectors/src/registry-signing-cli.ts keygen",
     "connector:sign-registry": "tsx packages/connectors/src/registry-signing-cli.ts sign",
+    "db:backup": "npm run db:backup --workspace=@byok-grid/db --",
+    "db:backup:verify": "npm run db:backup:verify --workspace=@byok-grid/db --",
     "db:generate": "npm run db:sqlite:generate --workspace=@byok-grid/db",
     "db:migrate": "npm run db:sqlite:migrate --workspace=@byok-grid/db",
     "db:postgres:generate": "npm run db:generate --workspace=@byok-grid/db",
     "db:postgres:migrate": "npm run db:migrate --workspace=@byok-grid/db",
     "db:sqlite:generate": "npm run db:sqlite:generate --workspace=@byok-grid/db",
     "db:sqlite:migrate": "npm run db:sqlite:migrate --workspace=@byok-grid/db",
+    "db:restore": "npm run db:restore --workspace=@byok-grid/db --",
     "dev": "npm run dev --workspace=@byok-grid/web",
     "dev:all": "turbo run dev",
     "dev:workflows": "turbo run dev --filter=@byok-grid/web --filter=@byok-grid/workflow-worker",
+    "drill:workflow-drain": "node scripts/drill-workflow-drain.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "helm:verify": "./scripts/verify-helm-chart.sh",
@@ -32,8 +36,13 @@
     "lint": "turbo run lint",
     "lint:connector-runner": "cargo clippy --locked --all-targets -- -D warnings",
     "pack:connector-sdk": "npm pack --dry-run --json --workspace=@byok-grid/connector-sdk",
-    "test": "turbo run test",
+    "release:matrix": "node scripts/verify-release-version.mjs --matrix",
+    "release:helm-digests": "node scripts/generate-helm-digest-values.mjs",
+    "release:package": "node scripts/package-release.mjs",
+    "release:verify-version": "node scripts/verify-release-version.mjs",
+    "test": "npm run test:release-tools && turbo run test",
     "test:connector-runner": "cargo test --locked --package byok-grid-connector-runner",
+    "test:release-tools": "node --test scripts/*.test.mjs",
     "typecheck": "turbo run typecheck"
   },
   "engines": {
@@ -53,6 +62,13 @@
       "postcss": "$postcss",
       "sharp": "$sharp"
     }
+  },
+  "allowScripts": {
+    "@hatchet-dev/typescript-sdk": false,
+    "esbuild": true,
+    "fsevents": false,
+    "protobufjs": false,
+    "unrs-resolver": true
   },
   "devDependencies": {
     "@types/node": "26.1.2",

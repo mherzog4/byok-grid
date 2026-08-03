@@ -102,6 +102,10 @@ destruction can provide an additional boundary where the storage design
 supports per-tenant keys, but the current schema does not claim per-workspace
 cryptographic erasure for all values.
 
+The local SQLite backup verifier, safe new-file restore flow, remote libSQL
+requirements, and restore-drill evidence are documented in
+[the backup and restore guide](BACKUP_RESTORE.md).
+
 BYOK Grid cannot delete copies retained by external providers that processed a
 request, user-managed Airbyte infrastructure, downstream destinations, webhook
 receivers, or exported files. Workspace owners and deployment operators remain

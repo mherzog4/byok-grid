@@ -11,8 +11,10 @@ import { executeSqliteWritebackDeliveryTask } from './execute-writeback-delivery
 import { workflowHatchet } from './hatchet';
 import { processSqliteRowSettlementTask } from './process-row-settlement';
 import { scheduleSqliteSources } from './source-scheduler';
+import { runWorkerLifecycle } from './worker-lifecycle';
 
 const worker = await workflowHatchet.worker('byok-grid-workflow-worker', {
+  handleKill: false,
   slots: 10,
   workflows: [
     applySqliteCsvImportTask,
@@ -26,14 +28,12 @@ const worker = await workflowHatchet.worker('byok-grid-workflow-worker', {
     processSqliteRowSettlementTask,
   ],
 });
-const dispatcherController = new AbortController();
-const dispatcher = dispatchWorkflowRuns(dispatcherController.signal);
-const sourceScheduler = scheduleSqliteSources(dispatcherController.signal);
-
-try {
-  await worker.start();
-} finally {
-  dispatcherController.abort();
-  await Promise.all([dispatcher, sourceScheduler]);
-  workflowDatabase.close();
-}
+await runWorkerLifecycle({
+  backgroundTasks: [
+    { name: 'workflow dispatcher', run: dispatchWorkflowRuns },
+    { name: 'source scheduler', run: scheduleSqliteSources },
+  ],
+  closeDatabase: () => workflowDatabase.close(),
+  signalSource: process,
+  worker,
+});

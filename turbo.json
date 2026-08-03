@@ -4,8 +4,7 @@
     "BETTER_AUTH_SECRET",
     "BETTER_AUTH_URL",
     "SQLITE_AUTH_TOKEN",
-    "SQLITE_DATABASE_URL",
-    "NEXT_PUBLIC_APP_URL"
+    "SQLITE_DATABASE_URL"
   ],
   "tasks": {
     "build": {

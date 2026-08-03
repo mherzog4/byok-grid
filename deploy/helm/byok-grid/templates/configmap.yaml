@@ -6,10 +6,12 @@ metadata:
     {{- include "byok-grid.labels" . | nindent 4 }}
 data:
   BETTER_AUTH_URL: {{ .Values.app.publicUrl | quote }}
-  NEXT_PUBLIC_APP_URL: {{ .Values.app.publicUrl | quote }}
   BYOK_GRID_MASTER_KEY_ID: {{ .Values.worker.masterKeyId | default "v1" | quote }}
+  HATCHET_CLIENT_API_URL: {{ .Values.worker.hatchet.apiUrl | quote }}
   HATCHET_CLIENT_HOST_PORT: {{ .Values.worker.hatchet.hostPort | quote }}
   HATCHET_CLIENT_TLS_STRATEGY: {{ .Values.worker.hatchet.tlsStrategy | quote }}
+  HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED: 'true'
+  HATCHET_CLIENT_WORKER_HEALTHCHECK_PORT: {{ .Values.worker.health.port | quote }}
   BULK_RUN_MAX_ROWS: {{ .Values.web.bulkRunLimits.maxRows | quote }}
   BULK_RUN_MAX_PROVIDER_REQUESTS: {{ .Values.web.bulkRunLimits.maxProviderRequests | quote }}
   BULK_RUN_MAX_OUTPUT_TOKENS: {{ .Values.web.bulkRunLimits.maxOutputTokens | quote }}

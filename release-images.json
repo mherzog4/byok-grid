@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "images": [
+    { "target": "web", "image": "byok-grid-web" },
+    {
+      "target": "workflow-worker",
+      "image": "byok-grid-workflow-worker"
+    },
+    { "target": "migration", "image": "byok-grid-migration" },
+    { "target": "maintenance", "image": "byok-grid-maintenance" },
+    {
+      "target": "connector-runner",
+      "image": "byok-grid-connector-runner"
+    },
+    {
+      "target": "airbyte-destination",
+      "image": "byok-grid-airbyte-destination"
+    },
+    {
+      "target": "analytics-projector",
+      "image": "byok-grid-analytics-projector"
+    }
+  ]
+}

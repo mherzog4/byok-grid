@@ -32,7 +32,11 @@ app.kubernetes.io/component: {{ .component }}
 {{- $root := index . 0 -}}
 {{- $component := index . 1 -}}
 {{- $image := (index $root.Values $component).image -}}
+{{- if $image.digest -}}
+{{- printf "%s@%s" $image.repository $image.digest -}}
+{{- else -}}
 {{- printf "%s:%s" $image.repository ($image.tag | default $root.Chart.AppVersion) -}}
+{{- end -}}
 {{- end }}
 
 {{- define "byok-grid.secretName" -}}

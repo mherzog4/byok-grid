@@ -2,8 +2,13 @@ import { createClient, type Client } from '@libsql/client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const runE2e = process.env.RUN_SQLITE_WEB_E2E === '1';
+const verifyWorkerExecution = process.env.VERIFY_WORKFLOW_EXECUTION === '1';
+const drainDrillRows = parseDrainDrillRows(
+  process.env.WORKFLOW_DRAIN_DRILL_ROWS
+);
 const databaseUrl = process.env.TEST_SQLITE_DATABASE_URL;
 const appUrl = process.env.TEST_APP_URL ?? 'http://127.0.0.1:3000';
+const requestOrigin = process.env.TEST_APP_ORIGIN ?? appUrl;
 
 describe.skipIf(!runE2e || !databaseUrl)(
   'SQLite auth and visual workflow HTTP end-to-end',
@@ -41,7 +46,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
           name: 'SQLite Workflow E2E',
           password: 'correct-horse-battery-staple-workflow-e2e',
         }),
-        headers: { 'content-type': 'application/json', origin: appUrl },
+        headers: { 'content-type': 'application/json', origin: requestOrigin },
         method: 'POST',
       });
       expect(signup.status, await signup.clone().text()).toBe(200);
@@ -82,7 +87,11 @@ describe.skipIf(!runE2e || !databaseUrl)(
           firstColumnValueType: 'text',
           name: 'Prospects',
         }),
-        headers: { 'content-type': 'application/json', cookie, origin: appUrl },
+        headers: {
+          'content-type': 'application/json',
+          cookie,
+          origin: requestOrigin,
+        },
         method: 'POST',
       });
       expect(createdTableResponse.status).toBe(201);
@@ -96,7 +105,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
           headers: {
             'content-type': 'application/json',
             cookie,
-            origin: appUrl,
+            origin: requestOrigin,
           },
           method: 'PATCH',
         }
@@ -110,11 +119,14 @@ describe.skipIf(!runE2e || !databaseUrl)(
       const columnResponse = await fetch(
         `${tableCollectionUrl}/${tableId}/columns/input`,
         {
-          body: JSON.stringify({ name: 'Employee count', valueType: 'number' }),
+          body: JSON.stringify({
+            name: 'Employee count',
+            valueType: 'number',
+          }),
           headers: {
             'content-type': 'application/json',
             cookie,
-            origin: appUrl,
+            origin: requestOrigin,
           },
           method: 'POST',
         }
@@ -122,7 +134,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
       expect(columnResponse.status).toBe(201);
 
       const rowResponse = await fetch(`${tableCollectionUrl}/${tableId}/rows`, {
-        headers: { cookie, origin: appUrl },
+        headers: { cookie, origin: requestOrigin },
         method: 'POST',
       });
       expect(rowResponse.status).toBe(201);
@@ -133,7 +145,11 @@ describe.skipIf(!runE2e || !databaseUrl)(
           expectedVersion: 0,
           value: { type: 'text', value: 'Acme' },
         }),
-        headers: { 'content-type': 'application/json', cookie, origin: appUrl },
+        headers: {
+          'content-type': 'application/json',
+          cookie,
+          origin: requestOrigin,
+        },
         method: 'PUT',
       });
       expect(cellResponse.status).toBe(200);
@@ -147,7 +163,11 @@ describe.skipIf(!runE2e || !databaseUrl)(
           expectedVersion: 0,
           value: { type: 'text', value: 'Stale overwrite' },
         }),
-        headers: { 'content-type': 'application/json', cookie, origin: appUrl },
+        headers: {
+          'content-type': 'application/json',
+          cookie,
+          origin: requestOrigin,
+        },
         method: 'PUT',
       });
       expect(staleCellResponse.status).toBe(409);
@@ -165,6 +185,10 @@ describe.skipIf(!runE2e || !databaseUrl)(
         version: 1,
       });
 
+      if (drainDrillRows !== null) {
+        await seedWorkflowRows(tableId, columnId, drainDrillRows);
+      }
+
       const collectionUrl = `${appUrl}/api/workspaces/${workspaceId}/workflows`;
       const createdResponse = await fetch(collectionUrl, {
         body: JSON.stringify({
@@ -176,7 +200,11 @@ describe.skipIf(!runE2e || !databaseUrl)(
           },
           name: 'E2E row copy',
         }),
-        headers: { 'content-type': 'application/json', cookie, origin: appUrl },
+        headers: {
+          'content-type': 'application/json',
+          cookie,
+          origin: requestOrigin,
+        },
         method: 'POST',
       });
       expect(createdResponse.status).toBe(201);
@@ -188,16 +216,19 @@ describe.skipIf(!runE2e || !databaseUrl)(
 
       const triggerId = crypto.randomUUID();
       const destinationId = crypto.randomUUID();
+      const filterIds =
+        drainDrillRows === null
+          ? []
+          : Array.from({ length: 98 }, () => crypto.randomUUID());
+      const executionNodeIds = [triggerId, ...filterIds, destinationId];
       const graph = {
-        edges: [
-          {
-            id: crypto.randomUUID(),
-            sourceHandle: 'rows',
-            sourceNodeId: triggerId,
-            targetHandle: 'rows',
-            targetNodeId: destinationId,
-          },
-        ],
+        edges: executionNodeIds.slice(0, -1).map((sourceNodeId, index) => ({
+          id: crypto.randomUUID(),
+          sourceHandle: index === 0 ? 'rows' : 'matched',
+          sourceNodeId,
+          targetHandle: 'rows',
+          targetNodeId: executionNodeIds[index + 1]!,
+        })),
         nodes: [
           {
             configuration: { searchQuery: null, tableId, viewId: null },
@@ -206,6 +237,15 @@ describe.skipIf(!runE2e || !databaseUrl)(
             name: 'Rows',
             position: { x: 0, y: 0 },
           },
+          ...filterIds.map((id, index) => ({
+            configuration: {
+              filterTree: { children: [], combinator: 'and' },
+            },
+            id,
+            kind: 'logic.filter',
+            name: `Drain filter ${index + 1}`,
+            position: { x: 300 + index * 10, y: 0 },
+          })),
           {
             configuration: {
               columnMappings: [
@@ -216,7 +256,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
             id: destinationId,
             kind: 'destination.write_table',
             name: 'Write',
-            position: { x: 300, y: 0 },
+            position: { x: 1_300, y: 0 },
           },
         ],
         schemaVersion: 1,
@@ -231,7 +271,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
         headers: {
           'content-type': 'application/json',
           cookie,
-          origin: appUrl,
+          origin: requestOrigin,
         },
         method: 'PATCH',
       });
@@ -250,7 +290,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
           headers: {
             'content-type': 'application/json',
             cookie,
-            origin: appUrl,
+            origin: requestOrigin,
           },
           method: 'POST',
         }
@@ -261,56 +301,193 @@ describe.skipIf(!runE2e || !databaseUrl)(
         state: 'active',
       });
 
-      const runResponse = await fetch(`${collectionUrl}/${created.id}/runs`, {
+      const runCollectionUrl = `${collectionUrl}/${created.id}/runs`;
+      const runResponse = await fetch(runCollectionUrl, {
         body: JSON.stringify({ input: { source: 'e2e' } }),
         headers: {
           'content-type': 'application/json',
           cookie,
-          origin: appUrl,
+          origin: requestOrigin,
         },
         method: 'POST',
       });
       expect(runResponse.status).toBe(202);
-      const run = (await runResponse.json()) as { id: string; status: string };
+      const run = (await runResponse.json()) as {
+        id: string;
+        status: string;
+      };
       expect(run.status).toBe('queued');
-      const runHistoryResponse = await fetch(
-        `${collectionUrl}/${created.id}/runs`,
-        { headers: { cookie } }
-      );
+
+      if (drainDrillRows !== null) {
+        await waitForRunningStep(runCollectionUrl, cookie, run.id);
+        console.log(
+          JSON.stringify({
+            marker: 'BYOK_GRID_DRAIN_DRILL_IN_FLIGHT',
+            rowCount: drainDrillRows,
+            runId: run.id,
+          })
+        );
+      }
+
+      const runHistoryResponse = await fetch(runCollectionUrl, {
+        headers: { cookie },
+      });
       expect(runHistoryResponse.status).toBe(200);
       const runHistory = (await runHistoryResponse.json()) as Array<{
         id: string;
         status: string;
         steps: Array<{ status: string }>;
       }>;
-      expect(runHistory[0]).toMatchObject({
-        id: run.id,
-        status: 'queued',
-      });
-      expect(runHistory[0]?.steps).toHaveLength(2);
-      expect(runHistory[0]?.steps.map((step) => step.status).sort()).toEqual([
-        'blocked',
-        'ready',
-      ]);
+      expect(runHistory[0]?.id).toBe(run.id);
+      if (drainDrillRows === null) {
+        expect(runHistory[0]?.status).toBe('queued');
+      }
+      expect(runHistory[0]?.steps).toHaveLength(executionNodeIds.length);
       const storedRun = await one(
         'select workflow_version, graph_digest, status from workflow_runs where id = ?',
         run.id
       );
-      expect(storedRun).toMatchObject({
-        status: 'queued',
-        workflow_version: 1,
-      });
+      expect(storedRun.workflow_version).toBe(1);
+      if (drainDrillRows === null) {
+        expect(storedRun.status).toBe('queued');
+      }
       expect(String(storedRun.graph_digest)).toMatch(/^[0-9a-f]{64}$/);
       const steps = await client!.execute({
         args: [run.id],
         sql: 'select step_id, status from workflow_step_runs where run_id = ? order by step_id',
       });
-      expect(steps.rows).toHaveLength(2);
-      expect(steps.rows.map((row) => row.status).sort()).toEqual([
-        'blocked',
-        'ready',
-      ]);
-    }, 30_000);
+      expect(steps.rows).toHaveLength(executionNodeIds.length);
+      if (drainDrillRows === null) {
+        expect(steps.rows.map((row) => row.status).sort()).toEqual([
+          'blocked',
+          'ready',
+        ]);
+      }
+
+      if (verifyWorkerExecution) {
+        const terminalRun = await waitForTerminalRun(
+          runCollectionUrl,
+          cookie,
+          run.id
+        );
+        expect(terminalRun.status).toBe('succeeded');
+        expect(terminalRun.steps.map((step) => step.status)).toHaveLength(
+          executionNodeIds.length
+        );
+        expect(
+          terminalRun.steps.every((step) => step.status === 'succeeded')
+        ).toBe(true);
+
+        const persistedRun = await one(
+          'select status from workflow_runs where id = ?',
+          run.id
+        );
+        expect(persistedRun.status).toBe('succeeded');
+      }
+    }, 120_000);
+
+    async function seedWorkflowRows(
+      tableId: string,
+      columnId: string,
+      targetCount: number
+    ) {
+      const count = await one(
+        'select count(*) as count from rows where table_id = ? and archived_at is null',
+        tableId
+      );
+      const additionalCount = Math.max(0, targetCount - Number(count.count));
+      const statements = Array.from({ length: additionalCount }, (_, index) => {
+        const rowId = crypto.randomUUID();
+        return [
+          {
+            args: [
+              rowId,
+              workspaceId!,
+              tableId,
+              `drain:${String(index).padStart(6, '0')}`,
+            ],
+            sql: 'insert into rows (id, workspace_id, table_id, position) values (?, ?, ?, ?)',
+          },
+          {
+            args: [
+              crypto.randomUUID(),
+              workspaceId!,
+              tableId,
+              rowId,
+              columnId,
+              `Drain fixture ${index}`,
+              `Drain fixture ${index}`,
+            ],
+            sql: "insert into cells (id, workspace_id, table_id, row_id, column_id, value_type, value_text, search_text) values (?, ?, ?, ?, ?, 'text', ?, ?)",
+          },
+        ];
+      });
+      for (let offset = 0; offset < statements.length; offset += 50) {
+        await client!.batch(statements.slice(offset, offset + 50).flat());
+      }
+    }
+
+    async function waitForRunningStep(
+      runCollectionUrl: string,
+      cookie: string,
+      runId: string
+    ) {
+      const deadline = Date.now() + 20_000;
+      while (Date.now() < deadline) {
+        const response = await fetch(runCollectionUrl, {
+          headers: { cookie },
+        });
+        expect(response.status).toBe(200);
+        const runs = (await response.json()) as Array<{
+          id: string;
+          status: string;
+          steps: Array<{ status: string }>;
+        }>;
+        const run = runs.find((candidate) => candidate.id === runId);
+        if (run?.steps.some((step) => step.status === 'running')) return;
+        if (
+          run?.status === 'succeeded' ||
+          run?.status === 'failed' ||
+          run?.status === 'cancelled'
+        ) {
+          throw new Error(
+            `Workflow run ${runId} reached ${run.status} before the drain signal.`
+          );
+        }
+        await new Promise((resolve) => setTimeout(resolve, 25));
+      }
+      throw new Error(
+        `Workflow run ${runId} did not expose a running step within 20 seconds.`
+      );
+    }
+
+    async function waitForTerminalRun(
+      runCollectionUrl: string,
+      cookie: string,
+      runId: string
+    ) {
+      const deadline = Date.now() + (drainDrillRows === null ? 20_000 : 90_000);
+      while (Date.now() < deadline) {
+        const response = await fetch(runCollectionUrl, {
+          headers: { cookie },
+        });
+        expect(response.status).toBe(200);
+        const runs = (await response.json()) as Array<{
+          id: string;
+          status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+          steps: Array<{ status: string }>;
+        }>;
+        const run = runs.find((candidate) => candidate.id === runId);
+        if (run?.status === 'succeeded') return run;
+        if (run?.status === 'failed' || run?.status === 'cancelled') {
+          throw new Error(`Workflow run ${runId} ended as ${run.status}.`);
+        }
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      throw new Error(
+        `Workflow run ${runId} did not finish before the verification deadline.`
+      );
+    }
 
     async function one(sql: string, argument: string) {
       const result = await client!.execute({ args: [argument], sql });
@@ -320,3 +497,14 @@ describe.skipIf(!runE2e || !databaseUrl)(
     }
   }
 );
+
+function parseDrainDrillRows(value: string | undefined): number | null {
+  if (value === undefined) return null;
+  const rows = Number(value);
+  if (!Number.isInteger(rows) || rows < 2 || rows > 500) {
+    throw new Error(
+      'WORKFLOW_DRAIN_DRILL_ROWS must be an integer from 2 to 500.'
+    );
+  }
+  return rows;
+}

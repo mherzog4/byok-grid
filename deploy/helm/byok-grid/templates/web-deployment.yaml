@@ -67,6 +67,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "byok-grid.secretName" . }}
                   key: {{ .Values.secrets.keys.betterAuthSecret }}
+            - name: BYOK_GRID_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "byok-grid.secretName" . }}
+                  key: {{ .Values.secrets.keys.masterKey }}
           ports:
             - name: http
               containerPort: 3000

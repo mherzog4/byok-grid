@@ -4,7 +4,7 @@ fullnameOverride: ''
 imagePullSecrets: []
 
 app:
-  # Must match the NEXT_PUBLIC_APP_URL used when the web image was built.
+  # Runtime canonical origin used for authentication callbacks and cookies.
   publicUrl: https://byok-grid.example.com
 
 secrets:
@@ -39,9 +39,10 @@ serviceAccount:
 web:
   replicaCount: 2
   image:
-    repository: ghcr.io/byok-grid/byok-grid-web
+    repository: ghcr.io/mherzog4/byok-grid-web
     pullPolicy: IfNotPresent
     tag: ''
+    digest: ''
   service:
     type: ClusterIP
     port: 80
@@ -67,10 +68,12 @@ web:
 
 worker:
   replicaCount: 1
+  terminationGracePeriodSeconds: 90
   image:
-    repository: ghcr.io/byok-grid/byok-grid-workflow-worker
+    repository: ghcr.io/mherzog4/byok-grid-workflow-worker
     pullPolicy: IfNotPresent
     tag: ''
+    digest: ''
   podAnnotations: {}
   resources:
     requests:
@@ -79,8 +82,11 @@ worker:
     limits:
       memory: 1Gi
   hatchet:
+    apiUrl: https://hatchet.example.com
     hostPort: hatchet-grpc.hatchet.svc.cluster.local:7077
     tlsStrategy: tls
+  health:
+    port: 8001
   limits:
     bulkRunExpansionChunkSize: 50
     automaticRunMaxPerRowChange: 10
@@ -92,9 +98,10 @@ migration:
   # If set, this ServiceAccount must exist before Helm runs pre-install hooks.
   serviceAccountName: ''
   image:
-    repository: ghcr.io/byok-grid/byok-grid-migration
+    repository: ghcr.io/mherzog4/byok-grid-migration
     pullPolicy: IfNotPresent
     tag: ''
+    digest: ''
   backoffLimit: 2
   activeDeadlineSeconds: 900
   ttlSecondsAfterFinished: 86400
@@ -108,9 +115,10 @@ migration:
 connectorRunner:
   enabled: false
   image:
-    repository: ghcr.io/byok-grid/byok-grid-connector-runner
+    repository: ghcr.io/mherzog4/byok-grid-connector-runner
     pullPolicy: IfNotPresent
     tag: ''
+    digest: ''
   existingClaim: ''
   registryPath: /connectors/registry.json
   registrySignaturePath: /connectors/registry.sig
@@ -132,9 +140,10 @@ analyticsProjector:
   enabled: false
   replicaCount: 1
   image:
-    repository: ghcr.io/byok-grid/byok-grid-analytics-projector
+    repository: ghcr.io/mherzog4/byok-grid-analytics-projector
     pullPolicy: IfNotPresent
     tag: ''
+    digest: ''
   clickhouse:
     url: https://clickhouse.example.com
     database: byok_grid_analytics

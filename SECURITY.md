@@ -28,13 +28,47 @@ production. Production deployments must use authenticated, pinned workflow
 infrastructure and unique database, auth, and encryption secrets.
 
 The Dockerfile runs both application targets as the unprivileged `node` user.
-Its public `NEXT_PUBLIC_APP_URL` argument is the only deployment value intended
-for build time. Never place database URLs, auth secrets, Hatchet tokens,
-workspace encryption keys, or provider credentials in build arguments or image
-layers. The Compose `app` profile still depends on the auth-disabled local
+Official images contain no deployment-specific build arguments. Never place
+database URLs, auth secrets, Hatchet tokens, workspace encryption keys, provider
+credentials, or operator origins in build arguments or image layers. The
+Compose `app` profile still depends on the auth-disabled local
 Hatchet image and fixed local database passwords, so it is an evaluation path,
 not a production manifest. Follow `docs/SELF_HOSTING.md` before exposing a
 deployment.
+
+npm installs run with strict lifecycle-script review. The root `allowScripts`
+policy permits only esbuild's platform-binary validation and unrs-resolver's
+native-package preparation; Hatchet's informational version warning and
+protobufjs's dependency-style warning remain explicitly denied, as does the
+optional fsevents native rebuild because its macOS binary ships in the package.
+Dependency updates that introduce or change lifecycle scripts must receive
+source review before the policy changes.
+
+GitHub Actions in ordinary CI and the release workflow are pinned to full
+commit SHAs, with reviewed version labels retained as comments. Do not replace
+those pins with mutable major, version, branch, or `latest` references. Action
+updates must review upstream release notes, the resolved commit, permissions,
+and any nested action or binary download behavior before changing a pin.
+
+The Dockerfile frontend, release bases, CI service containers, and
+Compose-owned third-party images retain a readable version tag but are pinned
+to an exact multi-platform manifest digest. The release verifier rejects
+mutable replacements. Digest updates are security changes: review upstream
+provenance and release notes, confirm both amd64 and arm64 manifests, rebuild
+every target, and rerun image scanning before accepting them.
+
+The workflow worker's Hatchet health port also exposes Prometheus metrics. The
+endpoint contains runtime and worker-capacity data but is unauthenticated; do
+not publish it through application ingress. Limit access to readiness probes
+and the cluster monitoring identity with network policy.
+
+The SHA-pinned security workflow runs CodeQL dataflow analysis for
+JavaScript/TypeScript and a locked Rust build on pushes, pull requests, and a
+weekly schedule. Pull requests also reject newly introduced runtime
+dependencies with known Moderate-or-higher advisories. Repository owners must
+enable code scanning, dependency graph, Dependabot alerts, secret scanning, and
+push protection in the public repository settings and make the security jobs
+required before stable release.
 
 The built-in HTTP connector pins DNS answers and rejects private, loopback,
 link-local, reserved, benchmarking, documentation, and multicast networks.

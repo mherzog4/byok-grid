@@ -4,14 +4,10 @@ BYOK Grid is a working codename for an open-source data-enrichment workspace:
 an editable grid whose columns can run formulas, APIs, LLMs, and reusable
 workflows with credentials supplied by each workspace.
 
-The project is intentionally not named after or affiliated with Clay. The core
-application is AGPL-3.0-only; the connector protocol and SDK are intended to be
-published separately under Apache-2.0.
-
 ## Current status
 
-This is an early architecture slice, not a production release. It currently
-includes:
+This is a release-candidate hardening build, not yet a stable production
+release. It currently includes:
 
 - email/password authentication and database-backed sessions;
 - a React Flow node editor with typed ports, structurally safe incomplete
@@ -281,6 +277,15 @@ ownership, workload isolation, and optional component boundaries.
 See [the workspace-purge ADR](docs/adr/0033-previewed-workspace-purge-and-cross-system-erasure.md)
 and [retention guide](docs/DATA_RETENTION.md) for confirmation, legal holds,
 receipts, analytics erasure, backups, and external-system boundaries.
+See [the backup and restore guide](docs/BACKUP_RESTORE.md) for verified online
+SQLite snapshots, safe new-file recovery, remote libSQL requirements, and
+restore-drill evidence.
+See [the release process](docs/RELEASING.md) and
+[release verification guide](docs/VERIFY_RELEASE.md) for version gates, image
+digests, generated digest-pinned Helm values, checksums, SBOM/provenance, and
+GitHub attestations.
+The current pass/fail evidence and the remaining stable-release blockers are in
+[the production-readiness ledger](docs/PRODUCTION_READINESS.md).
 See [the recoverable schema lifecycle ADR](docs/adr/0019-recoverable-schema-lifecycle.md)
 for preview recomputation, integration blockers, audit events, restoration, and
 the boundary between archival and physical erasure.
@@ -339,6 +344,7 @@ npm test
 npm run test:connector-runner
 npm run build
 npm run helm:verify
+npm run release:verify-version
 npm run pack:connector-sdk
 npm audit
 npm run benchmark:grid

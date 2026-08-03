@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { loadEnvFile } from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { parseMasterKey } from '@byok-grid/security';
 import { z } from 'zod';
 
 const rootEnvFile = resolve(
@@ -45,9 +46,19 @@ export const workflowWorkerConfig = z
       (value) => (value === '' ? undefined : value),
       z.url().optional()
     ),
+    HATCHET_CLIENT_API_URL: z.url(),
     HATCHET_CLIENT_HOST_PORT: z.string().min(1),
     HATCHET_CLIENT_TLS_STRATEGY: z.enum(['none', 'tls']).default('none'),
     HATCHET_CLIENT_TOKEN: z.string().min(1),
+    HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED: z
+      .enum(['true', 'false'])
+      .default('true'),
+    HATCHET_CLIENT_WORKER_HEALTHCHECK_PORT: z.coerce
+      .number()
+      .int()
+      .min(1024)
+      .max(65_535)
+      .default(8001),
     SQLITE_AUTH_TOKEN: optionalSecret,
     SQLITE_DATABASE_URL: z
       .string()
@@ -69,6 +80,17 @@ export const workflowWorkerConfig = z
       .default(1_000),
   })
   .superRefine((value, context) => {
+    try {
+      parseMasterKey(value.BYOK_GRID_MASTER_KEY_ID, value.BYOK_GRID_MASTER_KEY);
+    } catch {
+      context.addIssue({
+        code: 'custom',
+        message:
+          'The master key must be exactly 32 bytes of canonical base64 and its ID must not be empty.',
+        path: ['BYOK_GRID_MASTER_KEY'],
+      });
+    }
+
     if (
       Boolean(value.CONNECTOR_RUNNER_SHARED_SECRET) !==
       Boolean(value.CONNECTOR_RUNNER_URL)

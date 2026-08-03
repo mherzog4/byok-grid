@@ -2,7 +2,7 @@ name: byok-grid
 
 services:
   hatchet-postgres:
-    image: postgres:17-alpine
+    image: postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
     restart: unless-stopped
     environment:
       POSTGRES_DB: hatchet
@@ -21,7 +21,7 @@ services:
   hatchet:
     # Auth is compiled out of this image for local development only. Production
     # deployments must use Hatchet's authenticated image and a pinned release.
-    image: ghcr.io/hatchet-dev/hatchet/hatchet-lite-dev:latest
+    image: ghcr.io/hatchet-dev/hatchet/hatchet-lite-dev:latest@sha256:f635468ff0dfa35bfca55cdd777b9be6ec516a15d9f589a5a0c2ba8a655e639f
     restart: unless-stopped
     depends_on:
       hatchet-postgres:
@@ -48,12 +48,21 @@ services:
     build:
       context: .
       target: migration
-    command:
-      ['./node_modules/.bin/tsx', 'packages/db/src/sqlite/migrate-cli.ts']
     environment:
       SQLITE_DATABASE_URL: file:/data/byok-grid.sqlite
     restart: 'no'
     volumes:
+      - sqlite_data:/data
+
+  sqlite-maintenance:
+    profiles: ['maintenance']
+    build:
+      context: .
+      target: maintenance
+    environment:
+      SQLITE_DATABASE_URL: file:/data/byok-grid.sqlite
+    volumes:
+      - ${BACKUP_HOST_PATH:-./backups}:/backups
       - sqlite_data:/data
 
   web:
@@ -61,14 +70,14 @@ services:
     build:
       context: .
       target: web
-      args:
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     depends_on:
       sqlite-migrate:
         condition: service_completed_successfully
     environment:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      BYOK_GRID_MASTER_KEY: ${BYOK_GRID_MASTER_KEY:-}
+      BYOK_GRID_MASTER_KEY_ID: ${BYOK_GRID_MASTER_KEY_ID:-local-v1}
       BYOK_GRID_ALLOW_UNSIGNED_CONNECTOR_REGISTRY: ${BYOK_GRID_ALLOW_UNSIGNED_CONNECTOR_REGISTRY:-false}
       BYOK_GRID_CONNECTOR_REGISTRY_PATH: ${BYOK_GRID_CONNECTOR_REGISTRY_PATH:-}
       BYOK_GRID_CONNECTOR_REGISTRY_SIGNATURE_PATH: ${BYOK_GRID_CONNECTOR_REGISTRY_SIGNATURE_PATH:-}
@@ -103,13 +112,28 @@ services:
       BYOK_GRID_CONNECTOR_TRUST_KEYS: '${BYOK_GRID_CONNECTOR_TRUST_KEYS:-{"byok_grid_reference_2026":"d30d04cc80d66bff277650ce03561ed543a321921199f48de5c20355bb213e86"}}'
       CONNECTOR_RUNNER_SHARED_SECRET: ${CONNECTOR_RUNNER_SHARED_SECRET:-}
       CONNECTOR_RUNNER_URL: ${CONNECTOR_RUNNER_URL:-}
+      HATCHET_CLIENT_API_URL: http://hatchet:8888
       HATCHET_CLIENT_HOST_PORT: hatchet:7077
       HATCHET_CLIENT_TLS_STRATEGY: none
       HATCHET_CLIENT_TOKEN: ${HATCHET_CLIENT_TOKEN:-}
+      HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED: 'true'
+      HATCHET_CLIENT_WORKER_HEALTHCHECK_PORT: '8001'
       SQLITE_DATABASE_URL: file:/data/byok-grid.sqlite
       WORKFLOW_DISPATCH_POLL_MS: ${WORKFLOW_DISPATCH_POLL_MS:-1000}
       SOURCE_SCHEDULER_POLL_SECONDS: ${SOURCE_SCHEDULER_POLL_SECONDS:-30}
     restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:8001/health').then(async (response) => { const body = await response.json(); if (body.status !== 'HEALTHY') process.exit(1) }).catch(() => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
     networks:
       - default
       - connector_rpc

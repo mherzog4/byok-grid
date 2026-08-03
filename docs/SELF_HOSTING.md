@@ -34,6 +34,23 @@ Use `npm run self-host:down` to stop the profile. Named SQLite, Hatchet
 PostgreSQL, and Hatchet configuration volumes are retained. Removing volumes is
 a separate destructive operation and is intentionally not part of that script.
 
+### Local graceful-drain drill
+
+After the web and worker are healthy, run:
+
+```text
+npm run drill:workflow-drain
+```
+
+The command builds a disposable E2E image, creates a synthetic 500-row,
+100-node workflow in the shared local SQLite database, waits for a persisted
+running step, sends `SIGTERM` to the worker with its 90-second grace period,
+and requires the complete workflow to succeed. It verifies a clean container
+exit and Hatchet drain logs, cleans the synthetic workspace, restarts the
+worker, and waits for health. Do not run this disruptive drill against a
+production deployment; repeat its signal and recovery procedure through that
+environment's approved rollout tooling instead.
+
 ## Images
 
 Build either runtime directly from the repository root:
@@ -42,6 +59,7 @@ Build either runtime directly from the repository root:
 docker build --target web -t byok-grid-web .
 docker build --target workflow-worker -t byok-grid-workflow-worker .
 docker build --target migration -t byok-grid-migration .
+docker build --target maintenance -t byok-grid-maintenance .
 docker build --target connector-runner -t byok-grid-connector-runner .
 ```
 
@@ -49,15 +67,18 @@ The Dockerfile uses a digest-pinned Node 24.14 image, the repository-declared
 npm 11.17 installer, and `npm ci` against the committed lockfile. The web
 runtime consumes Next.js standalone output instead of a complete monorepo
 dependency tree. The worker deliberately retains the TypeScript workspace
-sources and production `tsx` runtime because those package exports currently
-point to source. The separately publishable connector SDK is compiled in an
+sources and production `tsx` loader because those package exports currently
+point to source. Runtime images invoke `node --import tsx` so the application,
+not a launcher, is container PID 1 and receives termination signals directly.
+The separately publishable connector SDK is compiled in an
 explicit clean stage and shared by both builds; host-generated `dist` files are
 excluded from the build context. Moving to a bundled worker is a future image-
 size optimization that must preserve connector loading and source maps. The
 workflow-worker target runs portable visual graphs and every background
-integration from the shared SQLite store. It does receive the
-deployment master key so credential-bearing nodes can decrypt secrets only at
-execution time; Hatchet receives delivery and run identifiers, never those
+integration from the shared SQLite store. The web and workflow-worker runtimes
+receive the same deployment master key: the web control plane encrypts
+credentials when they are saved, and credential-bearing nodes decrypt them only
+at execution time. Hatchet receives delivery and run identifiers, never those
 secrets. When community connectors are enabled, the workflow worker also needs
 the signed registry mount plus the connector-runner URL and shared RPC secret.
 The runner remains isolated from SQLite and workspace encryption keys.
@@ -65,10 +86,10 @@ The same workflow-worker process schedules and executes SQLite-owned HTTP and
 HubSpot sources. `SOURCE_SCHEDULER_POLL_SECONDS` controls the due-source scan
 interval; source credentials and encrypted page cursors never enter Hatchet.
 
-`NEXT_PUBLIC_APP_URL` is a public build argument because Next.js may embed
-`NEXT_PUBLIC_*` values in browser assets. Database URLs, auth secrets, provider
-keys, encryption keys, and Hatchet tokens are runtime values and must never be
-passed as image build arguments.
+The web UI uses same-origin requests, so the image contains no operator URL.
+Set the canonical runtime origin through `BETTER_AUTH_URL`. Database URLs, auth
+secrets, provider keys, encryption keys, Hatchet tokens, and operator origins
+must never be passed as image build arguments.
 
 ## Production boundary
 
@@ -91,11 +112,16 @@ defaults:
   procedures tested before accepting
   customer data.
 
+Use the repository's verified online-backup and new-file restore workflow in
+[the backup and restore guide](BACKUP_RESTORE.md). A copied SQLite file or an
+untested provider snapshot is not sufficient recovery evidence.
+
 Run SQLite migrations as a one-shot release job with `SQLITE_DATABASE_URL` and,
 for remote libSQL, `SQLITE_AUTH_TOKEN`. The web container needs those values,
-`BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL`. The workflow worker needs the same
-SQLite settings plus Hatchet client settings and BYOK encryption-key values.
-No BYOK Grid runtime needs PostgreSQL credentials.
+`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BYOK_GRID_MASTER_KEY`, and
+`BYOK_GRID_MASTER_KEY_ID`. The workflow worker needs the same SQLite and BYOK
+encryption-key settings plus Hatchet client settings. No BYOK Grid runtime needs
+PostgreSQL credentials.
 
 Set `AUTOMATIC_RUN_MAX_PER_ROW_CHANGE` and
 `AUTOMATIC_WRITEBACK_MAX_PER_ROW_CHANGE` conservatively for the deployment.
@@ -138,11 +164,21 @@ web, worker, and runner. During planned dual-signature rotation, workspace
 publisher revocation blocks execution only after every verified co-signer is
 revoked; an artifact block is the immediate exact-code kill switch.
 
-The image health check proves the Next.js server can open a fully migrated
-SQLite database; it does
-not prove Hatchet availability, provider reachability, or that background work
-is draining. Production monitoring must cover queued-work age, workflow failure
-rate, database saturation, and provider error/limit rates separately.
+Set both `HATCHET_CLIENT_HOST_PORT` for gRPC task dispatch and
+`HATCHET_CLIENT_API_URL` for REST lifecycle operations. Do not rely on the API
+URL embedded in a token: it may name `localhost` from the machine where the
+token was minted, which prevents a containerized worker from pausing itself
+during a graceful drain.
+
+The web image health check proves runtime configuration is valid and the Next.js
+server can open a fully migrated SQLite database. The worker profile parses
+Hatchet's native health status and performs a graceful drain on termination.
+Neither check proves provider reachability or that queue age is within its SLO.
+Production monitoring must cover queued-work age, workflow failure rate,
+database saturation, and provider error/limit rates separately.
+The worker's health port also serves Prometheus metrics at `/metrics`; it
+contains process and worker-capacity data, not application authorization, and
+must remain on a trusted monitoring network rather than a public ingress.
 
 ## Production Kubernetes
 

@@ -1,4 +1,5 @@
 export * from './analytics';
+export * from './backup';
 export * from './bulk-runs';
 export * from './cell-values';
 export * from './client';
@@ -15,6 +16,7 @@ export * from './grid-views';
 export * from './imports';
 export * from './ingestion';
 export * from './migrate';
+export * from './migration-status';
 export * from './outbox';
 export * from './row-automations';
 export * from './row-mutations';
