@@ -1,0 +1,67 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "byok-grid.fullname" . }}-migrate-{{ .Release.Revision }}
+  labels:
+    {{- include "byok-grid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migration
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: '-10'
+    # Retain the latest result for release debugging; the next release removes it.
+    # TODO(operator): add hook-succeeded if clean namespaces matter more than audit visibility.
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  backoffLimit: {{ .Values.migration.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.migration.activeDeadlineSeconds }}
+  ttlSecondsAfterFinished: {{ .Values.migration.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      labels:
+        {{- include "byok-grid.selectorLabels" (dict "root" . "component" "migration") | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      {{- with .Values.migration.serviceAccountName }}
+      serviceAccountName: {{ . }}
+      {{- end }}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: migrate
+          image: {{ include "byok-grid.image" (list . "migration") | quote }}
+          imagePullPolicy: {{ .Values.migration.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          env:
+            - name: SQLITE_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "byok-grid.secretName" . }}
+                  key: {{ .Values.secrets.keys.sqliteDatabaseUrl }}
+            - name: SQLITE_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "byok-grid.secretName" . }}
+                  key: {{ .Values.secrets.keys.sqliteAuthToken }}
+                  optional: true
+          resources:
+            {{- toYaml .Values.migration.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

@@ -1,0 +1,24 @@
+{
+  "name": "@byok-grid/connectors",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./http": "./src/http.ts",
+    "./hunter": "./src/hunter.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@byok-grid/connector-sdk": "*",
+    "ajv": "8.20.0",
+    "undici": "8.9.0",
+    "zod": "4.4.3"
+  }
+}

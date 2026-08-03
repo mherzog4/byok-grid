@@ -1,0 +1,47 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "SQLITE_AUTH_TOKEN",
+    "SQLITE_DATABASE_URL",
+    "NEXT_PUBLIC_APP_URL"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "dependsOn": ["^build"],
+      "env": [
+        "BYOK_GRID_MASTER_KEY",
+        "BYOK_GRID_MASTER_KEY_ID",
+        "HATCHET_CLIENT_HOST_PORT",
+        "HATCHET_CLIENT_TLS_STRATEGY",
+        "HATCHET_CLIENT_TOKEN"
+      ],
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build", "^lint"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "env": [
+        "RLS_DATABASE_URL",
+        "RLS_WORKER_DATABASE_URL",
+        "RUN_NETWORK_E2E",
+        "RUN_WEB_E2E",
+        "TEST_APP_URL",
+        "TEST_DATABASE_URL",
+        "TEST_SQLITE_DATABASE_URL"
+      ],
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": ["^build", "^typecheck"]
+    }
+  }
+}

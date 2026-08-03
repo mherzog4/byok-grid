@@ -1,0 +1,10 @@
+.data
+.next
+apps/web/next-env.d.ts
+coverage
+dist
+deploy/helm/byok-grid/templates
+node_modules
+package-lock.json
+packages/db/migrations/meta
+packages/db/sqlite-migrations/meta

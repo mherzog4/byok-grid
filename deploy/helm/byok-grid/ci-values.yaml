@@ -1,0 +1,33 @@
+app:
+  publicUrl: https://grid.test.example
+secrets:
+  existingSecret: ''
+  create: true
+  values:
+    sqliteDatabaseUrl: libsql://byok-grid-ci.example.turso.io
+    sqliteAuthToken: ci-only-libsql-token
+    betterAuthSecret: ci-only-better-auth-secret-000000000
+    masterKey: Y2ktb25seS1mb3ItdGVtcGxhdGUtcmVuZGVyaW5n
+    hatchetClientToken: ci-only-token
+    connectorRunnerSharedSecret: ci-only-runner-secret-0000000000000000
+    clickhousePassword: ci-only-clickhouse-password
+connectorRunner:
+  enabled: true
+  existingClaim: reviewed-connector-registry
+  trustKeys: '{"ci":"0000000000000000000000000000000000000000000000000000000000000000"}'
+analyticsProjector:
+  enabled: true
+  clickhouse:
+    url: https://clickhouse.test.example
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: grid.test.example
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: grid-test-tls
+      hosts:
+        - grid.test.example

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "byok-grid.fullname" . }}-config
+  labels:
+    {{- include "byok-grid.labels" . | nindent 4 }}
+data:
+  BETTER_AUTH_URL: {{ .Values.app.publicUrl | quote }}
+  NEXT_PUBLIC_APP_URL: {{ .Values.app.publicUrl | quote }}
+  BYOK_GRID_MASTER_KEY_ID: {{ .Values.worker.masterKeyId | default "v1" | quote }}
+  HATCHET_CLIENT_HOST_PORT: {{ .Values.worker.hatchet.hostPort | quote }}
+  HATCHET_CLIENT_TLS_STRATEGY: {{ .Values.worker.hatchet.tlsStrategy | quote }}
+  BULK_RUN_MAX_ROWS: {{ .Values.web.bulkRunLimits.maxRows | quote }}
+  BULK_RUN_MAX_PROVIDER_REQUESTS: {{ .Values.web.bulkRunLimits.maxProviderRequests | quote }}
+  BULK_RUN_MAX_OUTPUT_TOKENS: {{ .Values.web.bulkRunLimits.maxOutputTokens | quote }}
+  BULK_RUN_EXPANSION_CHUNK_SIZE: {{ .Values.worker.limits.bulkRunExpansionChunkSize | quote }}
+  AUTOMATIC_RUN_MAX_PER_ROW_CHANGE: {{ .Values.worker.limits.automaticRunMaxPerRowChange | quote }}
+  AUTOMATIC_WRITEBACK_MAX_PER_ROW_CHANGE: {{ .Values.worker.limits.automaticWritebackMaxPerRowChange | quote }}
+  SOURCE_SCHEDULER_POLL_SECONDS: {{ .Values.worker.limits.sourceSchedulerPollSeconds | quote }}
+  WORKFLOW_DISPATCH_POLL_MS: {{ .Values.worker.limits.workflowDispatchPollMs | quote }}
+  {{- if .Values.connectorRunner.enabled }}
+  BYOK_GRID_CONNECTOR_REGISTRY_PATH: {{ .Values.connectorRunner.registryPath | quote }}
+  BYOK_GRID_CONNECTOR_REGISTRY_SIGNATURE_PATH: {{ .Values.connectorRunner.registrySignaturePath | quote }}
+  BYOK_GRID_CONNECTOR_TRUST_KEYS: {{ .Values.connectorRunner.trustKeys | quote }}
+  BYOK_GRID_ALLOW_UNSIGNED_CONNECTOR_REGISTRY: 'false'
+  CONNECTOR_RUNNER_URL: {{ printf "http://%s-connector-runner:%v" (include "byok-grid.fullname" .) .Values.connectorRunner.service.port | quote }}
+  {{- end }}

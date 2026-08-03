@@ -1,0 +1,174 @@
+nameOverride: ''
+fullnameOverride: ''
+
+imagePullSecrets: []
+
+app:
+  # Must match the NEXT_PUBLIC_APP_URL used when the web image was built.
+  publicUrl: https://byok-grid.example.com
+
+secrets:
+  # Production operators should provision this Secret from their secret manager.
+  existingSecret: byok-grid-secrets
+  create: false
+  values:
+    sqliteDatabaseUrl: ''
+    sqliteAuthToken: ''
+    betterAuthSecret: ''
+    masterKey: ''
+    hatchetClientToken: ''
+    connectorRunnerSharedSecret: ''
+    clickhousePassword: ''
+  keys:
+    sqliteDatabaseUrl: sqlite-database-url
+    sqliteAuthToken: sqlite-auth-token
+    betterAuthSecret: better-auth-secret
+    masterKey: byok-grid-master-key
+    hatchetClientToken: hatchet-client-token
+    connectorRunnerSharedSecret: connector-runner-shared-secret
+    clickhousePassword: clickhouse-password
+
+serviceAccount:
+  create: true
+  annotations: {}
+  webName: ''
+  workerName: ''
+  connectorRunnerName: ''
+  analyticsProjectorName: ''
+
+web:
+  replicaCount: 2
+  image:
+    repository: ghcr.io/byok-grid/byok-grid-web
+    pullPolicy: IfNotPresent
+    tag: ''
+  service:
+    type: ClusterIP
+    port: 80
+  podAnnotations: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 768Mi
+  bulkRunLimits:
+    maxRows: 500
+    maxProviderRequests: 1000
+    maxOutputTokens: 500000
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+worker:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/byok-grid/byok-grid-workflow-worker
+    pullPolicy: IfNotPresent
+    tag: ''
+  podAnnotations: {}
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+  hatchet:
+    hostPort: hatchet-grpc.hatchet.svc.cluster.local:7077
+    tlsStrategy: tls
+  limits:
+    bulkRunExpansionChunkSize: 50
+    automaticRunMaxPerRowChange: 10
+    automaticWritebackMaxPerRowChange: 5
+    sourceSchedulerPollSeconds: 15
+    workflowDispatchPollMs: 1000
+
+migration:
+  # If set, this ServiceAccount must exist before Helm runs pre-install hooks.
+  serviceAccountName: ''
+  image:
+    repository: ghcr.io/byok-grid/byok-grid-migration
+    pullPolicy: IfNotPresent
+    tag: ''
+  backoffLimit: 2
+  activeDeadlineSeconds: 900
+  ttlSecondsAfterFinished: 86400
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+connectorRunner:
+  enabled: false
+  image:
+    repository: ghcr.io/byok-grid/byok-grid-connector-runner
+    pullPolicy: IfNotPresent
+    tag: ''
+  existingClaim: ''
+  registryPath: /connectors/registry.json
+  registrySignaturePath: /connectors/registry.sig
+  trustKeys: '{}'
+  allowUnsignedRegistry: false
+  fuel: '10000000'
+  memoryBytes: '16777216'
+  service:
+    port: 4319
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: '1'
+      memory: 256Mi
+
+analyticsProjector:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: ghcr.io/byok-grid/byok-grid-analytics-projector
+    pullPolicy: IfNotPresent
+    tag: ''
+  clickhouse:
+    url: https://clickhouse.example.com
+    database: byok_grid_analytics
+    table: events
+    username: projector
+    allowInsecureHttp: false
+  projection:
+    batchSize: 100
+    leaseSeconds: 300
+    pollSeconds: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+ingress:
+  enabled: false
+  className: ''
+  annotations: {}
+  hosts:
+    - host: byok-grid.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+networkPolicy:
+  # This generic policy isolates the optional runner. Provider egress policy is
+  # cluster/CNI-specific and must be added by the operator.
+  enabled: true
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []

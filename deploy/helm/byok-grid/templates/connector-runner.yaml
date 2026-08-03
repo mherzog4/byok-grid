@@ -1,0 +1,129 @@
+{{- if .Values.connectorRunner.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "byok-grid.fullname" . }}-connector-runner
+  labels:
+    {{- include "byok-grid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: connector-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "byok-grid.selectorLabels" (dict "root" . "component" "connector-runner") | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.secrets.create }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
+      labels:
+        {{- include "byok-grid.selectorLabels" (dict "root" . "component" "connector-runner") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "byok-grid.serviceAccountName" (list . "connectorRunner") }}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: connector-runner
+          image: {{ include "byok-grid.image" (list . "connectorRunner") | quote }}
+          imagePullPolicy: {{ .Values.connectorRunner.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          env:
+            - name: CONNECTOR_RUNNER_LISTEN
+              value: 0.0.0.0:4319
+            - name: CONNECTOR_RUNNER_REGISTRY_PATH
+              value: {{ .Values.connectorRunner.registryPath | quote }}
+            - name: CONNECTOR_RUNNER_REGISTRY_SIGNATURE_PATH
+              value: {{ .Values.connectorRunner.registrySignaturePath | quote }}
+            - name: CONNECTOR_RUNNER_TRUST_KEYS
+              value: {{ .Values.connectorRunner.trustKeys | quote }}
+            - name: CONNECTOR_RUNNER_ALLOW_UNSIGNED_REGISTRY
+              value: 'false'
+            - name: CONNECTOR_RUNNER_FUEL
+              value: {{ .Values.connectorRunner.fuel | quote }}
+            - name: CONNECTOR_RUNNER_MEMORY_BYTES
+              value: {{ .Values.connectorRunner.memoryBytes | quote }}
+            - name: CONNECTOR_RUNNER_SHARED_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "byok-grid.secretName" . }}
+                  key: {{ .Values.secrets.keys.connectorRunnerSharedSecret }}
+          ports:
+            - name: http
+              containerPort: 4319
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.connectorRunner.resources | nindent 12 }}
+          volumeMounts:
+            - name: connector-registry
+              mountPath: /connectors
+              readOnly: true
+      volumes:
+        - name: connector-registry
+          persistentVolumeClaim:
+            claimName: {{ .Values.connectorRunner.existingClaim }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "byok-grid.fullname" . }}-connector-runner
+  labels:
+    {{- include "byok-grid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: connector-runner
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ .Values.connectorRunner.service.port }}
+      targetPort: http
+  selector:
+    {{- include "byok-grid.selectorLabels" (dict "root" . "component" "connector-runner") | nindent 4 }}
+{{- if .Values.networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "byok-grid.fullname" . }}-connector-runner
+  labels:
+    {{- include "byok-grid.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "byok-grid.selectorLabels" (dict "root" . "component" "connector-runner") | nindent 6 }}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "byok-grid.selectorLabels" (dict "root" . "component" "worker") | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 4319
+  egress: []
+{{- end }}
+{{- end }}

@@ -1,0 +1,2 @@
+ALTER TABLE "schema_lifecycle_events" DROP CONSTRAINT "schema_lifecycle_events_valid_action";--> statement-breakpoint
+ALTER TABLE "schema_lifecycle_events" ADD CONSTRAINT "schema_lifecycle_events_valid_action" CHECK ("schema_lifecycle_events"."action" in ('column_archived', 'column_restored', 'column_type_converted', 'table_archived', 'table_restored'));

@@ -1,0 +1,9 @@
+apiVersion: v2
+name: byok-grid
+description: Vendor-neutral Kubernetes deployment for the open-source BYOK Grid control plane and workers
+type: application
+version: 0.1.0
+appVersion: 0.0.0
+annotations:
+  artifacthub.io/license: AGPL-3.0-only
+  artifacthub.io/prerelease: 'true'

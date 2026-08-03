@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "app",
+    "secrets",
+    "web",
+    "worker",
+    "migration",
+    "connectorRunner",
+    "analyticsProjector"
+  ],
+  "properties": {
+    "app": {
+      "type": "object",
+      "required": ["publicUrl"],
+      "properties": {
+        "publicUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        }
+      }
+    },
+    "secrets": {
+      "type": "object",
+      "required": ["existingSecret", "create", "values", "keys"],
+      "properties": {
+        "existingSecret": { "type": "string" },
+        "create": { "type": "boolean" },
+        "values": {
+          "type": "object",
+          "properties": {
+            "sqliteDatabaseUrl": { "type": "string" },
+            "sqliteAuthToken": { "type": "string" },
+            "betterAuthSecret": { "type": "string" },
+            "masterKey": { "type": "string" },
+            "hatchetClientToken": { "type": "string" },
+            "connectorRunnerSharedSecret": { "type": "string" },
+            "clickhousePassword": { "type": "string" }
+          }
+        },
+        "keys": { "type": "object" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "create": { "const": false } } },
+          "then": { "properties": { "existingSecret": { "minLength": 1 } } }
+        },
+        {
+          "if": { "properties": { "create": { "const": true } } },
+          "then": {
+            "properties": {
+              "values": {
+                "required": [
+                  "sqliteDatabaseUrl",
+                  "betterAuthSecret",
+                  "masterKey",
+                  "hatchetClientToken"
+                ],
+                "properties": {
+                  "sqliteDatabaseUrl": {
+                    "minLength": 1,
+                    "pattern": "^libsql://"
+                  },
+                  "betterAuthSecret": { "minLength": 32 },
+                  "masterKey": { "minLength": 1 },
+                  "hatchetClientToken": { "minLength": 1 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "web": { "$ref": "#/definitions/workload" },
+    "worker": { "$ref": "#/definitions/workload" },
+    "migration": { "$ref": "#/definitions/imageWorkload" },
+    "connectorRunner": {
+      "allOf": [
+        { "$ref": "#/definitions/imageWorkload" },
+        {
+          "type": "object",
+          "required": ["enabled", "existingClaim", "allowUnsignedRegistry"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "existingClaim": { "type": "string" },
+            "allowUnsignedRegistry": { "const": false }
+          },
+          "if": { "properties": { "enabled": { "const": true } } },
+          "then": { "properties": { "existingClaim": { "minLength": 1 } } }
+        }
+      ]
+    },
+    "analyticsProjector": {
+      "allOf": [
+        { "$ref": "#/definitions/imageWorkload" },
+        {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "clickhouse": {
+              "type": "object",
+              "properties": {
+                "url": { "type": "string", "format": "uri" },
+                "allowInsecureHttp": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ingress": { "type": "object" },
+    "networkPolicy": { "type": "object" },
+    "serviceAccount": { "type": "object" },
+    "imagePullSecrets": { "type": "array" },
+    "nodeSelector": { "type": "object" },
+    "tolerations": { "type": "array" },
+    "affinity": { "type": "object" },
+    "topologySpreadConstraints": { "type": "array" },
+    "nameOverride": { "type": "string" },
+    "fullnameOverride": { "type": "string" }
+  },
+  "definitions": {
+    "image": {
+      "type": "object",
+      "required": ["repository", "pullPolicy", "tag"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "pullPolicy": { "enum": ["Always", "IfNotPresent", "Never"] },
+        "tag": { "type": "string" }
+      }
+    },
+    "imageWorkload": {
+      "type": "object",
+      "required": ["image"],
+      "properties": { "image": { "$ref": "#/definitions/image" } }
+    },
+    "workload": {
+      "allOf": [
+        { "$ref": "#/definitions/imageWorkload" },
+        {
+          "type": "object",
+          "required": ["replicaCount", "resources"],
+          "properties": {
+            "replicaCount": { "type": "integer", "minimum": 1 },
+            "resources": { "type": "object" }
+          }
+        }
+      ]
+    }
+  }
+}

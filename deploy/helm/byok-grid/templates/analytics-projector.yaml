@@ -1,0 +1,86 @@
+{{- if .Values.analyticsProjector.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "byok-grid.fullname" . }}-analytics-projector
+  labels:
+    {{- include "byok-grid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: analytics-projector
+spec:
+  replicas: {{ .Values.analyticsProjector.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "byok-grid.selectorLabels" (dict "root" . "component" "analytics-projector") | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- if .Values.secrets.create }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
+      labels:
+        {{- include "byok-grid.selectorLabels" (dict "root" . "component" "analytics-projector") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "byok-grid.serviceAccountName" (list . "analyticsProjector") }}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: analytics-projector
+          image: {{ include "byok-grid.image" (list . "analyticsProjector") | quote }}
+          imagePullPolicy: {{ .Values.analyticsProjector.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          env:
+            - name: SQLITE_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "byok-grid.secretName" . }}
+                  key: {{ .Values.secrets.keys.sqliteDatabaseUrl }}
+            - name: SQLITE_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "byok-grid.secretName" . }}
+                  key: {{ .Values.secrets.keys.sqliteAuthToken }}
+                  optional: true
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "byok-grid.secretName" . }}
+                  key: {{ .Values.secrets.keys.clickhousePassword }}
+            - name: CLICKHOUSE_URL
+              value: {{ .Values.analyticsProjector.clickhouse.url | quote }}
+            - name: CLICKHOUSE_DATABASE
+              value: {{ .Values.analyticsProjector.clickhouse.database | quote }}
+            - name: CLICKHOUSE_TABLE
+              value: {{ .Values.analyticsProjector.clickhouse.table | quote }}
+            - name: CLICKHOUSE_USERNAME
+              value: {{ .Values.analyticsProjector.clickhouse.username | quote }}
+            - name: CLICKHOUSE_ALLOW_INSECURE_HTTP
+              value: {{ .Values.analyticsProjector.clickhouse.allowInsecureHttp | quote }}
+            - name: ANALYTICS_PROJECTION_BATCH_SIZE
+              value: {{ .Values.analyticsProjector.projection.batchSize | quote }}
+            - name: ANALYTICS_PROJECTION_LEASE_SECONDS
+              value: {{ .Values.analyticsProjector.projection.leaseSeconds | quote }}
+            - name: ANALYTICS_PROJECTION_POLL_SECONDS
+              value: {{ .Values.analyticsProjector.projection.pollSeconds | quote }}
+          resources:
+            {{- toYaml .Values.analyticsProjector.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+{{- end }}

@@ -1,0 +1,66 @@
+{
+  "connectors": [
+    {
+      "artifact": {
+        "path": "./reference.wat",
+        "sha256": "7cd4d2130e21799ad083aea167e8da260345d550ab4d9ff3637a2d281c62fc0e"
+      },
+      "catalog": true,
+      "credentialForm": null,
+      "manifest": {
+        "actions": [
+          {
+            "cellOutput": {
+              "path": ["runtime"],
+              "valueType": "text"
+            },
+            "description": "Prove that a digest-pinned module runs without host imports.",
+            "hostPolicy": {
+              "hosts": ["example.com"],
+              "kind": "fixed"
+            },
+            "id": "verify_isolation",
+            "inputFields": [
+              {
+                "description": "A grid value used to demonstrate a column binding.",
+                "key": "value",
+                "label": "Grid value",
+                "required": true,
+                "source": "column"
+              }
+            ],
+            "inputSchema": {
+              "additionalProperties": false,
+              "properties": { "value": {} },
+              "required": ["value"],
+              "type": "object"
+            },
+            "name": "Verify isolation",
+            "outputSchema": {
+              "additionalProperties": false,
+              "properties": {
+                "isolation": { "type": "string" },
+                "runtime": { "type": "string" }
+              },
+              "required": ["isolation", "runtime"],
+              "type": "object"
+            }
+          }
+        ],
+        "category": "data",
+        "credentialName": "No credential",
+        "credentialRequired": false,
+        "credentialSchema": {
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "description": "Minimal capability-free connector for validating a self-hosted runner.",
+        "displayName": "Sandbox reference",
+        "documentationUrl": "https://github.com/byok-grid/byok-grid/tree/main/examples/connectors/reference",
+        "id": "community_reference",
+        "protocolVersion": "1.1",
+        "version": "1.0.0"
+      }
+    }
+  ]
+}

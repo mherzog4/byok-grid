@@ -1,0 +1,3 @@
+ALTER TABLE "bulk_run_batches" ADD COLUMN "selection_snapshot" jsonb DEFAULT '{"kind":"all_rows"}'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "bulk_run_batches" ADD COLUMN "selection_digest" text DEFAULT '0000000000000000000000000000000000000000000000000000000000000000' NOT NULL;--> statement-breakpoint
+ALTER TABLE "bulk_run_batches" ADD CONSTRAINT "bulk_run_batches_selection_shape" CHECK (jsonb_typeof("bulk_run_batches"."selection_snapshot") = 'object' and "bulk_run_batches"."selection_digest" ~ '^[0-9a-f]{64}$');

@@ -1,0 +1,65 @@
+{
+  "name": "byok-grid",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Open-source, BYOK data enrichment workflows in a collaborative grid.",
+  "license": "AGPL-3.0-only",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "benchmark:grid": "npm run benchmark:grid --workspace=@byok-grid/db",
+    "build": "turbo run build",
+    "connector:keygen": "tsx packages/connectors/src/registry-signing-cli.ts keygen",
+    "connector:sign-registry": "tsx packages/connectors/src/registry-signing-cli.ts sign",
+    "db:generate": "npm run db:sqlite:generate --workspace=@byok-grid/db",
+    "db:migrate": "npm run db:sqlite:migrate --workspace=@byok-grid/db",
+    "db:postgres:generate": "npm run db:generate --workspace=@byok-grid/db",
+    "db:postgres:migrate": "npm run db:migrate --workspace=@byok-grid/db",
+    "db:sqlite:generate": "npm run db:sqlite:generate --workspace=@byok-grid/db",
+    "db:sqlite:migrate": "npm run db:sqlite:migrate --workspace=@byok-grid/db",
+    "dev": "npm run dev --workspace=@byok-grid/web",
+    "dev:all": "turbo run dev",
+    "dev:workflows": "turbo run dev --filter=@byok-grid/web --filter=@byok-grid/workflow-worker",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "helm:verify": "./scripts/verify-helm-chart.sh",
+    "infra:down": "docker compose down",
+    "infra:up": "docker compose up -d",
+    "self-host:down": "docker compose --profile app down",
+    "self-host:up": "docker compose --profile app up --build -d",
+    "lint": "turbo run lint",
+    "lint:connector-runner": "cargo clippy --locked --all-targets -- -D warnings",
+    "pack:connector-sdk": "npm pack --dry-run --json --workspace=@byok-grid/connector-sdk",
+    "test": "turbo run test",
+    "test:connector-runner": "cargo test --locked --package byok-grid-connector-runner",
+    "typecheck": "turbo run typecheck"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "npm@11.17.0",
+  "dependencies": {
+    "drizzle-orm": "0.45.2",
+    "postcss": "8.5.25",
+    "sharp": "0.35.3"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    },
+    "next@16.2.12": {
+      "postcss": "$postcss",
+      "sharp": "$sharp"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "26.1.2",
+    "prettier": "3.9.6",
+    "tsx": "4.23.1",
+    "turbo": "2.10.8",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}

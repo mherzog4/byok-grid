@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+: "${SQLITE_DATABASE_URL:?SQLITE_DATABASE_URL is required}"
+: "${BYOK_GRID_MASTER_KEY:?BYOK_GRID_MASTER_KEY is required}"
+: "${BYOK_GRID_MASTER_KEY_ID:?BYOK_GRID_MASTER_KEY_ID is required}"
+: "${HATCHET_CLIENT_TOKEN:?HATCHET_CLIENT_TOKEN is required}"
+: "${HATCHET_CLIENT_HOST_PORT:?HATCHET_CLIENT_HOST_PORT is required}"
+
+exec "$@"

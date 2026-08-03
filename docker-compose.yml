@@ -1,0 +1,197 @@
+name: byok-grid
+
+services:
+  hatchet-postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hatchet
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    ports:
+      - '55432:5432'
+    volumes:
+      - hatchet_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d hatchet']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  hatchet:
+    # Auth is compiled out of this image for local development only. Production
+    # deployments must use Hatchet's authenticated image and a pinned release.
+    image: ghcr.io/hatchet-dev/hatchet/hatchet-lite-dev:latest
+    restart: unless-stopped
+    depends_on:
+      hatchet-postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@hatchet-postgres:5432/hatchet?sslmode=disable
+      SERVER_AUTH_COOKIE_DOMAIN: localhost
+      SERVER_AUTH_COOKIE_INSECURE: 'true'
+      SERVER_GRPC_BIND_ADDRESS: 0.0.0.0
+      SERVER_GRPC_BROADCAST_ADDRESS: localhost:7077
+      SERVER_GRPC_INSECURE: 'true'
+      SERVER_GRPC_PORT: '7077'
+      SERVER_INTERNAL_CLIENT_INTERNAL_GRPC_BROADCAST_ADDRESS: localhost:7077
+      SERVER_MSGQUEUE_KIND: postgres
+      SERVER_URL: http://localhost:8888
+    ports:
+      - '7077:7077'
+      - '8888:8888'
+    volumes:
+      - hatchet_config:/config
+
+  sqlite-migrate:
+    profiles: ['app', 'analytics']
+    build:
+      context: .
+      target: migration
+    command:
+      ['./node_modules/.bin/tsx', 'packages/db/src/sqlite/migrate-cli.ts']
+    environment:
+      SQLITE_DATABASE_URL: file:/data/byok-grid.sqlite
+    restart: 'no'
+    volumes:
+      - sqlite_data:/data
+
+  web:
+    profiles: ['app']
+    build:
+      context: .
+      target: web
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    depends_on:
+      sqlite-migrate:
+        condition: service_completed_successfully
+    environment:
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      BYOK_GRID_ALLOW_UNSIGNED_CONNECTOR_REGISTRY: ${BYOK_GRID_ALLOW_UNSIGNED_CONNECTOR_REGISTRY:-false}
+      BYOK_GRID_CONNECTOR_REGISTRY_PATH: ${BYOK_GRID_CONNECTOR_REGISTRY_PATH:-}
+      BYOK_GRID_CONNECTOR_REGISTRY_SIGNATURE_PATH: ${BYOK_GRID_CONNECTOR_REGISTRY_SIGNATURE_PATH:-}
+      BYOK_GRID_CONNECTOR_TRUST_KEYS: '${BYOK_GRID_CONNECTOR_TRUST_KEYS:-{"byok_grid_reference_2026":"d30d04cc80d66bff277650ce03561ed543a321921199f48de5c20355bb213e86"}}'
+      SQLITE_DATABASE_URL: file:/data/byok-grid.sqlite
+    ports:
+      - '3000:3000'
+    restart: unless-stopped
+    volumes:
+      - ${CONNECTOR_REGISTRY_HOST_PATH:-./examples/connectors/reference}:/connectors:ro
+      - sqlite_data:/data
+
+  workflow-worker:
+    profiles: ['app']
+    build:
+      context: .
+      target: workflow-worker
+    depends_on:
+      hatchet:
+        condition: service_started
+      sqlite-migrate:
+        condition: service_completed_successfully
+    environment:
+      AUTOMATIC_RUN_MAX_PER_ROW_CHANGE: ${AUTOMATIC_RUN_MAX_PER_ROW_CHANGE:-10}
+      AUTOMATIC_WRITEBACK_MAX_PER_ROW_CHANGE: ${AUTOMATIC_WRITEBACK_MAX_PER_ROW_CHANGE:-5}
+      BULK_RUN_EXPANSION_CHUNK_SIZE: ${BULK_RUN_EXPANSION_CHUNK_SIZE:-50}
+      BYOK_GRID_MASTER_KEY: ${BYOK_GRID_MASTER_KEY:-}
+      BYOK_GRID_MASTER_KEY_ID: ${BYOK_GRID_MASTER_KEY_ID:-local-v1}
+      BYOK_GRID_ALLOW_UNSIGNED_CONNECTOR_REGISTRY: ${BYOK_GRID_ALLOW_UNSIGNED_CONNECTOR_REGISTRY:-false}
+      BYOK_GRID_CONNECTOR_REGISTRY_PATH: ${BYOK_GRID_CONNECTOR_REGISTRY_PATH:-}
+      BYOK_GRID_CONNECTOR_REGISTRY_SIGNATURE_PATH: ${BYOK_GRID_CONNECTOR_REGISTRY_SIGNATURE_PATH:-}
+      BYOK_GRID_CONNECTOR_TRUST_KEYS: '${BYOK_GRID_CONNECTOR_TRUST_KEYS:-{"byok_grid_reference_2026":"d30d04cc80d66bff277650ce03561ed543a321921199f48de5c20355bb213e86"}}'
+      CONNECTOR_RUNNER_SHARED_SECRET: ${CONNECTOR_RUNNER_SHARED_SECRET:-}
+      CONNECTOR_RUNNER_URL: ${CONNECTOR_RUNNER_URL:-}
+      HATCHET_CLIENT_HOST_PORT: hatchet:7077
+      HATCHET_CLIENT_TLS_STRATEGY: none
+      HATCHET_CLIENT_TOKEN: ${HATCHET_CLIENT_TOKEN:-}
+      SQLITE_DATABASE_URL: file:/data/byok-grid.sqlite
+      WORKFLOW_DISPATCH_POLL_MS: ${WORKFLOW_DISPATCH_POLL_MS:-1000}
+      SOURCE_SCHEDULER_POLL_SECONDS: ${SOURCE_SCHEDULER_POLL_SECONDS:-30}
+    restart: unless-stopped
+    networks:
+      - default
+      - connector_rpc
+    volumes:
+      - ${CONNECTOR_REGISTRY_HOST_PATH:-./examples/connectors/reference}:/connectors:ro
+      - sqlite_data:/data
+
+  connector-runner:
+    profiles: ['sandbox-connectors']
+    build:
+      context: .
+      target: connector-runner
+    cap_drop: ['ALL']
+    environment:
+      CONNECTOR_RUNNER_ALLOW_UNSIGNED_REGISTRY: ${CONNECTOR_RUNNER_ALLOW_UNSIGNED_REGISTRY:-false}
+      CONNECTOR_RUNNER_REGISTRY_PATH: /connectors/registry.json
+      CONNECTOR_RUNNER_REGISTRY_SIGNATURE_PATH: ${CONNECTOR_RUNNER_REGISTRY_SIGNATURE_PATH:-}
+      CONNECTOR_RUNNER_SHARED_SECRET: ${CONNECTOR_RUNNER_SHARED_SECRET:-}
+      CONNECTOR_RUNNER_TRUST_KEYS: '${CONNECTOR_RUNNER_TRUST_KEYS:-{"byok_grid_reference_2026":"d30d04cc80d66bff277650ce03561ed543a321921199f48de5c20355bb213e86"}}'
+    networks:
+      - connector_rpc
+    read_only: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ${CONNECTOR_REGISTRY_HOST_PATH:-./examples/connectors/reference}:/connectors:ro
+
+  clickhouse:
+    profiles: ['analytics']
+    image: clickhouse/clickhouse-server:26.3.12.3-alpine@sha256:5760feb32c82d55a525920bbe4b5fb354e37d4fb95859a56814191c43394fc6f
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DATABASE:-byok_grid_analytics}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: '1'
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse-local-only}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USERNAME:-projector}
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'clickhouse-client --user "$$CLICKHOUSE_USER" --password "$$CLICKHOUSE_PASSWORD" --query "SELECT 1"',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - '58123:8123'
+    restart: unless-stopped
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+
+  analytics-projector:
+    profiles: ['analytics']
+    build:
+      context: .
+      target: analytics-projector
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      sqlite-migrate:
+        condition: service_completed_successfully
+    environment:
+      ANALYTICS_PROJECTION_BATCH_SIZE: ${ANALYTICS_PROJECTION_BATCH_SIZE:-100}
+      ANALYTICS_PROJECTION_LEASE_SECONDS: ${ANALYTICS_PROJECTION_LEASE_SECONDS:-300}
+      ANALYTICS_PROJECTION_POLL_SECONDS: ${ANALYTICS_PROJECTION_POLL_SECONDS:-2}
+      CLICKHOUSE_ALLOW_INSECURE_HTTP: 'true'
+      CLICKHOUSE_DATABASE: ${CLICKHOUSE_DATABASE:-byok_grid_analytics}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse-local-only}
+      CLICKHOUSE_TABLE: ${CLICKHOUSE_TABLE:-events}
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_USERNAME: ${CLICKHOUSE_USERNAME:-projector}
+      SQLITE_DATABASE_URL: file:/data/byok-grid.sqlite
+    restart: unless-stopped
+    volumes:
+      - sqlite_data:/data
+
+networks:
+  connector_rpc:
+    internal: true
+
+volumes:
+  clickhouse_data:
+  hatchet_config:
+  hatchet_postgres_data:
+  sqlite_data:

@@ -1,0 +1,24 @@
+{
+  "name": "@byok-grid/workflow-worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "dev": "tsx watch src/index.ts",
+    "lint": "tsc --noEmit",
+    "start": "tsx src/index.ts",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@byok-grid/connectors": "*",
+    "@byok-grid/db": "*",
+    "@byok-grid/domain": "*",
+    "@byok-grid/security": "*",
+    "@hatchet-dev/typescript-sdk": "1.28.1",
+    "drizzle-orm": "0.45.2",
+    "tsx": "4.23.1",
+    "zod": "4.4.3"
+  }
+}

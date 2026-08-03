@@ -1,0 +1,2 @@
+CREATE INDEX "cells_boolean_sort_idx" ON "cells" USING btree ("column_id","value_boolean","row_id");--> statement-breakpoint
+CREATE INDEX "cells_status_filter_idx" ON "cells" USING btree ("column_id","status","row_id");

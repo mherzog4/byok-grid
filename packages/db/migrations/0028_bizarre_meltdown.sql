@@ -1,0 +1,10 @@
+ALTER TABLE "writeback_deliveries" ADD COLUMN "trigger_mode" "webhook_trigger_mode" DEFAULT 'manual' NOT NULL;--> statement-breakpoint
+ALTER TABLE "writeback_deliveries" ADD COLUMN "filter_tree_snapshot" jsonb;--> statement-breakpoint
+ALTER TABLE "writeback_deliveries" ADD COLUMN "payload_fingerprint" text;--> statement-breakpoint
+ALTER TABLE "writeback_destinations" ADD COLUMN "filter_tree" jsonb DEFAULT '{"children":[],"combinator":"and"}'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "writeback_destinations" ADD COLUMN "trigger_mode" "webhook_trigger_mode" DEFAULT 'manual' NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "writeback_deliveries_settlement_unique" ON "writeback_deliveries" USING btree ("destination_id","row_id","row_version") WHERE "writeback_deliveries"."trigger_mode" = 'row_settled';--> statement-breakpoint
+CREATE UNIQUE INDEX "writeback_deliveries_automatic_payload_unique" ON "writeback_deliveries" USING btree ("destination_id","row_id","payload_fingerprint") WHERE "writeback_deliveries"."trigger_mode" = 'row_settled';--> statement-breakpoint
+ALTER TABLE "writeback_deliveries" ADD CONSTRAINT "writeback_deliveries_valid_fingerprint" CHECK ("writeback_deliveries"."payload_fingerprint" is null or "writeback_deliveries"."payload_fingerprint" ~ '^[0-9a-f]{64}$');--> statement-breakpoint
+ALTER TABLE "writeback_deliveries" ADD CONSTRAINT "writeback_deliveries_automatic_snapshot" CHECK ("writeback_deliveries"."trigger_mode" = 'manual' or ("writeback_deliveries"."payload_fingerprint" is not null and jsonb_typeof("writeback_deliveries"."filter_tree_snapshot") = 'object'));--> statement-breakpoint
+ALTER TABLE "writeback_destinations" ADD CONSTRAINT "writeback_destinations_filter_shape" CHECK (jsonb_typeof("writeback_destinations"."filter_tree") = 'object' and "writeback_destinations"."filter_tree" ? 'combinator' and jsonb_typeof("writeback_destinations"."filter_tree"->'children') = 'array');

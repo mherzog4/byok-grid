@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: byok_grid
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d byok_grid"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      BETTER_AUTH_SECRET: ci-only-secret-not-for-production-123456
+      BETTER_AUTH_URL: http://localhost:3000
+      BYOK_GRID_MASTER_KEY: Y2ktb25seS1ub3QtYS1wcm9kdWN0aW9uLWtleQ==
+      BYOK_GRID_MASTER_KEY_ID: ci-v1
+      HATCHET_CLIENT_TOKEN: ci-compose-validation-only
+      SQLITE_DATABASE_URL: file:./data/byok-grid-ci.sqlite
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v5.0.1
+        with:
+          version: v4.2.3
+
+      - name: Create least-privilege database roles
+        env:
+          PGPASSWORD: postgres
+        run: >-
+          psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d byok_grid
+          -c "CREATE ROLE byok_grid_web LOGIN PASSWORD 'byok-grid-web-ci' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS"
+          -c "CREATE ROLE byok_grid_worker LOGIN PASSWORD 'byok-grid-worker-ci' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT BYPASSRLS"
+
+      - name: Apply SQLite migrations
+        run: npm run db:migrate
+
+      - name: Apply legacy PostgreSQL compatibility migrations
+        env:
+          MIGRATION_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/byok_grid
+        run: npm run db:postgres:migrate
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Lint connector runner
+        run: npm run lint:connector-runner
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run connector runner tests
+        run: npm run test:connector-runner
+
+      - name: Run legacy PostgreSQL compatibility tests
+        env:
+          RLS_DATABASE_URL: postgresql://byok_grid_web:byok-grid-web-ci@127.0.0.1:5432/byok_grid
+          RLS_WORKER_DATABASE_URL: postgresql://byok_grid_worker:byok-grid-worker-ci@127.0.0.1:5432/byok_grid
+          TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/byok_grid
+        run: npm test --workspace=@byok-grid/db
+
+      - name: Build production artifacts
+        run: npm run build
+
+      - name: Build production container targets
+        run: |
+          docker build --target web --tag byok-grid-web:ci .
+          docker build --target workflow-worker --tag byok-grid-workflow-worker:ci .
+          docker build --target migration --tag byok-grid-migration:ci .
+          docker build --target connector-runner --tag byok-grid-connector-runner:ci .
+          docker build --target airbyte-destination --tag byok-grid-airbyte-destination:ci .
+          docker build --target analytics-projector --tag byok-grid-analytics-projector:ci .
+
+      - name: Assert SQLite-only Node runtime images
+        run: |
+          docker run --rm --entrypoint node byok-grid-workflow-worker:ci -e "let leaked=false; try { require.resolve('postgres'); leaked=true } catch {} if (leaked) process.exit(1)"
+          docker run --rm --entrypoint node byok-grid-analytics-projector:ci -e "let leaked=false; try { require.resolve('postgres'); leaked=true } catch {} if (leaked) process.exit(1)"
+          docker run --rm -e SQLITE_DATABASE_URL=file:/data/ci.sqlite byok-grid-migration:ci
+
+      - name: Verify connector SDK package contents
+        run: npm run pack:connector-sdk
+
+      - name: Validate local infrastructure definition
+        run: docker compose config --quiet
+
+      - name: Validate production Helm chart
+        run: npm run helm:verify
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=moderate

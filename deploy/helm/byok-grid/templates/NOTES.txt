@@ -1,0 +1,12 @@
+BYOK Grid was rendered for {{ .Release.Namespace }}.
+
+The release expects an existing Secret named {{ include "byok-grid.secretName" . }} unless
+secrets.create=true. Verify that the migration hook succeeds before routing traffic:
+
+  kubectl get jobs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=migration
+  kubectl rollout status deployment/{{ include "byok-grid.fullname" . }}-web -n {{ .Release.Namespace }}
+  kubectl rollout status deployment/{{ include "byok-grid.fullname" . }}-worker -n {{ .Release.Namespace }}
+
+Remote libSQL and authenticated Hatchet are external dependencies. ClickHouse and the
+community connector runner are optional. Airbyte is installed separately as a BYOK
+Grid destination and is not part of this release.

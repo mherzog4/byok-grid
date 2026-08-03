@@ -1,0 +1,25 @@
+# Dependencies and build output
+node_modules/
+.next/
+dist/
+coverage/
+.turbo/
+/target/
+
+# Local runtime state
+.data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.log
+
+# Secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
