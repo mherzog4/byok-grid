@@ -1,0 +1,77 @@
+apps/web/src/proxy.ts
+  s_28ae7db8033464::t_30993ff6d1e2aa 3
+  s_28ae7db8033464::t_9862bae1fef2a8 1-2,4-14
+apps/web/src/workflow-sqlite.e2e.test.ts
+  s_28ae7db8033464::t_84ef2b93cf287e 2,27-30
+  s_28ae7db8033464::t_27fc1c73d9f359 51-67,70-73,126,132-149,595-606
+  s_28ae7db8033464::t_53e07f3e5d20f1 68-69
+  s_28ae7db8033464::t_94068416ca752c 607
+  s_28ae7db8033464::t_16a39bbccacb76 608
+apps/web/src/lib/runtime-config.ts
+  s_28ae7db8033464::t_e812a3c91d4798 97-99
+.env.example
+  s_28ae7db8033464::t_54814a5a1d414f 65-66
+docs/adr/0035-sqlite-first-application-core.md
+  s_28ae7db8033464::t_4b37659f03ca98 28-29
+  s_28ae7db8033464::t_84ef2b93cf287e 30-35
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_54814a5a1d414f 90-95,110-112
+apps/web/src/lib/runtime-config.test.ts
+  s_28ae7db8033464::t_e812a3c91d4798 37-52
+apps/web/src/lib/request-origin.ts
+  s_28ae7db8033464::t_9862bae1fef2a8 1-98
+  s_28ae7db8033464::t_4f7d8e24158310 99
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_4b37659f03ca98 31-32
+  s_28ae7db8033464::t_54814a5a1d414f 23-26
+  s_28ae7db8033464::t_94068416ca752c 27
+deploy/helm/byok-grid/values.yaml
+  s_28ae7db8033464::t_54814a5a1d414f 7-8
+apps/web/next.config.ts
+  s_28ae7db8033464::t_e812a3c91d4798 32-35
+  s_28ae7db8033464::t_94068416ca752c 58
+apps/web/src/proxy.test.ts
+  s_28ae7db8033464::t_9862bae1fef2a8 1-39
+apps/web/src/lib/request-origin.test.ts
+  s_28ae7db8033464::t_9862bae1fef2a8 1-93
+apps/web/src/next-config.test.ts
+  s_28ae7db8033464::t_9862bae1fef2a8 1-4,9-43
+  s_28ae7db8033464::t_94068416ca752c 5-8
+docs/API_SECURITY.md
+  s_28ae7db8033464::t_5ac23f09733b9a 95-98
+  s_28ae7db8033464::t_94068416ca752c 64-67
+  s_28ae7db8033464::t_85aa296b6a6a84 40-63,68
+packages/db/src/sqlite/client.test.ts
+  s_28ae7db8033464::t_4b37659f03ca98 2-6,32
+packages/db/src/sqlite/backup.ts
+  s_28ae7db8033464::t_84ef2b93cf287e 17,77-80,152-155
+packages/db/src/sqlite/client.ts
+  s_28ae7db8033464::t_4b37659f03ca98 15,34-36,41
+apps/web/src/lib/auth.ts
+  s_28ae7db8033464::t_e812a3c91d4798 38
+README.md
+  s_28ae7db8033464::t_54814a5a1d414f 97
+  s_28ae7db8033464::t_94068416ca752c 98-99
+SECURITY.md
+  s_28ae7db8033464::t_94068416ca752c 54-57
+  s_28ae7db8033464::t_54814a5a1d414f 48-53,58
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_aa9e30f681aef2 37,55-63
+  s_28ae7db8033464::t_6c08a5a816c7e9 25-33,46-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "7b152d0a1b230239d8a24b17e5011631e66f42c3",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
