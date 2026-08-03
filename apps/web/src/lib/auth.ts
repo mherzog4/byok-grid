@@ -35,6 +35,7 @@ export const auth = betterAuth({
     database: {
       generateId: 'uuid',
     },
+    trustedProxyHeaders: false,
   },
   databaseHooks: {
     user: {

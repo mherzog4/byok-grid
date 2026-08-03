@@ -25,10 +25,14 @@ process uses Drizzle's SQLite dialect with `@libsql/client` and a local `file:`
 URL. A remote, self-hosted `libsql://` endpoint is an optional deployment mode.
 It is not required by the default installation.
 
-Every connection enables foreign keys and a five-second busy timeout. Local
-files use WAL journal mode and `synchronous=NORMAL`. Deployments must place the
-database and its WAL files on persistent, low-latency storage. A network file
-system shared by independent application replicas is unsupported.
+Every connection enables foreign keys and a five-second busy timeout. The
+timeout is supplied to `@libsql/client` at construction so it also reaches
+connections opened internally for transactions. Maintenance and test clients
+use the same setting; setting a PRAGMA on only the initial connection is
+insufficient. Local files use WAL journal mode and `synchronous=NORMAL`.
+Deployments must place the database and its WAL files on persistent, low-latency
+storage. A network file system shared by independent application replicas is
+unsupported.
 
 SQLite does not provide PostgreSQL row-level security. Every user-facing data
 operation must therefore begin from an authenticated workspace scope and join

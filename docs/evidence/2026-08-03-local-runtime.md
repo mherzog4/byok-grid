@@ -22,16 +22,19 @@ npm run drill:workflow-drain
 
 The command built the disposable production web test stage, created a synthetic
 500-row workflow at the 100-node graph limit, and waited until the API exposed
-a persisted running step. Before creating ordinary data, the same E2E sent a
-signup larger than the 64-KiB authentication boundary and an authenticated table
-mutation larger than the five-MiB product JSON boundary to the rebuilt
-standalone web container; both required their exact `413` transport responses.
-It then sent Compose `SIGTERM` with a 90-second timeout. Evidence emitted by the
-command:
+a persisted running step. Before creating ordinary data, the same E2E rejected
+cross-site signup and cookie-authenticated table mutations with the exact `403`
+contract, sent a signup larger than the 64-KiB authentication boundary, and sent
+an authenticated table mutation larger than the five-MiB product JSON boundary;
+both oversized requests required their exact `413` transport responses. The
+authenticated application response also had to expose CSP, one-year HSTS,
+no-referrer, anti-framing, MIME-sniffing, and browser-capability restrictions
+without `X-Powered-By`. It then sent Compose `SIGTERM` with a 90-second timeout.
+Evidence emitted by the command:
 
 ```text
 {"marker":"BYOK_GRID_DRAIN_DRILL_IN_FLIGHT","rowCount":500,...}
-{"drainMs":1413,"marker":"BYOK_GRID_DRAIN_SIGNAL_COMPLETE"}
+{"drainMs":1293,"marker":"BYOK_GRID_DRAIN_SIGNAL_COMPLETE"}
 {"marker":"BYOK_GRID_DRAIN_DRILL_PASSED","rows":500,"steps":100}
 ```
 
@@ -40,6 +43,24 @@ domain mutation logic, then proved an ordinary signup, mutation, run, and all
 100 steps succeeded. The drill also proved worker exit code 0, no OOM kill,
 Hatchet pending-task drain confirmation, no REST pause failure, and successful
 worker health after automatic restart.
+
+The first run of the expanded drill exposed `SQLITE_BUSY` while the workflow
+worker acquired an internal local transaction connection. Its attempt to record
+the step failure also encountered the lock, so the run remained nonterminal and
+the 90-second E2E deadline correctly failed. The bootstrap had set
+`PRAGMA busy_timeout` through the initial client connection, but
+`@libsql/client` may open separate connections for transactions. The corrected
+bootstrap supplies the same five-second timeout in `createClient`, which applies
+it to every internal local connection, while retaining the per-process writer
+queue and `BEGIN IMMEDIATE` transaction policy.
+
+A subsequent strengthened run completed the workflow and its new early-`403`
+header assertions but exposed the same immediate-lock default in the disposable
+E2E client's fixture cleanup. The audit then applied the shared timeout constant
+to every direct local client, including online backup verification/creation and
+the E2E harness. Client and backup integration tests passed, and the final clean
+rerun above completed workflow execution, cleanup, drain, and recovery. Failed
+runs were not counted as evidence.
 The current drill additionally requires the private application metrics
 endpoint before signaling and after recovery, including workflow status, queue
 age, and dispatch backlog series.

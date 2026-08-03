@@ -14,6 +14,7 @@ import {
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createClient, type Client } from '@libsql/client';
+import { SQLITE_BUSY_TIMEOUT_MS } from './client';
 
 const requiredApplicationTables = [
   '__drizzle_migrations',
@@ -73,7 +74,10 @@ export async function verifySqliteBackup(
     );
   }
 
-  const client = createClient({ url: pathToFileURL(path).href });
+  const client = createClient({
+    timeout: SQLITE_BUSY_TIMEOUT_MS,
+    url: pathToFileURL(path).href,
+  });
   try {
     const quickCheck = await client.execute('PRAGMA quick_check');
     if (quickCheck.rows.length !== 1 || quickCheck.rows[0]?.[0] !== 'ok') {
@@ -145,7 +149,10 @@ export async function createSqliteBackup(input: {
   const temporaryPath = partialPathFor(outputPath);
   let client: Client | undefined;
   try {
-    client = createClient({ url: pathToFileURL(sourcePath).href });
+    client = createClient({
+      timeout: SQLITE_BUSY_TIMEOUT_MS,
+      url: pathToFileURL(sourcePath).href,
+    });
     await client.execute({
       args: [temporaryPath],
       sql: 'VACUUM main INTO ?',

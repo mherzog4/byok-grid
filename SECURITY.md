@@ -45,6 +45,17 @@ CSV imports. Reject compressed request bodies and configure edge request-rate,
 concurrent-request, slow-body, header, and connection limits. See
 `docs/API_SECURITY.md` for the exact transport contract and negative tests.
 
+Every unsafe `/api/*` request with browser provenance must match the canonical
+`BETTER_AUTH_URL` origin. Cookie-bearing mutations without `Origin` or `Referer`
+fail closed, while headless Bearer-capability clients remain supported when they
+send no browser metadata. Better Auth independently retains its own CSRF checks
+and is configured not to infer its base URL from forwarded proxy headers. The
+web server emits CSP, one-year HSTS, no-referrer, anti-framing, MIME-sniffing,
+and browser-capability restrictions without advertising the framework. A TLS
+proxy must preserve these response headers and the browser request-provenance
+headers. Domain owners may add HSTS subdomain coverage or preload only after
+reviewing every affected hostname.
+
 npm installs run with strict lifecycle-script review. The root `allowScripts`
 policy permits only esbuild's platform-binary validation and unrs-resolver's
 native-package preparation; Hatchet's informational version warning and

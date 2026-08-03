@@ -87,9 +87,12 @@ HubSpot sources. `SOURCE_SCHEDULER_POLL_SECONDS` controls the due-source scan
 interval; source credentials and encrypted page cursors never enter Hatchet.
 
 The web UI uses same-origin requests, so the image contains no operator URL.
-Set the canonical runtime origin through `BETTER_AUTH_URL`. Database URLs, auth
-secrets, provider keys, encryption keys, Hatchet tokens, and operator origins
-must never be passed as image build arguments.
+Set the canonical runtime origin through `BETTER_AUTH_URL`; it must contain only
+scheme, host, and optional port. The web runtime uses that exact origin for
+browser mutation enforcement and does not trust forwarded proxy headers to
+derive Better Auth's base URL. Database URLs, auth secrets, provider keys,
+encryption keys, Hatchet tokens, and operator origins must never be passed as
+image build arguments.
 
 ## Production boundary
 
@@ -104,6 +107,9 @@ defaults:
 - unique `BETTER_AUTH_SECRET`, `BYOK_GRID_MASTER_KEY`, and
   `BYOK_GRID_MASTER_KEY_ID` values from a secret manager;
 - HTTPS termination with the canonical public URL configured consistently;
+- preservation of the application's CSP, HSTS, no-referrer, anti-framing,
+  MIME-sniffing, browser-capability, and cache-control response headers plus the
+  browser's `Origin`, `Referer`, and `Sec-Fetch-*` request headers;
 - private-network egress denial, DNS controls, and provider allowlisting around
   the worker as defense in depth;
 - route-aware request-size, slow-body, connection, concurrency, and request-rate

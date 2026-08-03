@@ -34,6 +34,22 @@ describe('web runtime configuration', () => {
     ).toThrow('BETTER_AUTH_URL must use HTTPS unless it targets loopback.');
   });
 
+  it('requires the public auth URL to be a canonical origin', () => {
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BETTER_AUTH_URL: 'https://grid.example.com/a/subpath',
+      })
+    ).toThrow('BETTER_AUTH_URL must be an origin without a path.');
+
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BETTER_AUTH_URL: 'https://grid.example.com/',
+      })
+    ).not.toThrow();
+  });
+
   it('rejects weak auth secrets and malformed encryption keys safely', () => {
     let error: unknown;
     try {

@@ -1,4 +1,5 @@
 import { createClient, type Client } from '@libsql/client';
+import { SQLITE_BUSY_TIMEOUT_MS } from '@byok-grid/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   MAXIMUM_API_JSON_BODY_BYTES,
@@ -23,7 +24,10 @@ describe.skipIf(!runE2e || !databaseUrl)(
     let workspaceId: string | undefined;
 
     beforeAll(async () => {
-      client = createClient({ url: databaseUrl! });
+      client = createClient({
+        timeout: SQLITE_BUSY_TIMEOUT_MS,
+        url: databaseUrl!,
+      });
       await client.execute('PRAGMA foreign_keys = ON');
     });
 
@@ -44,6 +48,29 @@ describe.skipIf(!runE2e || !databaseUrl)(
     });
 
     it('authors SQLite grid data, publishes a graph, and queues its run', async () => {
+      const crossOriginSignup = await fetch(
+        `${appUrl}/api/auth/sign-up/email`,
+        {
+          body: JSON.stringify({
+            email,
+            name: 'Cross-origin attempt',
+            password: 'correct-horse-battery-staple-workflow-e2e',
+          }),
+          headers: {
+            'content-type': 'application/json',
+            origin: 'https://attacker.example',
+            'sec-fetch-site': 'cross-site',
+          },
+          method: 'POST',
+        }
+      );
+      expect(crossOriginSignup.status).toBe(403);
+      expect(crossOriginSignup.headers.get('cache-control')).toBe('no-store');
+      expectSecurityHeaders(crossOriginSignup.headers);
+      await expect(crossOriginSignup.json()).resolves.toEqual({
+        error: 'Cross-origin API mutations are not allowed.',
+      });
+
       const oversizedSignup = await fetch(`${appUrl}/api/auth/sign-up/email`, {
         body: JSON.stringify({
           email,
@@ -96,11 +123,30 @@ describe.skipIf(!runE2e || !databaseUrl)(
 
       const app = await fetch(`${appUrl}/app`, { headers: { cookie } });
       expect(app.status).toBe(200);
+      expectSecurityHeaders(app.headers);
       const appHtml = await app.text();
       expect(appHtml).toContain('Engineer the row journey');
       expect(appHtml).toContain('Add row');
 
       const tableCollectionUrl = `${appUrl}/api/workspaces/${workspaceId}/tables`;
+      const crossOriginTableResponse = await fetch(tableCollectionUrl, {
+        body: JSON.stringify({
+          firstColumnName: 'Company',
+          firstColumnValueType: 'text',
+          name: 'Cross-origin table',
+        }),
+        headers: {
+          'content-type': 'application/json',
+          cookie,
+          origin: 'https://attacker.example',
+        },
+        method: 'POST',
+      });
+      expect(crossOriginTableResponse.status).toBe(403);
+      await expect(crossOriginTableResponse.json()).resolves.toEqual({
+        error: 'Cross-origin API mutations are not allowed.',
+      });
+
       const oversizedTableResponse = await fetch(tableCollectionUrl, {
         body: JSON.stringify({
           firstColumnName: 'Company',
@@ -545,4 +591,18 @@ function parseDrainDrillRows(value: string | undefined): number | null {
     );
   }
   return rows;
+}
+
+function expectSecurityHeaders(headers: Headers): void {
+  expect(headers.get('content-security-policy')).toContain(
+    "frame-ancestors 'none'"
+  );
+  expect(headers.get('strict-transport-security')).toBe('max-age=31536000');
+  expect(headers.get('x-content-type-options')).toBe('nosniff');
+  expect(headers.get('x-frame-options')).toBe('DENY');
+  expect(headers.get('referrer-policy')).toBe('no-referrer');
+  expect(headers.get('permissions-policy')).toBe(
+    'camera=(), microphone=(), geolocation=(), browsing-topics=()'
+  );
+  expect(headers.has('x-powered-by')).toBe(false);
 }

@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { openSqliteDatabase, type SqliteDatabaseHandle } from './client';
+import {
+  openSqliteDatabase,
+  SQLITE_BUSY_TIMEOUT_MS,
+  type SqliteDatabaseHandle,
+} from './client';
 import { defaultSqliteDatabaseUrl, sqliteDatabaseConfigSchema } from './config';
 
 describe('SQLite database bootstrap', () => {
@@ -25,6 +29,6 @@ describe('SQLite database bootstrap', () => {
     const busyTimeout = await handle.client.execute('PRAGMA busy_timeout');
 
     expect(foreignKeys.rows[0]?.[0]).toBe(1);
-    expect(busyTimeout.rows[0]?.[0]).toBe(5_000);
+    expect(busyTimeout.rows[0]?.[0]).toBe(SQLITE_BUSY_TIMEOUT_MS);
   });
 });

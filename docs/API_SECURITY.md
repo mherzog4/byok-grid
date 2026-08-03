@@ -37,6 +37,35 @@ configuration, while a single editable cell may contain up to 256 KiB. Lowering
 the transport boundary without also reducing those product contracts would
 make valid data impossible to save.
 
+## Browser mutation origin boundary
+
+The Next.js Proxy matches the complete `/api/*` surface. `GET`, `HEAD`, and
+`OPTIONS` pass through. Every other method rejects cross-site Fetch Metadata or
+an `Origin` that differs from the canonical `BETTER_AUTH_URL` origin. A
+same-origin `Referer` is the fallback when `Origin` is absent. Cookie-bearing
+mutations with neither header fail closed.
+
+Headless capability clients such as the Airbyte destination remain supported:
+an unsafe request with no cookie and no browser provenance passes to the route,
+where its Bearer token, content type, payload, and idempotency key are still
+validated. The application does not enable cross-origin resource sharing.
+Better Auth also retains its own endpoint-specific CSRF and origin validation;
+its fixed base URL is not inferred from forwarded proxy headers.
+
+`BETTER_AUTH_URL` must contain only an HTTP(S) scheme, hostname, and optional
+port. Production requires HTTPS. A path, credentials, query, or fragment makes
+the web runtime invalid. The TLS proxy must preserve `Origin`, `Referer`, and
+`Sec-Fetch-*` request headers rather than removing or rewriting them.
+
+## Response headers
+
+Every response carries the application CSP, one-year HSTS, no-referrer,
+anti-framing, MIME-sniffing, and browser-capability restrictions. Invitation
+pages additionally use a private, no-store cache policy, and framework
+identification is disabled. HSTS is effective only when received over HTTPS;
+the TLS proxy must preserve it. The application does not claim
+`includeSubDomains` or preload because those are domain-wide operator decisions.
+
 ## Proxy and ingress alignment
 
 Set route-aware limits at the TLS proxy or ingress as the first layer, but keep
@@ -63,7 +92,10 @@ a route calls `request.json()` directly or fails to return the bounded reader's
 transport response before schema parsing. A separate source contract protects
 the Better Auth POST wrapper. Unit tests prove declared-length rejection,
 chunked-body cancellation, replay fidelity, UTF-8 byte accounting, malformed
-input handling, compressed-body rejection, and both production ceilings.
+input handling, compressed-body rejection, and both production ceilings. The
+origin suite proves safe-method behavior, same-origin Origin/Referer handling,
+cross-site and missing-provenance rejection, headless-client compatibility, and
+Proxy wiring. The header suite freezes the global and invitation policies.
 
 Before cutover, send both declared and chunked requests immediately below, at,
 and above each configured edge limit. Confirm the edge and application agree,

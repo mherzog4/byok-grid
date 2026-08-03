@@ -94,6 +94,9 @@ function validateAuthUrl(value: string, issues: string[]): void {
       'BETTER_AUTH_URL must not contain credentials, a query string, or a fragment.'
     );
   }
+  if (parsed.pathname !== '/') {
+    issues.push('BETTER_AUTH_URL must be an origin without a path.');
+  }
 }
 
 function isLoopbackHostname(hostname: string): boolean {

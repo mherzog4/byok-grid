@@ -20,9 +20,16 @@ working tree:
   Route Handler, with declared and observed 64-KiB/five-MiB enforcement,
   compressed-body rejection, transport-specific responses, and source contracts
   that reject future direct `request.json()` use or an unwrapped auth handler;
+- a Next.js Proxy same-origin contract for every unsafe API request, preserving
+  headless Bearer clients while rejecting cross-site browser metadata and
+  provenance-free cookie mutations; fixed-origin Better Auth proxy trust plus
+  CSP, HSTS, no-referrer, anti-framing, MIME-sniffing, browser-capability, and
+  invitation no-store header contracts without framework identification;
 - Rust connector-runner formatting, linting, and tests;
 - current-schema migration plus an N-1-to-current SQLite upgrade preserving
   tenant data, migration history, foreign keys, and integrity;
+- driver-level five-second local SQLite busy handling applied to every internal
+  transaction connection, paired with per-process write serialization;
 - readiness rejection for a database missing the latest required migration;
 - online SQLite backup, integrity verification, restore to a new file, and
   digest equality while the web container remained available;

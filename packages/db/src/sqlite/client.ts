@@ -12,6 +12,7 @@ export type SqliteTransaction = Parameters<
 >[0];
 
 const sqliteWriteTails = new WeakMap<SqliteDatabase, Promise<void>>();
+export const SQLITE_BUSY_TIMEOUT_MS = 5_000;
 
 export interface SqliteDatabaseHandle {
   client: Client;
@@ -30,11 +31,14 @@ export async function openSqliteDatabase(
   const config = sqliteDatabaseConfigSchema.parse(input);
   const client = createClient({
     ...(config.authToken ? { authToken: config.authToken } : {}),
+    // Unlike a PRAGMA issued after construction, this reaches every local
+    // connection that @libsql/client opens internally for transactions.
+    timeout: SQLITE_BUSY_TIMEOUT_MS,
     url: config.url,
   });
 
   await client.execute('PRAGMA foreign_keys = ON');
-  await client.execute('PRAGMA busy_timeout = 5000');
+  await client.execute(`PRAGMA busy_timeout = ${SQLITE_BUSY_TIMEOUT_MS}`);
   if (config.url !== ':memory:' && !config.url.startsWith('libsql://')) {
     await client.execute('PRAGMA journal_mode = WAL');
     await client.execute('PRAGMA synchronous = NORMAL');
