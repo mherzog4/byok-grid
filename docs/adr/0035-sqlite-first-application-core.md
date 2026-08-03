@@ -34,6 +34,10 @@ Deployments must place the database and its WAL files on persistent, low-latency
 storage. A network file system shared by independent application replicas is
 unsupported.
 
+ADR 0045 adds bounded cross-process acquisition recovery. It retries only
+machine-coded lock failures raised before the application transaction callback
+starts; callback and commit failures are never replayed.
+
 SQLite does not provide PostgreSQL row-level security. Every user-facing data
 operation must therefore begin from an authenticated workspace scope and join
 through `workspace_members`; identifier-only lookups are forbidden. These

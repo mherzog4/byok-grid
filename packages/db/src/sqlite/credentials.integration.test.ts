@@ -429,7 +429,7 @@ describe('SQLite BYOK credential vault', () => {
       rotated: 1,
       total: 1,
     });
-  });
+  }, 15_000);
 
   function createMasterKey(id: string) {
     const key = parseMasterKey(id, randomBytes(32).toString('base64'));

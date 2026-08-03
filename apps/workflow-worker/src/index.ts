@@ -1,4 +1,7 @@
-import { collectSqliteOperationalMetrics } from '@byok-grid/db';
+import {
+  collectSqliteOperationalMetrics,
+  sqliteWriteContentionSnapshot,
+} from '@byok-grid/db';
 import { workflowDatabase } from './database';
 import { applySqliteIngestionBatchTask } from './apply-ingestion-batch';
 import { applySqliteCsvImportTask } from './apply-csv-import';
@@ -40,6 +43,7 @@ await runWorkerLifecycle({
           createOperationalMetricsTask({
             collect: () =>
               collectSqliteOperationalMetrics(workflowDatabase.client),
+            collectContention: sqliteWriteContentionSnapshot,
             port: workflowWorkerConfig.BYOK_GRID_METRICS_PORT,
           }),
         ]

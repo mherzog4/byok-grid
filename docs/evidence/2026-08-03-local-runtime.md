@@ -68,6 +68,24 @@ runs were not counted as evidence.
 The current drill additionally requires the private application metrics
 endpoint before signaling and after recovery, including workflow status, queue
 age, and dispatch backlog series.
+
+The shared write helper now also has an independent two-process contention
+drill. A child process acquired a real WAL write transaction and held it beyond
+the parent's five-second driver timeout. The parent received a machine-coded
+pre-callback lock failure, reset the stale local libSQL connection, retried with
+bounded jitter, committed its own transaction, and then counted both rows. Unit
+coverage separately proved a lock error after callback entry is never retried,
+unknown failures are preserved, and acquisition stops after three attempts.
+The private worker metrics endpoint exposes process-local retry and exhaustion
+counters; this evidence does not replace the remaining multi-replica remote
+libSQL provider drill or define a production concurrency limit.
+The pruned production workflow-worker image was rebuilt and run as its
+unprivileged `node` user. Importing the packaged database module inside that
+image returned
+`{"acquisitionExhaustions":0,"acquisitionRetries":0}`, proving the counter
+contract is present in the shipped dependency graph rather than only the
+monorepo test environment.
+
 The runtime command uses `node --import tsx`, making the application Node
 process container PID 1; a pre-fix drill with the `tsx` launcher correctly
 failed with exit 143 and an abandoned lease, which is why PID topology is part

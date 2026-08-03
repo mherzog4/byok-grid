@@ -12,6 +12,10 @@ describe('workflow operational metrics server', () => {
         await new Promise((resolve) => setTimeout(resolve, 20));
         return snapshot();
       },
+      collectContention: () => ({
+        acquisitionExhaustions: 1,
+        acquisitionRetries: 3,
+      }),
       host: '127.0.0.1',
       onListening: ({ port }) => listening.resolve(port),
       port: 0,
@@ -37,6 +41,12 @@ describe('workflow operational metrics server', () => {
       );
       expect(body).toContain(
         'byok_grid_outbox_unpublished_oldest_age_seconds 13'
+      );
+      expect(body).toContain(
+        'byok_grid_sqlite_write_acquisition_events{outcome="retry"} 3'
+      );
+      expect(body).toContain(
+        'byok_grid_sqlite_write_acquisition_events{outcome="exhausted"} 1'
       );
       expect(body).not.toContain('workspace-');
       expect(collectionCount).toBe(1);

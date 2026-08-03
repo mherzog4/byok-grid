@@ -49,16 +49,20 @@ messages.
 | `byok_grid_outbox_unpublished_events`                       | Dispatchable events not yet handed to Hatchet                 |
 | `byok_grid_outbox_unpublished_oldest_age_seconds`           | Age of the oldest dispatchable unpublished event              |
 | `byok_grid_metrics_collection_timestamp_seconds`            | Timestamp of the last successful database collection          |
+| `byok_grid_sqlite_write_acquisition_events{outcome}`        | Process-local retry or exhausted write-acquisition events     |
 
 Analytics-only outbox records are deliberately excluded from dispatch backlog
 metrics. Their independent leases require separate ClickHouse projection
 monitoring.
 
 Every worker replica queries the same authoritative SQLite/libSQL database, so
-these are replicated deployment gauges. Aggregate them across worker pods with
-`max`, not `sum`. A scrape that cannot complete its bounded database read within
-five seconds returns `503` without database error details; Prometheus should
-also alert on its generated `up == 0` signal.
+the workflow and outbox series are replicated deployment gauges. Aggregate
+those across worker pods with `max`, not `sum`. The write-acquisition series is
+different: it is a monotonic process-local gauge that resets on restart. Keep
+the scrape target/instance dimension and watch positive deltas per replica. A
+scrape that cannot complete its bounded database read within five seconds
+returns `503` without database error details; Prometheus should also alert on
+its generated `up == 0` signal.
 
 ## Kubernetes discovery
 
@@ -99,8 +103,22 @@ max by (status, window_seconds) (
 )
 ```
 
-Use the last vector to calculate the failed share only after enforcing a
-minimum completed-run sample size. Alert separately on database latency,
-libSQL/provider availability, Hatchet queue age, provider rate limits,
-connector failures, backup freshness, and optional analytics erasure backlog;
-the application gauges do not claim to replace those service-specific signals.
+Use the terminal-outcome vector to calculate the failed share only after
+enforcing a minimum completed-run sample size.
+
+```promql
+clamp_min(
+  delta(byok_grid_sqlite_write_acquisition_events{outcome="exhausted"}[5m]),
+  0
+) > 0
+```
+
+Any exhaustion should be investigated. A sustained positive retry delta means
+the deployment is approaching its write-contention envelope even when requests
+eventually succeed; use it with database latency and provider-side signals when
+setting the measured capacity limit.
+
+Alert separately on database latency, libSQL/provider availability, Hatchet
+queue age, provider rate limits, connector failures, backup freshness, and
+optional analytics erasure backlog; the application gauges do not claim to
+replace those service-specific signals.

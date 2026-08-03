@@ -1,6 +1,9 @@
 import { createServer, type Server, type ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import type { SqliteOperationalMetricsSnapshot } from '@byok-grid/db';
+import type {
+  SqliteOperationalMetricsSnapshot,
+  SqliteWriteContentionSnapshot,
+} from '@byok-grid/db';
 import { Gauge, Registry } from 'prom-client';
 import type { WorkerLifecycleTask } from './worker-lifecycle';
 
@@ -21,6 +24,7 @@ const activeWorkflowStepStatuses = ['ready', 'running'] as const;
 
 export interface OperationalMetricsTaskOptions {
   collect: () => Promise<SqliteOperationalMetricsSnapshot>;
+  collectContention?: () => SqliteWriteContentionSnapshot;
   host?: string;
   onListening?: (address: AddressInfo) => void;
   port: number;
@@ -29,7 +33,10 @@ export interface OperationalMetricsTaskOptions {
 export function createOperationalMetricsTask(
   options: OperationalMetricsTaskOptions
 ): WorkerLifecycleTask {
-  const metrics = createOperationalMetrics(options.collect);
+  const metrics = createOperationalMetrics(
+    options.collect,
+    options.collectContention ?? (() => EMPTY_CONTENTION_SNAPSHOT)
+  );
   return {
     name: 'operational metrics server',
     run: (signal) => runMetricsServer({ ...options, metrics, signal }),
@@ -37,7 +44,8 @@ export function createOperationalMetricsTask(
 }
 
 function createOperationalMetrics(
-  collect: () => Promise<SqliteOperationalMetricsSnapshot>
+  collect: () => Promise<SqliteOperationalMetricsSnapshot>,
+  collectContention: () => SqliteWriteContentionSnapshot
 ) {
   const registry = new Registry();
   const workflowRuns = gauge(registry, {
@@ -76,6 +84,11 @@ function createOperationalMetrics(
     help: 'Unix timestamp of the most recent successful BYOK Grid metrics collection.',
     name: 'byok_grid_metrics_collection_timestamp_seconds',
   });
+  const sqliteWriteAcquisitionEvents = gauge(registry, {
+    help: 'Monotonic process-local SQLite write acquisition events by outcome.',
+    labelNames: ['outcome'],
+    name: 'byok_grid_sqlite_write_acquisition_events',
+  });
 
   let scrapeInFlight: Promise<string> | undefined;
   return {
@@ -105,6 +118,13 @@ function createOperationalMetrics(
             snapshot.oldestUnpublishedOutboxAgeSeconds
           );
           collectionTimestamp.set(snapshot.observedAtEpochSeconds);
+          const contention = collectContention();
+          sqliteWriteAcquisitionEvents
+            .labels('retry')
+            .set(contention.acquisitionRetries);
+          sqliteWriteAcquisitionEvents
+            .labels('exhausted')
+            .set(contention.acquisitionExhaustions);
           return registry.metrics();
         })
         .finally(() => {
@@ -114,6 +134,11 @@ function createOperationalMetrics(
     },
   };
 }
+
+const EMPTY_CONTENTION_SNAPSHOT: SqliteWriteContentionSnapshot = {
+  acquisitionExhaustions: 0,
+  acquisitionRetries: 0,
+};
 
 function gauge(
   registry: Registry,

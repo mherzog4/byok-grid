@@ -60,7 +60,10 @@ working tree:
 - current-schema migration plus an N-1-to-current SQLite upgrade preserving
   tenant data, migration history, foreign keys, and integrity;
 - driver-level five-second local SQLite busy handling applied to every internal
-  transaction connection, paired with per-process write serialization;
+  transaction connection, paired with per-process write serialization and
+  three bounded, jittered retries only when machine-coded lock acquisition
+  fails before application work starts; a real two-process WAL drill proves
+  stale-connection reset and recovery without callback replay;
 - readiness rejection for a database missing the latest required migration;
 - online SQLite backup, integrity verification, restore to a new file, and
   digest equality while the web container remained available;
@@ -83,7 +86,8 @@ working tree:
   with container verification that the production dependency is present;
 - a separate graceful-lifecycle application metrics endpoint covering
   deployment-wide workflow status, terminal outcomes, active-step age, and
-  dispatch backlog without tenant or payload labels;
+  dispatch backlog plus process-local SQLite acquisition retries/exhaustions
+  without tenant, payload, or error-message labels;
 - Compose rendering and Helm security/health/migration contract verification;
 - chart-owned default-deny runtime ingress, trusted web and monitoring peer
   contracts, permanent connector-runner egress denial, opt-in component-scoped
