@@ -1,0 +1,87 @@
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_53ddf3be3ba78b 118-141,157
+apps/web/src/proxy.ts
+  s_28ae7db8033464::t_4d8b5cdb28b83e 20-23
+  s_28ae7db8033464::t_ddb40b38f964d6 24-31
+apps/web/src/lib/runtime-origin.ts
+  s_28ae7db8033464::t_28a27ffcaa84bf 1-18
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_817cb1f94e22f1 95-99,107,113-116
+apps/web/src/app/globals.css
+  s_28ae7db8033464::t_7b7fe4e0539bef 431-436
+apps/web/src/lib/session-policy.test.ts
+  s_28ae7db8033464::t_28a27ffcaa84bf 1-64
+apps/web/src/lib/signup-policy.ts
+  s_28ae7db8033464::t_716f7fc3abae20 1-2
+apps/web/src/lib/auth.ts
+  s_28ae7db8033464::t_0c72d6c690f5cb 3,16-19,29
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_53ddf3be3ba78b 23-27
+docs/API_SECURITY.md
+  s_28ae7db8033464::t_4fa6f5cb6256d2 47-52
+  s_28ae7db8033464::t_53ddf3be3ba78b 34-46,53
+apps/web/src/lib/runtime-config.ts
+  s_28ae7db8033464::t_28a27ffcaa84bf 3-7,59-62
+  s_28ae7db8033464::t_fa518a7da5af05 63-65
+  s_28ae7db8033464::t_e211f6d9e89bd1 66-68
+apps/web/src/app/app/page.tsx
+  s_28ae7db8033464::t_7b7fe4e0539bef 41-42,44-49,149
+deploy/helm/byok-grid/ci-values.yaml
+  s_28ae7db8033464::t_d33297914b2c5f 4-7
+apps/web/src/proxy.test.ts
+  s_28ae7db8033464::t_4d8b5cdb28b83e 59-67,69-73
+  s_28ae7db8033464::t_ddb40b38f964d6 57-58,68,74-75
+README.md
+  s_28ae7db8033464::t_53ddf3be3ba78b 12-14
+apps/web/src/lib/auth-factory.integration.test.ts
+  s_28ae7db8033464::t_0c72d6c690f5cb 11,40,61
+  s_28ae7db8033464::t_62054baa327970 89-115,119-126
+  s_28ae7db8033464::t_ba446e4a350fcd 127
+deploy/helm/byok-grid/templates/configmap.yaml
+  s_28ae7db8033464::t_d33297914b2c5f 10-12
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_53ddf3be3ba78b 86-91
+deploy/helm/byok-grid/values.yaml
+  s_28ae7db8033464::t_d33297914b2c5f 13-18
+deploy/helm/byok-grid/values.schema.json
+  s_28ae7db8033464::t_d33297914b2c5f 16,23-45
+.env.example
+  s_28ae7db8033464::t_d33297914b2c5f 74-78
+apps/web/src/lib/session-policy.ts
+  s_28ae7db8033464::t_28a27ffcaa84bf 1-92
+docker-compose.yml
+  s_28ae7db8033464::t_d33297914b2c5f 81-83
+apps/web/src/lib/runtime-config.test.ts
+  s_28ae7db8033464::t_28a27ffcaa84bf 38-55
+scripts/verify-helm-chart.sh
+  s_28ae7db8033464::t_d33297914b2c5f 43-45,72-73,108-110
+  s_28ae7db8033464::t_32b09cca915efb 111-113
+apps/web/src/app/app/sign-out-button.tsx
+  s_28ae7db8033464::t_7b7fe4e0539bef 7-13,15-42,45-65
+docs/adr/0039-bounded-session-lifecycle.md
+  s_28ae7db8033464::t_817cb1f94e22f1 1-37,41-68
+  s_28ae7db8033464::t_a845f9da8f8bd2 38-40,69-71
+apps/web/src/lib/auth-factory.ts
+  s_28ae7db8033464::t_0c72d6c690f5cb 9,16,22,43-47
+  s_28ae7db8033464::t_c9df201e861d72 48
+scripts/drill-signup-policy.mjs
+  s_28ae7db8033464::t_4753feff948dd2 89-92,97,99-101,103-109,113,119-131,134-144,157-159,245-258,321,323-324,326-327,332-333,336-339,344-346,348
+  s_28ae7db8033464::t_0e9a13345757c9 93-96,98,102,110-112,114-118,322,325,328-331,334-335,340-343,347
+  s_28ae7db8033464::t_34e7932bc0c09b 349
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "b3fa7fea2e18290b1137939dd46fd2013dc21c4b",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
