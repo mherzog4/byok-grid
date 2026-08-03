@@ -1,0 +1,50 @@
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_29b449a6c44c3f 142-145,280-282
+  s_28ae7db8033464::t_f267a6bb604d24 92-98,235,245-279,283
+  s_28ae7db8033464::t_9ce44d216b6f34 1-91,99-141,146-234,236-244,284-437
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_63343eef20af8e 1-114
+scripts/verify-production-evidence.mjs
+  s_28ae7db8033464::t_f267a6bb604d24 8,11,13,20,28
+  s_28ae7db8033464::t_9ce44d216b6f34 1-7,9-10,12,14-19,21-27,29-40
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_63343eef20af8e 140-144,217-220
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_f267a6bb604d24 3-9,16,150,161,164,211,214,301,307-328,330-336
+  s_28ae7db8033464::t_fb36db35242738 37
+  s_28ae7db8033464::t_29b449a6c44c3f 141-147,337-349
+  s_28ae7db8033464::t_68d65388063817 1-2,10-15,17-24,26-36,38-58,60-140,148-149,151-160,162-163,165-210,212-213,215-222,224-249,280-282,296-300,304-305,350-395
+  s_28ae7db8033464::t_e6d3c2e7bd9e56 25,59,223,250-279,283-295,302-303,306,329
+docs/adr/0052-machine-verifiable-stable-promotion.md
+  s_28ae7db8033464::t_63343eef20af8e 1-54
+package.json
+  s_28ae7db8033464::t_9ce44d216b6f34 51
+README.md
+  s_28ae7db8033464::t_63343eef20af8e 305-307
+scripts/verify-release-version.mjs
+  s_28ae7db8033464::t_9ce44d216b6f34 1,61,63-64,218-226,261
+  s_28ae7db8033464::t_f267a6bb604d24 3-7,62,227-260,262
+.github/workflows/release.yml
+  s_28ae7db8033464::t_f267a6bb604d24 46
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_29b449a6c44c3f 32,41-47
+  s_28ae7db8033464::t_63343eef20af8e 1-31,33-40,48-137
+docs/RELEASING.md
+  s_28ae7db8033464::t_63343eef20af8e 96-105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "68fabc19e871d08948d506b5ce734238296fb2db",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
