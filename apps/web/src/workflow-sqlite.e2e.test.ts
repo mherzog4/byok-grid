@@ -66,7 +66,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
       );
       expect(crossOriginSignup.status).toBe(403);
       expect(crossOriginSignup.headers.get('cache-control')).toBe('no-store');
-      expectSecurityHeaders(crossOriginSignup.headers);
+      const rejectionNonce = expectSecurityHeaders(crossOriginSignup.headers);
       await expect(crossOriginSignup.json()).resolves.toEqual({
         error: 'Cross-origin API mutations are not allowed.',
       });
@@ -123,8 +123,10 @@ describe.skipIf(!runE2e || !databaseUrl)(
 
       const app = await fetch(`${appUrl}/app`, { headers: { cookie } });
       expect(app.status).toBe(200);
-      expectSecurityHeaders(app.headers);
+      const appNonce = expectSecurityHeaders(app.headers);
+      expect(appNonce).not.toBe(rejectionNonce);
       const appHtml = await app.text();
+      expectRenderedScriptNonces(appHtml, appNonce);
       expect(appHtml).toContain('Engineer the row journey');
       expect(appHtml).toContain('Add row');
 
@@ -593,10 +595,17 @@ function parseDrainDrillRows(value: string | undefined): number | null {
   return rows;
 }
 
-function expectSecurityHeaders(headers: Headers): void {
-  expect(headers.get('content-security-policy')).toContain(
-    "frame-ancestors 'none'"
-  );
+function expectSecurityHeaders(headers: Headers): string {
+  const policy = headers.get('content-security-policy');
+  expect(policy).toContain("frame-ancestors 'none'");
+  const scriptDirective = policy
+    ?.split('; ')
+    .find((directive) => directive.startsWith('script-src '));
+  expect(scriptDirective).toContain("'strict-dynamic'");
+  expect(scriptDirective).not.toContain("'unsafe-inline'");
+  expect(scriptDirective).not.toContain("'unsafe-eval'");
+  const nonce = scriptDirective?.match(/'nonce-([^']+)'/u)?.[1];
+  expect(nonce).toBeTruthy();
   expect(headers.get('strict-transport-security')).toBe('max-age=31536000');
   expect(headers.get('x-content-type-options')).toBe('nosniff');
   expect(headers.get('x-frame-options')).toBe('DENY');
@@ -605,4 +614,13 @@ function expectSecurityHeaders(headers: Headers): void {
     'camera=(), microphone=(), geolocation=(), browsing-topics=()'
   );
   expect(headers.has('x-powered-by')).toBe(false);
+  return nonce!;
+}
+
+function expectRenderedScriptNonces(html: string, nonce: string): void {
+  const scripts = html.match(/<script\b[^>]*>/gu) ?? [];
+  expect(scripts.length).toBeGreaterThan(0);
+  for (const script of scripts) {
+    expect(script.match(/\bnonce="([^"]+)"/u)?.[1]).toBe(nonce);
+  }
 }

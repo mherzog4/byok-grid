@@ -107,9 +107,11 @@ defaults:
 - unique `BETTER_AUTH_SECRET`, `BYOK_GRID_MASTER_KEY`, and
   `BYOK_GRID_MASTER_KEY_ID` values from a secret manager;
 - HTTPS termination with the canonical public URL configured consistently;
-- preservation of the application's CSP, HSTS, no-referrer, anti-framing,
-  MIME-sniffing, browser-capability, and cache-control response headers plus the
-  browser's `Origin`, `Referer`, and `Sec-Fetch-*` request headers;
+- preservation of the application's request-scoped nonce CSP, HSTS,
+  no-referrer, anti-framing, MIME-sniffing, browser-capability, and cache-control
+  response headers plus the browser's `Origin`, `Referer`, and `Sec-Fetch-*`
+  request headers; the proxy must not rewrite or merge CSP values or cache
+  nonce-bearing HTML for reuse across requests;
 - private-network egress denial, DNS controls, and provider allowlisting around
   the worker as defense in depth;
 - route-aware request-size, slow-body, connection, concurrency, and request-rate

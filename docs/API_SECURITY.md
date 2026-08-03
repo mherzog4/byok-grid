@@ -59,12 +59,24 @@ the web runtime invalid. The TLS proxy must preserve `Origin`, `Referer`, and
 
 ## Response headers
 
-Every response carries the application CSP, one-year HSTS, no-referrer,
-anti-framing, MIME-sniffing, and browser-capability restrictions. Invitation
-pages additionally use a private, no-store cache policy, and framework
-identification is disabled. HSTS is effective only when received over HTTPS;
-the TLS proxy must preserve it. The application does not claim
-`includeSubDomains` or preload because those are domain-wide operator decisions.
+Every application response carries a request-scoped CSP nonce. The script
+policy requires that nonce, enables `strict-dynamic`, and permits neither
+`unsafe-inline` nor `unsafe-eval` in production. Every server-rendered script
+must carry the exact nonce from its response header. Inline styles remain
+allowed because the virtualized grid and workflow canvas calculate styles at
+runtime.
+
+The same responses carry one-year HSTS, no-referrer, anti-framing,
+MIME-sniffing, and browser-capability restrictions. Invitation pages
+additionally use a private, no-store cache policy, and framework identification
+is disabled. HSTS is effective only when received over HTTPS; the TLS proxy must
+preserve it. The application does not claim `includeSubDomains` or preload
+because those are domain-wide operator decisions.
+
+The application renders HTML dynamically so each request receives a fresh
+nonce. A reverse proxy or CDN must preserve the CSP exactly and must not cache
+nonce-bearing HTML for reuse across requests. Static Next.js assets are excluded
+from nonce generation and may retain their normal immutable caching behavior.
 
 ## Proxy and ingress alignment
 

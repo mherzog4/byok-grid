@@ -23,8 +23,11 @@ working tree:
 - a Next.js Proxy same-origin contract for every unsafe API request, preserving
   headless Bearer clients while rejecting cross-site browser metadata and
   provenance-free cookie mutations; fixed-origin Better Auth proxy trust plus
-  CSP, HSTS, no-referrer, anti-framing, MIME-sniffing, browser-capability, and
-  invitation no-store header contracts without framework identification;
+  a fresh nonce CSP per application response, production `strict-dynamic`
+  scripts without `unsafe-inline` or `unsafe-eval`, exact rendered-script nonce
+  matching, nonce uniqueness across responses, HSTS, no-referrer, anti-framing,
+  MIME-sniffing, browser-capability, and invitation no-store header contracts
+  without framework identification;
 - Rust connector-runner formatting, linting, and tests;
 - current-schema migration plus an N-1-to-current SQLite upgrade preserving
   tenant data, migration history, foreign keys, and integrity;

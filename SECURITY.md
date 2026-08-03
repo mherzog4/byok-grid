@@ -50,11 +50,16 @@ Every unsafe `/api/*` request with browser provenance must match the canonical
 fail closed, while headless Bearer-capability clients remain supported when they
 send no browser metadata. Better Auth independently retains its own CSRF checks
 and is configured not to infer its base URL from forwarded proxy headers. The
-web server emits CSP, one-year HSTS, no-referrer, anti-framing, MIME-sniffing,
-and browser-capability restrictions without advertising the framework. A TLS
-proxy must preserve these response headers and the browser request-provenance
-headers. Domain owners may add HSTS subdomain coverage or preload only after
-reviewing every affected hostname.
+web server generates a fresh CSP nonce for every application response, requires
+that nonce on scripts, and enables `strict-dynamic` without production
+`unsafe-inline` or `unsafe-eval` script permission. Inline styles remain allowed
+for the virtualized grid and workflow canvas. The server also emits one-year
+HSTS, no-referrer, anti-framing, MIME-sniffing, and browser-capability
+restrictions without advertising the framework. A TLS proxy must preserve these
+response headers and the browser request-provenance headers. It must not cache
+nonce-bearing HTML for reuse across requests or rewrite, merge, or strip its CSP.
+Domain owners may add HSTS subdomain coverage or preload only after reviewing
+every affected hostname.
 
 npm installs run with strict lifecycle-script review. The root `allowScripts`
 policy permits only esbuild's platform-binary validation and unrs-resolver's

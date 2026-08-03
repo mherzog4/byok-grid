@@ -94,9 +94,10 @@ release. It currently includes:
 - bounded streaming request reads for Better Auth, every product JSON mutation,
   push-ingestion batch, and CSV import, with declared and observed byte
   enforcement;
-- a canonical same-origin boundary for browser API mutations plus CSP, HSTS,
-  no-referrer, anti-framing, MIME-sniffing, browser-capability, and framework-
-  identification suppression headers;
+- a canonical same-origin boundary for browser API mutations plus a fresh
+  nonce-based script CSP on every application response, HSTS, no-referrer,
+  anti-framing, MIME-sniffing, browser-capability, and framework-identification
+  suppression headers;
 - a Node.js workflow worker that resolves credentials just in time, records run
   provenance, and dispatches identifier-only
   outbox events through Hatchet while keeping definitions, row batches, step

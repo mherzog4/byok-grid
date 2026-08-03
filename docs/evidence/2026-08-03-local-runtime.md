@@ -27,22 +27,26 @@ cross-site signup and cookie-authenticated table mutations with the exact `403`
 contract, sent a signup larger than the 64-KiB authentication boundary, and sent
 an authenticated table mutation larger than the five-MiB product JSON boundary;
 both oversized requests required their exact `413` transport responses. The
-authenticated application response also had to expose CSP, one-year HSTS,
-no-referrer, anti-framing, MIME-sniffing, and browser-capability restrictions
-without `X-Powered-By`. It then sent Compose `SIGTERM` with a 90-second timeout.
-Evidence emitted by the command:
+authenticated application response also had to expose a request-scoped CSP
+nonce, production `strict-dynamic` without script `unsafe-inline` or
+`unsafe-eval`, one-year HSTS, no-referrer, anti-framing, MIME-sniffing, and
+browser-capability restrictions without `X-Powered-By`. The test required every
+rendered script to carry the exact response nonce and proved a rejected
+cross-origin response received a different nonce. It then sent Compose
+`SIGTERM` with a 90-second timeout. Evidence emitted by the command:
 
 ```text
 {"marker":"BYOK_GRID_DRAIN_DRILL_IN_FLIGHT","rowCount":500,...}
-{"drainMs":1293,"marker":"BYOK_GRID_DRAIN_SIGNAL_COMPLETE"}
+{"drainMs":1826,"marker":"BYOK_GRID_DRAIN_SIGNAL_COMPLETE"}
 {"marker":"BYOK_GRID_DRAIN_DRILL_PASSED","rows":500,"steps":100}
 ```
 
 The E2E assertions proved the oversized requests did not enter Better Auth or
-domain mutation logic, then proved an ordinary signup, mutation, run, and all
-100 steps succeeded. The drill also proved worker exit code 0, no OOM kill,
-Hatchet pending-task drain confirmation, no REST pause failure, and successful
-worker health after automatic restart.
+domain mutation logic, verified the response-scoped script policy on compiled
+standalone HTML, then proved an ordinary signup, mutation, run, and all 100
+steps succeeded. The drill also proved worker exit code 0, no OOM kill, Hatchet
+pending-task drain confirmation, no REST pause failure, and successful worker
+health after automatic restart.
 
 The first run of the expanded drill exposed `SQLITE_BUSY` while the workflow
 worker acquired an internal local transaction connection. Its attempt to record
