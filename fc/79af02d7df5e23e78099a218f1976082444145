@@ -1,0 +1,41 @@
+docs/NETWORK_SECURITY.md
+  s_28ae7db8033464::t_5b0cc2d304d54d 1-141
+deploy/helm/byok-grid/values.schema.json
+  s_28ae7db8033464::t_a704d5935905d8 170-222,270-371
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_5b0cc2d304d54d 194-196
+deploy/helm/byok-grid/templates/network-policies.yaml
+  s_28ae7db8033464::t_4a32fe1c2e6f35 1-30,32-37,41-53,55-64,68-127,129-135,139-151,153-168,172-185,187-193,197-199
+  s_28ae7db8033464::t_e562b33622d65c 31,38-40,54,65-67,128,136-138,152,169-171,186,194-196
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_5b0cc2d304d54d 149-164
+deploy/helm/byok-grid/values.yaml
+  s_28ae7db8033464::t_4a32fe1c2e6f35 179-180,182-194
+README.md
+  s_28ae7db8033464::t_5b0cc2d304d54d 101-103,278-280
+scripts/verify-helm-chart.sh
+  s_28ae7db8033464::t_e4fbee1ecf87ec 61-64
+  s_28ae7db8033464::t_e562b33622d65c 10-11,18-21,50-60,99-115
+  s_28ae7db8033464::t_55fc29872fc0cc 116
+deploy/helm/byok-grid/ci-values.yaml
+  s_28ae7db8033464::t_4a32fe1c2e6f35 47-62
+  s_28ae7db8033464::t_e4fbee1ecf87ec 63-97
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_5b0cc2d304d54d 42-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "fc79af02d7df5e23e78099a218f1976082444145",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
