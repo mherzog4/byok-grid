@@ -63,6 +63,9 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
 6. Verify every released file and image using `docs/VERIFY_RELEASE.md`, then
    install a digest-pinned candidate in the reference environment by applying
    the release's generated `values.digests.yaml` after operator values.
+7. Run the read-only public deployment verifier from
+   `docs/VERIFY_DEPLOYMENT.md` against the canonical TLS origin and retain its
+   structured success record with the deployment evidence.
 
 The image job initially publishes only commit-scoped staging tags. Each image
 is scanned at its immutable digest and attested only after the scan passes. A

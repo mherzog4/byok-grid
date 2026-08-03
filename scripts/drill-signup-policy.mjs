@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
+import { verifyPublicDeployment } from './verify-public-deployment.mjs';
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const standaloneServer = join(
@@ -65,6 +66,7 @@ async function verifyPublicOpenRejected() {
 async function verifyDisabledSignup() {
   const runtime = await startRuntime('disabled', '');
   try {
+    await verifyCompiledPublicContract(runtime);
     const signup = await signUp(
       runtime,
       `disabled-${crypto.randomUUID()}@example.test`
@@ -155,6 +157,22 @@ async function verifyDisabledSignup() {
     await runtime.stop();
   }
   console.log(JSON.stringify({ marker: 'BYOK_GRID_SIGNUP_DISABLED_VERIFIED' }));
+}
+
+async function verifyCompiledPublicContract(runtime) {
+  await verifyPublicDeployment({
+    fetchImplementation: (input, init) => {
+      const requested = new URL(input);
+      return fetch(
+        new URL(`${requested.pathname}${requested.search}`, runtime.localUrl),
+        init
+      );
+    },
+    origin: runtime.publicUrl,
+  });
+  console.log(
+    JSON.stringify({ marker: 'BYOK_GRID_PUBLIC_CONTRACT_DRILL_PASSED' })
+  );
 }
 
 async function verifyAllowlistedSignup() {

@@ -263,6 +263,11 @@ compressed-body policy, and edge tests. Do not rely exclusively on proxy limits:
 the application bounds observed bytes so chunked requests and alternate internal
 paths cannot bypass the memory boundary.
 
+After the canonical HTTPS ingress is live, run the repository's read-only
+[`public deployment verifier`](VERIFY_DEPLOYMENT.md). It confirms health,
+request correlation, security headers, and per-response CSP nonce behavior
+through the real proxy without creating product data.
+
 Use the repository's verified online-backup and new-file restore workflow in
 [the backup and restore guide](BACKUP_RESTORE.md). A copied SQLite file or an
 untested provider snapshot is not sufficient recovery evidence.

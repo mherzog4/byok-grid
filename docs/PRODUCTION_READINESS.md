@@ -118,6 +118,10 @@ working tree:
 - atomic, cross-platform release packaging that removes failed staging output
   and creates checksums only after the chart, SDK, digest manifest, and Helm
   digest values all exist;
+- a bounded, read-only public deployment verifier for exact live/ready bodies,
+  redirect rejection, unique request correlation, ingress-preserved security
+  headers, and distinct response-bound CSP script nonces, reused by the
+  compiled-standalone drill without treating loopback as ingress evidence;
 - full-digest pins for release bases, CI services, and Compose third-party
   images, with registry evidence that each referenced manifest supports both
   `linux/amd64` and `linux/arm64`.
@@ -157,6 +161,8 @@ dated evidence linked from a release issue or runbook record:
 - deploy the reference Helm release behind real TLS with an external secret
   manager, default-deny network policy, provider-specific egress, centralized
   logs, metrics, alert routing, and an operator-owned rollback decision path;
+  retain a passing `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` record from the
+  canonical ingress;
 - capture the production ingress `X-Forwarded-For` chain, prove the proxy
   overwrites or predictably appends it, deny direct web access, configure only
   the observed proxy IP/CIDR boundary, and exercise both application and edge

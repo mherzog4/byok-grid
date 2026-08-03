@@ -47,3 +47,8 @@ then run the preflight, migration, readiness, workflow, backup, and restore
 checks described in the operator guides. Provenance proves origin and build
 identity; it does not prove that a release is free of vulnerabilities or
 operational defects.
+
+Once the digest-pinned release is reachable through its canonical HTTPS
+ingress, run the read-only checks in
+[`docs/VERIFY_DEPLOYMENT.md`](VERIFY_DEPLOYMENT.md). Preserve its structured
+success marker with the digest manifest and operator evidence.

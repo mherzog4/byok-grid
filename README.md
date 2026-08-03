@@ -375,6 +375,10 @@ npm audit
 npm run benchmark:grid
 ```
 
+After a digest-pinned candidate is installed behind its real HTTPS ingress, run
+the read-only checks in
+[`docs/VERIFY_DEPLOYMENT.md`](docs/VERIFY_DEPLOYMENT.md).
+
 SQLite integration tests run in the default suite against isolated temporary
 databases. Historical PostgreSQL compatibility tests remain opt-in and require
 a separately prepared legacy database; they are not part of the shipped runtime:

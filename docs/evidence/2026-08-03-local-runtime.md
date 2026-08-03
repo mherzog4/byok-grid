@@ -249,7 +249,14 @@ npm run drill:signup-policy
 The first process proved that public open signup and a trust-all `/0`
 authentication proxy range both exit before readiness, while the diagnostic
 named the setting without echoing its value. The second used a public HTTPS
-canonical origin with signup disabled. It returned
+canonical origin with signup disabled. Before any mutation, the new public
+deployment verifier was routed through the compiled listener. It proved the
+exact non-cacheable live and ready JSON bodies, unique request IDs, one-year
+HSTS and the remaining fixed security headers, absent framework disclosure,
+distinct CSP nonces across two sign-in responses, and exact nonce attachment to
+every rendered script. This loopback execution emitted
+`BYOK_GRID_PUBLIC_CONTRACT_DRILL_PASSED`; it does not replace running the same
+verifier through the real TLS ingress. The process then returned
 `400` for account creation and omitted the Create account control from
 server-rendered HTML. Successful page responses, the disabled-signup response,
 and a cross-origin proxy rejection each returned a canonical, unique,
@@ -272,6 +279,7 @@ emitted by the command:
 ```text
 {"marker":"BYOK_GRID_PUBLIC_OPEN_SIGNUP_REJECTED"}
 {"marker":"BYOK_GRID_UNSAFE_PROXY_TRUST_REJECTED"}
+{"marker":"BYOK_GRID_PUBLIC_CONTRACT_DRILL_PASSED"}
 {"marker":"BYOK_GRID_REQUEST_CORRELATION_DRILL_PASSED"}
 {"marker":"BYOK_GRID_AUTH_RATE_LIMIT_DRILL_PASSED"}
 {"marker":"BYOK_GRID_SIGNUP_DISABLED_VERIFIED"}

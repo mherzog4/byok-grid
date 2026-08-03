@@ -9,11 +9,14 @@ export async function GET() {
   try {
     assertWebRuntimeConfiguration();
     await assertSqliteMigrationsReady(sqliteDatabase.client);
-    return NextResponse.json({
-      configuration: 'valid',
-      database: 'sqlite',
-      status: 'ok',
-    });
+    return NextResponse.json(
+      {
+        configuration: 'valid',
+        database: 'sqlite',
+        status: 'ok',
+      },
+      { headers: { 'Cache-Control': 'no-store' } }
+    );
   } catch {
     return NextResponse.json(
       {
@@ -21,7 +24,7 @@ export async function GET() {
         database: 'sqlite_unready',
         status: 'degraded',
       },
-      { status: 503 }
+      { headers: { 'Cache-Control': 'no-store' }, status: 503 }
     );
   }
 }
