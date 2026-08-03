@@ -1,0 +1,47 @@
+package.json
+  s_28ae7db8033464::t_6b64ea60928e78 14
+.github/workflows/ci.yml
+  s_28ae7db8033464::t_6b64ea60928e78 45-46,54-55
+  s_28ae7db8033464::t_881f721c8b20fe 56
+CONTRIBUTING.md
+  s_28ae7db8033464::t_204c937ce09614 17-19,25-28
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_204c937ce09614 15-17
+docs/adr/0042-preinstall-workflow-supply-chain-policy.md
+  s_28ae7db8033464::t_10f625b3bff2dd 33-35
+  s_28ae7db8033464::t_204c937ce09614 1-32,36-40,43-62
+  s_28ae7db8033464::t_7d15c7c2e2504c 41-42
+scripts/verify-workflows.test.mjs
+  s_28ae7db8033464::t_6b64ea60928e78 1,4,7-79,90-95,114
+  s_28ae7db8033464::t_e442260553fd87 2-3,5-6,96-113
+  s_28ae7db8033464::t_10f625b3bff2dd 80-89
+.github/workflows/security.yml
+  s_28ae7db8033464::t_6b64ea60928e78 16-35,55-56,83-84
+docs/evidence/2026-08-03-github-hosted-state.md
+  s_28ae7db8033464::t_204c937ce09614 29-33
+scripts/verify-workflows.mjs
+  s_28ae7db8033464::t_6b64ea60928e78 1-32,41-43,56,60-109,113-115,119-121,126-130,134-193
+  s_28ae7db8033464::t_10f625b3bff2dd 33-40,44-55,57-59,110-112,116-118,122-125,131-133
+SECURITY.md
+  s_28ae7db8033464::t_204c937ce09614 86-90
+  s_28ae7db8033464::t_7d15c7c2e2504c 91-93
+.github/workflows/release.yml
+  s_28ae7db8033464::t_6b64ea60928e78 45-46,54-56,131-132,257-258
+  s_28ae7db8033464::t_7d15c7c2e2504c 296-297
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "70d2ff6eb8037880796e2963cdd9a11afb45af82",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
