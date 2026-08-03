@@ -21,6 +21,7 @@ import {
   packageRelease,
 } from './package-release.mjs';
 import { RELEASE_IMAGE_SMOKE_MARKER } from './verify-release-image-smoke-lib.mjs';
+import { RELEASE_BUNDLE_MARKER } from './verify-release-bundle-lib.mjs';
 
 const releaseImages = [
   ['web', 'byok-grid-web'],
@@ -273,6 +274,26 @@ test(
       );
       assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
       assert.match(result.stdout, /assembled atomically/u);
+      const verification = spawnSync(
+        process.execPath,
+        [
+          'scripts/verify-release-bundle.mjs',
+          '--version',
+          '0.1.0-rc.1',
+          '--directory',
+          output,
+        ],
+        { encoding: 'utf8' }
+      );
+      assert.equal(
+        verification.status,
+        0,
+        `${verification.stdout}\n${verification.stderr}`
+      );
+      assert.equal(
+        JSON.parse(verification.stdout).marker,
+        RELEASE_BUNDLE_MARKER
+      );
       assert.equal(existsSync(join(output, 'byok-grid-0.1.0-rc.1.tgz')), true);
       assert.equal(
         readdirSync(output).filter((name) => name.endsWith('.tgz')).length,

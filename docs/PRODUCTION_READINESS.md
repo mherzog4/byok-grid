@@ -118,6 +118,10 @@ working tree:
 - atomic, cross-platform release packaging that removes failed staging output
   and creates checksums only after the chart, SDK, digest manifest, and Helm
   digest values all exist;
+- a dependency-free release-bundle verifier that requires the exact six assets,
+  streams checksum validation, semantically binds digest-pinned Helm values and
+  fourteen image-smoke records, emits a bounded success marker, and runs before
+  release-file attestation;
 - a bounded, read-only public deployment verifier for exact live/ready bodies,
   redirect rejection, unique request correlation, ingress-preserved security
   headers, and distinct response-bound CSP script nonces, reused by the

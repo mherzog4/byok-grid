@@ -73,6 +73,89 @@ export function verifyReleaseImageSmokeEvidence(value, options) {
   return evidenceRecord(expected);
 }
 
+export function verifyReleaseImageSmokeManifest(source, options) {
+  if (typeof source !== 'string' || Buffer.byteLength(source) > 65_536) {
+    fail('The release image smoke manifest must be bounded text.');
+  }
+  if (!source.endsWith('\n') || source.includes('\r')) {
+    fail('The release image smoke manifest must be canonical JSONL.');
+  }
+  if (!options || !Array.isArray(options.expectedImages)) {
+    fail('The release image smoke manifest needs expected images.');
+  }
+
+  const expectedImages = new Map();
+  for (const entry of options.expectedImages) {
+    const expectedTarget = target(entry?.target, 'manifest target');
+    if (
+      typeof entry?.digest !== 'string' ||
+      !DIGEST_PATTERN.test(entry.digest) ||
+      expectedImages.has(expectedTarget)
+    ) {
+      fail('The release image smoke manifest images must be safe and unique.');
+    }
+    expectedImages.set(expectedTarget, entry.digest);
+  }
+  if (expectedImages.size === 0) {
+    fail('The release image smoke manifest needs expected images.');
+  }
+
+  const releaseTargets = [...expectedImages.keys()];
+  const lines = source.slice(0, -1).split('\n');
+  if (
+    lines.length !== expectedImages.size * PLATFORMS.length ||
+    lines.some((line) => line.length === 0)
+  ) {
+    fail('The release image smoke manifest has the wrong record count.');
+  }
+
+  const records = [];
+  const identities = new Set();
+  for (const line of lines) {
+    let parsed;
+    try {
+      parsed = JSON.parse(line);
+    } catch {
+      fail('The release image smoke manifest contains invalid JSON.');
+    }
+    const expectedDigest = expectedImages.get(parsed?.target);
+    if (!expectedDigest) {
+      fail('The release image smoke manifest contains an unknown target.');
+    }
+    const verified = verifyReleaseImageSmokeEvidence(parsed, {
+      expectedDigest,
+      expectedPlatform: parsed?.platform,
+      expectedTarget: parsed?.target,
+      releaseTargets,
+    });
+    const identity = `${verified.target}\u0000${verified.platform}`;
+    if (identities.has(identity)) {
+      fail('The release image smoke manifest repeats a target platform.');
+    }
+    identities.add(identity);
+    records.push(verified);
+  }
+
+  for (const expectedTarget of releaseTargets) {
+    for (const platform of PLATFORMS) {
+      if (!identities.has(`${expectedTarget}\u0000${platform}`)) {
+        fail('The release image smoke manifest is missing a target platform.');
+      }
+    }
+  }
+
+  records.sort(
+    (left, right) =>
+      compareAscii(left.target, right.target) ||
+      PLATFORMS.indexOf(left.platform) - PLATFORMS.indexOf(right.platform)
+  );
+  const canonical = `${records.map((record) => JSON.stringify(record)).join('\n')}\n`;
+  if (source !== canonical) {
+    fail('The release image smoke manifest must be canonical JSONL.');
+  }
+  return records;
+}
+
 function validateExpectedSmoke(options) {
   if (
     !options ||
@@ -114,6 +197,12 @@ function evidenceRecord(expected) {
     platform: expected.platform,
     target: expected.target,
   };
+}
+
+function compareAscii(left, right) {
+  if (left < right) return -1;
+  if (left > right) return 1;
+  return 0;
 }
 
 function target(value, name) {

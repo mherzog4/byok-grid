@@ -41,6 +41,20 @@ covering `linux/amd64` and `linux/arm64` once each. The output directory must
 not already exist; this prevents a retry from mixing artifacts from different
 attempts.
 
+Independently verify the assembled bytes with the same dependency-free command
+that runs before release-file attestation:
+
+```text
+npm run release:verify-bundle -- \
+  --version 0.1.0-rc.1 \
+  --directory dist/release
+```
+
+Success emits `BYOK_GRID_RELEASE_BUNDLE_VERIFIED` with the exact asset, image,
+and smoke-record counts. The verifier streams archive hashing and rejects any
+extra asset, checksum drift, digest/value mismatch, or noncanonical smoke
+evidence.
+
 Maintainers can exercise the real local Helm/npm packaging toolchain without
 publishing anything:
 
@@ -72,8 +86,9 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
 5. Let `.github/workflows/release.yml` verify source, build images, publish
    attestations, smoke every immutable image on `linux/amd64` and `linux/arm64`,
    revalidate the seven two-record `release-smoke-<target>` artifacts into the
-   checksummed and attested `IMAGE_SMOKE.jsonl` release asset, and create the
-   GitHub Release. Do not manually replace failed assets or move the tag.
+   checksummed `IMAGE_SMOKE.jsonl` release asset, independently verify the
+   complete bundle, attest it, and create the GitHub Release. Do not manually
+   replace failed assets or move the tag.
 6. Verify every released file and image using `docs/VERIFY_RELEASE.md`, then
    install a digest-pinned candidate in the reference environment by applying
    the release's generated `values.digests.yaml` after operator values.

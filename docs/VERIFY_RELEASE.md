@@ -18,6 +18,20 @@ exactly fourteen `BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED` records: one
 packager reconstructs and validates this file from the seven matrix artifacts
 before checksumming and attesting it.
 
+From the matching release source, run the complete bundle verifier against a
+directory containing only the six downloaded release assets:
+
+```text
+npm run release:verify-bundle -- \
+  --version 0.1.0-rc.1 \
+  --directory /path/to/downloaded-release
+```
+
+The `BYOK_GRID_RELEASE_BUNDLE_VERIFIED` result proves the exact asset set,
+canonical checksums, archive hashes, seven-image digest manifest, generated
+Helm values, and fourteen digest-bound smoke records. It complements—not
+replaces—the GitHub attestations and registry vulnerability scan.
+
 Verify a downloaded chart or SDK package against the repository identity:
 
 ```text

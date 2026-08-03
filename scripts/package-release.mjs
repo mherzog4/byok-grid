@@ -15,7 +15,10 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { generateHelmDigestValues } from './generate-helm-digest-values.mjs';
-import { verifyReleaseImageSmokeEvidence } from './verify-release-image-smoke-lib.mjs';
+import {
+  verifyReleaseImageSmokeEvidence,
+  verifyReleaseImageSmokeManifest,
+} from './verify-release-image-smoke-lib.mjs';
 
 const semverPattern =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|[A-Za-z-][0-9A-Za-z-]*))*))?$/;
@@ -72,7 +75,7 @@ export function collectReleaseSmokeEvidence(
     }
   }
 
-  const digests = digestTargets(digestManifest, entries);
+  const digests = releaseDigestTargets(digestManifest, releaseConfig);
   const records = [];
   for (const { target } of entries) {
     const file = `${target}.jsonl`;
@@ -130,7 +133,14 @@ export function collectReleaseSmokeEvidence(
       smokePlatforms.indexOf(left.platform) -
         smokePlatforms.indexOf(right.platform)
   );
-  return `${records.map((record) => JSON.stringify(record)).join('\n')}\n`;
+  const manifest = `${records.map((record) => JSON.stringify(record)).join('\n')}\n`;
+  verifyReleaseImageSmokeManifest(manifest, {
+    expectedImages: entries.map(({ target }) => ({
+      digest: digests.get(target),
+      target,
+    })),
+  });
+  return manifest;
 }
 
 export function createChecksumManifest(directory) {
@@ -268,7 +278,8 @@ function validateReleaseConfig(config) {
   });
 }
 
-function digestTargets(manifest, entries) {
+export function releaseDigestTargets(manifest, releaseConfig) {
+  const entries = validateReleaseConfig(releaseConfig);
   if (typeof manifest !== 'string' || Buffer.byteLength(manifest) > 16_384) {
     throw new Error('Image digest manifest must be bounded text.');
   }

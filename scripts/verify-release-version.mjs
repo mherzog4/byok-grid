@@ -154,6 +154,28 @@ if (!releaseWorkflow.includes('npm run release:package --')) {
   fail('The release must use the tested atomic artifact packager.');
 }
 
+if (
+  rootPackage.scripts?.['release:verify-bundle'] !==
+  'node scripts/verify-release-bundle.mjs'
+) {
+  fail('The release bundle verifier must remain a public repository command.');
+}
+
+const packageIndex = releaseWorkflow.indexOf('npm run release:package --');
+const bundleVerificationIndex = releaseWorkflow.indexOf(
+  'npm run release:verify-bundle --'
+);
+const releaseAttestationIndex = releaseWorkflow.indexOf(
+  '- name: Attest release files'
+);
+if (
+  bundleVerificationIndex <= packageIndex ||
+  releaseAttestationIndex <= bundleVerificationIndex ||
+  !releaseWorkflow.includes('--directory dist/release')
+) {
+  fail('Release files must be independently verified before attestation.');
+}
+
 for (const evidencePackagingContract of [
   'pattern: release-smoke-*',
   'path: release-smoke',

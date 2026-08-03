@@ -7,6 +7,7 @@ import {
   RELEASE_IMAGE_SMOKE_MARKER,
   verifyReleaseImageSmoke,
   verifyReleaseImageSmokeEvidence,
+  verifyReleaseImageSmokeManifest,
 } from './verify-release-image-smoke-lib.mjs';
 
 const DIGEST = `sha256:${'a'.repeat(64)}`;
@@ -72,6 +73,48 @@ describe('multi-architecture release image smoke', () => {
           }
         ),
       /does not match/u
+    );
+  });
+
+  it('accepts only a complete canonical consolidated manifest', () => {
+    const expectedImages = [
+      { digest: DIGEST, target: 'web' },
+      { digest: `sha256:${'b'.repeat(64)}`, target: 'workflow-worker' },
+    ];
+    const records = expectedImages.flatMap(({ digest, target }) =>
+      ['linux/amd64', 'linux/arm64'].map((platform) => ({
+        digest,
+        marker: RELEASE_IMAGE_SMOKE_MARKER,
+        platform,
+        target,
+      }))
+    );
+    const manifest = `${records.map((record) => JSON.stringify(record)).join('\n')}\n`;
+    assert.deepEqual(
+      verifyReleaseImageSmokeManifest(manifest, { expectedImages }),
+      records
+    );
+    assert.throws(
+      () =>
+        verifyReleaseImageSmokeManifest(
+          `${records
+            .toReversed()
+            .map((record) => JSON.stringify(record))
+            .join('\n')}\n`,
+          { expectedImages }
+        ),
+      /canonical JSONL/u
+    );
+    assert.throws(
+      () =>
+        verifyReleaseImageSmokeManifest(
+          `${records
+            .slice(1)
+            .map((record) => JSON.stringify(record))
+            .join('\n')}\n`,
+          { expectedImages }
+        ),
+      /wrong record count/u
     );
   });
 
