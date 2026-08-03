@@ -194,4 +194,21 @@ describe('web runtime configuration', () => {
       })
     ).toThrow('SQLITE_DATABASE_URL must include a file path.');
   });
+
+  it('requires libSQL when the deployment selects remote database mode', () => {
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_DATABASE_MODE: 'remote',
+      })
+    ).toThrow('BYOK_GRID_DATABASE_MODE=remote requires libsql://');
+
+    expect(() =>
+      assertWebRuntimeConfiguration({
+        ...validEnvironment,
+        BYOK_GRID_DATABASE_MODE: 'remote',
+        SQLITE_DATABASE_URL: 'libsql://database.example.test',
+      })
+    ).not.toThrow();
+  });
 });

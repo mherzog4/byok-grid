@@ -18,6 +18,7 @@ if (config.SQLITE_DATABASE_URL.startsWith('file:')) {
 }
 const database = await openSqliteDatabase({
   ...(config.SQLITE_AUTH_TOKEN ? { authToken: config.SQLITE_AUTH_TOKEN } : {}),
+  mode: config.BYOK_GRID_DATABASE_MODE,
   url: config.SQLITE_DATABASE_URL,
 });
 const clickhouse = new ClickHouseProjectionClient(config);

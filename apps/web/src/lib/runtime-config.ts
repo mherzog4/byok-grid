@@ -98,11 +98,12 @@ export function assertWebRuntimeConfiguration(
     ...(environment.SQLITE_AUTH_TOKEN
       ? { authToken: environment.SQLITE_AUTH_TOKEN }
       : {}),
+    mode: environment.BYOK_GRID_DATABASE_MODE,
     url: databaseUrl,
   });
   if (!databaseResult.success) {
     issues.push(
-      'SQLITE_DATABASE_URL must be a valid file:, :memory:, or libsql:// URL.'
+      'SQLITE_DATABASE_URL must be a valid file:, :memory:, or libsql:// URL; BYOK_GRID_DATABASE_MODE=remote requires libsql://.'
     );
   } else if (
     databaseResult.data.url.startsWith('file:') &&

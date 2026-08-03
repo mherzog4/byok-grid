@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { loadEnvFile } from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { sqliteDatabaseModeSchema } from '@byok-grid/db';
 import { z } from 'zod';
 
 const identifier = z.string().regex(/^[A-Za-z_][A-Za-z0-9_]{0,62}$/);
@@ -16,6 +17,7 @@ const optionalSecret = z.preprocess(
 
 const schema = z
   .object({
+    BYOK_GRID_DATABASE_MODE: sqliteDatabaseModeSchema,
     SQLITE_AUTH_TOKEN: optionalSecret,
     SQLITE_DATABASE_URL: z
       .string()
@@ -53,6 +55,17 @@ const schema = z
       .regex(/^[A-Za-z0-9_.@-]+$/),
   })
   .superRefine((value, context) => {
+    if (
+      value.BYOK_GRID_DATABASE_MODE === 'remote' &&
+      !value.SQLITE_DATABASE_URL.startsWith('libsql://')
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Remote database mode requires a libsql:// URL.',
+        path: ['SQLITE_DATABASE_URL'],
+      });
+    }
+
     const url = new URL(value.CLICKHOUSE_URL);
     if (url.username || url.password || url.search || url.hash) {
       context.addIssue({

@@ -16,6 +16,7 @@ export const workflowDatabase = await openSqliteDatabase({
   ...(workflowWorkerConfig.SQLITE_AUTH_TOKEN
     ? { authToken: workflowWorkerConfig.SQLITE_AUTH_TOKEN }
     : {}),
+  mode: workflowWorkerConfig.BYOK_GRID_DATABASE_MODE,
   url: workflowWorkerConfig.SQLITE_DATABASE_URL,
 });
 

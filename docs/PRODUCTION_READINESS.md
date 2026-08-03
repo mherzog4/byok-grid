@@ -67,6 +67,10 @@ working tree:
   fails before application work starts; a real two-process WAL drill proves
   stale-connection reset and recovery without callback replay;
 - readiness rejection for a database missing the latest required migration;
+- explicit local/remote database topology policy, with every Helm-owned
+  database process requiring `libsql://` against the kubelet-resolved Secret,
+  startup-safe rejection before file creation or application work, and
+  default/full-render coverage for all required and optional workloads;
 - online SQLite backup, integrity verification, restore to a new file, and
   digest equality while the web container remained available;
 - bounded deployment master-key overlap and workspace-key-only rewrapping with

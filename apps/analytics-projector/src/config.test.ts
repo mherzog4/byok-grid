@@ -23,8 +23,26 @@ describe('analytics projector configuration', () => {
       CLICKHOUSE_ALLOW_INSECURE_HTTP: false,
       CLICKHOUSE_DATABASE: 'byok_grid_analytics',
       CLICKHOUSE_TABLE: 'events',
+      BYOK_GRID_DATABASE_MODE: 'local',
       SQLITE_DATABASE_URL: 'file:./data/byok-grid.sqlite',
     });
+  });
+
+  it('requires libSQL when remote database mode is selected', () => {
+    expect(() =>
+      parseAnalyticsProjectorConfig({
+        ...base,
+        BYOK_GRID_DATABASE_MODE: 'remote',
+      })
+    ).toThrow(/requires a libsql:\/\/ URL/i);
+
+    expect(
+      parseAnalyticsProjectorConfig({
+        ...base,
+        BYOK_GRID_DATABASE_MODE: 'remote',
+        SQLITE_DATABASE_URL: 'libsql://database.example.test',
+      }).BYOK_GRID_DATABASE_MODE
+    ).toBe('remote');
   });
 
   it('requires explicit local HTTP and keeps credentials out of the URL', () => {

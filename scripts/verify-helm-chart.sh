@@ -47,6 +47,8 @@ test "$(grep -c 'startupProbe:' "$default_render")" -eq 1
 grep -A4 'startupProbe:' "$default_render" | grep -q 'path: /api/live'
 grep -q 'helm.sh/hook: pre-install,pre-upgrade' "$default_render"
 grep -q 'key: sqlite-database-url' "$default_render"
+test "$(grep -c 'name: BYOK_GRID_DATABASE_MODE' "$default_render")" -eq 3
+test "$(grep -A1 'name: BYOK_GRID_DATABASE_MODE' "$default_render" | grep -c 'value: remote')" -eq 3
 grep -q 'BYOK_GRID_SIGNUP_MODE: "disabled"' "$default_render"
 grep -q 'BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS: ""' "$default_render"
 grep -q 'BYOK_GRID_EMAIL_MODE: "disabled"' "$default_render"
@@ -96,6 +98,8 @@ grep -q 'BYOK_GRID_SESSION_UPDATE_AGE_SECONDS: "3600"' "$full_render"
 grep -q 'signup-allowed-emails: "release-owner@example.test"' "$full_render"
 grep -q 'byok-grid-additional-master-keys:' "$full_render"
 grep -q 'name: SQLITE_DATABASE_URL' "$full_render"
+test "$(grep -c 'name: BYOK_GRID_DATABASE_MODE' "$full_render")" -eq 4
+test "$(grep -A1 'name: BYOK_GRID_DATABASE_MODE' "$full_render" | grep -c 'value: remote')" -eq 4
 grep -q 'app.kubernetes.io/component: analytics-projector' "$full_render"
 grep -q 'app.kubernetes.io/component: connector-runner' "$full_render"
 test "$(grep -c 'image: \"ghcr.io/mherzog4/byok-grid-.*@sha256:' "$full_render")" -eq 5

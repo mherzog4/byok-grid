@@ -6,6 +6,28 @@ This record is reproducible repository evidence; it is not a substitute for an
 authenticated production Hatchet, remote libSQL, or reference Kubernetes
 deployment.
 
+## Kubernetes remote-database fail-closed contract
+
+The shared configuration, web runtime, and analytics-projector tests exercised
+the explicit local/remote database policy. Local mode retained file-backed
+SQLite, while remote mode accepted `libsql://` and rejected a file URL without
+including that URL in the structured validation issue.
+
+The real migration command was then run with remote mode and a fresh path under
+`/tmp`. It exited before database opening with:
+
+```text
+Remote database mode requires a libsql:// URL.
+```
+
+The candidate file did not exist after the process exited, proving validation
+preceded local directory or database creation. Helm lint and the default, full,
+egress, and digest renders required `BYOK_GRID_DATABASE_MODE=remote` on web,
+workflow worker, migration, and the enabled analytics projector. This closes
+the repository/configuration path that could otherwise create per-pod local
+state; it does not satisfy the remote provider's multi-replica, backup, restore,
+or failover gate.
+
 ## Connector-runner SIGTERM drain
 
 The Unix integration test launched the real compiled connector-runner binary

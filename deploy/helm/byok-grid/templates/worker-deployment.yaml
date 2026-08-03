@@ -53,6 +53,8 @@ spec:
             - configMapRef:
                 name: {{ include "byok-grid.fullname" . }}-config
           env:
+            - name: BYOK_GRID_DATABASE_MODE
+              value: remote
             - name: SQLITE_DATABASE_URL
               valueFrom:
                 secretKeyRef:

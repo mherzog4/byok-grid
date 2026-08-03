@@ -35,7 +35,11 @@ Provision a durable remote libSQL database. The web, workflow worker, migration
 job, and optional projector receive one `libsql://` URL and, when required by
 the service, an auth token. Use service-side network and tenant isolation; the
 chart does not support a pod-local `file:` database because replicas would not
-share one authoritative file.
+share one authoritative file. Helm cannot inspect a URL stored in an external
+Secret, so the chart sets `BYOK_GRID_DATABASE_MODE=remote` on every
+database-owning process. Runtime validation rejects `file:` and `:memory:`
+before serving, registering work, migrating, or projecting. See
+[ADR 0048](adr/0048-kubernetes-remote-database-mode.md).
 
 Provision authenticated Hatchet separately. Its development `hatchet-lite-dev`
 image from Compose is not suitable for this chart.
@@ -114,6 +118,11 @@ helm template byok-grid deploy/helm/byok-grid \
   --values values.production.yaml \
   --values values.digests.yaml
 ```
+
+These render checks prove that every database-owning workload requires remote
+mode, but only pod startup validates the external Secret's resolved URL. Treat
+a remote-mode configuration failure as a deployment failure; do not bypass it
+by changing the mode or mounting a shared SQLite file.
 
 Then install atomically:
 

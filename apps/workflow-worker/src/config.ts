@@ -3,6 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { loadEnvFile } from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { parseMasterKeyRing } from '@byok-grid/security';
+import { sqliteDatabaseModeSchema } from '@byok-grid/db';
 import { z } from 'zod';
 
 const rootEnvFile = resolve(
@@ -46,6 +47,7 @@ export const workflowWorkerConfig = z
     BYOK_GRID_MASTER_KEY: z.string().min(1),
     BYOK_GRID_MASTER_KEY_ID: z.string().min(1),
     BYOK_GRID_ADDITIONAL_MASTER_KEYS: optionalSecret,
+    BYOK_GRID_DATABASE_MODE: sqliteDatabaseModeSchema,
     CONNECTOR_RUNNER_SHARED_SECRET: z.preprocess(
       (value) => (value === '' ? undefined : value),
       z.string().min(32).optional()
@@ -125,6 +127,17 @@ export const workflowWorkerConfig = z
         message:
           'Connector runner URL and shared secret must be configured together.',
         path: ['CONNECTOR_RUNNER_URL'],
+      });
+    }
+
+    if (
+      value.BYOK_GRID_DATABASE_MODE === 'remote' &&
+      !value.SQLITE_DATABASE_URL.startsWith('libsql://')
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Remote database mode requires a libsql:// URL.',
+        path: ['SQLITE_DATABASE_URL'],
       });
     }
   })
