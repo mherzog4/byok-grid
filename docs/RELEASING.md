@@ -58,7 +58,9 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    rollout contract.
    Multi-host candidates must also retain both successful markers from
    `docs/REMOTE_LIBSQL_DRILL.md` after a provider backup is restored into an
-   isolated database.
+   isolated database. Retain the authenticated Kubernetes worker marker from
+   `docs/KUBERNETES_WORKER_DRAIN_DRILL.md` after signalling an in-flight run in
+   the isolated reference deployment.
 4. Create and push a signed annotated tag such as `v0.1.0-rc.1`.
 5. Let `.github/workflows/release.yml` verify source, build images, publish
    attestations, and create the GitHub Release. Do not manually replace failed

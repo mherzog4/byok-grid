@@ -127,6 +127,11 @@ working tree:
   committed writer, observes the challenge from a second process, and compares
   source/restore schema, migration, and table-count fingerprints before exact
   cleanup;
+- a fail-closed authenticated Kubernetes worker-drain harness that requires an
+  isolated idle environment and one stable replica, signals PID 1 during a real
+  500-row workflow, and verifies clean previous termination, one restart,
+  renewed Hatchet health, drain logs, durable completion, and returned-idle
+  application metrics without emitting credentials or transport errors;
 - full-digest pins for release bases, CI services, and Compose third-party
   images, with registry evidence that each referenced manifest supports both
   `linux/amd64` and `linux/arm64`.
@@ -158,8 +163,10 @@ dated evidence linked from a release issue or runbook record:
 - run an authenticated Hatchet worker against the supported production Hatchet
   version, prove health registration, then send `SIGTERM` during an in-flight
   workflow and prove lease-safe completion or recovery inside the 90-second
-  grace period; the passing auth-disabled local Compose drill does not satisfy
-  this environment-specific gate;
+  grace period using
+  [`KUBERNETES_WORKER_DRAIN_DRILL.md`](KUBERNETES_WORKER_DRAIN_DRILL.md); the
+  passing auth-disabled local Compose drill does not satisfy this
+  environment-specific gate;
 - test the chosen remote libSQL provider with at least two application replicas,
   a simulated replica/process loss, provider backup creation, and restore into
   an isolated database before cutover; retain the drill's prepared and

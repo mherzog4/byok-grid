@@ -51,6 +51,13 @@ worker, and waits for health. Do not run this disruptive drill against a
 production deployment; repeat its signal and recovery procedure through that
 environment's approved rollout tooling instead.
 
+For the authenticated Kubernetes release gate, use the isolated remote
+procedure in
+[`KUBERNETES_WORKER_DRAIN_DRILL.md`](KUBERNETES_WORKER_DRAIN_DRILL.md). It
+proves real Hatchet registration, PID 1 draining, clean restart state, and
+durable completion; the local Compose result does not substitute for that
+environment evidence.
+
 ## Images
 
 Build either runtime directly from the repository root:

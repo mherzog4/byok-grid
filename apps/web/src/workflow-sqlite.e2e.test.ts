@@ -19,12 +19,18 @@ describe.skipIf(!runE2e || !databaseUrl)(
   'SQLite auth and visual workflow HTTP end-to-end',
   () => {
     let client: Client | undefined;
-    const email = `workflow-sqlite-${crypto.randomUUID()}@example.test`;
+    const email =
+      process.env.WORKFLOW_DRILL_EMAIL ??
+      `workflow-sqlite-${crypto.randomUUID()}@example.test`;
+    const password = `workflow-${crypto.randomUUID()}-${crypto.randomUUID()}`;
     let userId: string | undefined;
     let workspaceId: string | undefined;
 
     beforeAll(async () => {
       client = createClient({
+        ...(process.env.TEST_SQLITE_AUTH_TOKEN
+          ? { authToken: process.env.TEST_SQLITE_AUTH_TOKEN }
+          : {}),
         timeout: SQLITE_BUSY_TIMEOUT_MS,
         url: databaseUrl!,
       });
@@ -54,7 +60,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
           body: JSON.stringify({
             email,
             name: 'Cross-origin attempt',
-            password: 'correct-horse-battery-staple-workflow-e2e',
+            password,
           }),
           headers: {
             'content-type': 'application/json',
@@ -75,9 +81,12 @@ describe.skipIf(!runE2e || !databaseUrl)(
         body: JSON.stringify({
           email,
           name: 'x'.repeat(MAXIMUM_AUTH_REQUEST_BODY_BYTES),
-          password: 'correct-horse-battery-staple-workflow-e2e',
+          password,
         }),
-        headers: { 'content-type': 'application/json', origin: requestOrigin },
+        headers: {
+          'content-type': 'application/json',
+          origin: requestOrigin,
+        },
         method: 'POST',
       });
       expect(oversizedSignup.status, await oversizedSignup.clone().text()).toBe(
@@ -91,9 +100,12 @@ describe.skipIf(!runE2e || !databaseUrl)(
         body: JSON.stringify({
           email,
           name: 'SQLite Workflow E2E',
-          password: 'correct-horse-battery-staple-workflow-e2e',
+          password,
         }),
-        headers: { 'content-type': 'application/json', origin: requestOrigin },
+        headers: {
+          'content-type': 'application/json',
+          origin: requestOrigin,
+        },
         method: 'POST',
       });
       expect(signup.status, await signup.clone().text()).toBe(200);

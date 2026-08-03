@@ -296,6 +296,9 @@ receipts, analytics erasure, backups, and external-system boundaries.
 See [the backup and restore guide](docs/BACKUP_RESTORE.md) for verified online
 SQLite snapshots, safe new-file recovery, remote libSQL requirements, and
 restore-drill evidence.
+See [the authenticated Kubernetes worker drain drill](docs/KUBERNETES_WORKER_DRAIN_DRILL.md)
+for isolated Hatchet registration, in-flight `SIGTERM`, clean restart, and
+durable workflow-completion evidence.
 See [the release process](docs/RELEASING.md) and
 [release verification guide](docs/VERIFY_RELEASE.md) for version gates, image
 digests, generated digest-pinned Helm values, checksums, SBOM/provenance, and
