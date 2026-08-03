@@ -191,7 +191,9 @@ web, worker, and migration identities and supports the optional runner and
 analytics projector without bundling their external data services. See the
 [`Kubernetes deployment guide`](KUBERNETES.md) for the Secret contract,
 migration-hook ordering, secure pod defaults, validation commands, and rollout
-procedure.
+procedure. The [network security guide](NETWORK_SECURITY.md) covers the
+chart-owned default-deny ingress baseline, explicit runtime egress mode, and
+the cluster tests required before cutover.
 
 Airbyte and ClickHouse are not default image dependencies. Deploy them only
 when an operator chooses the optional bulk-ingestion adapter or analytics

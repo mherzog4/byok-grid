@@ -98,8 +98,9 @@ release. It currently includes:
 - non-root, multi-stage web and worker images with an opt-in migration-ordered
   Compose evaluation profile;
 - a vendor-neutral Helm release with least-privilege runtime identities,
-  pre-rollout migrations, external-secret support, secure pod defaults, and
-  opt-in connector-runner and ClickHouse-projector workloads;
+  pre-rollout migrations, external-secret support, secure pod defaults,
+  default-deny runtime ingress, explicit egress-isolation controls, and opt-in
+  connector-runner and ClickHouse-projector workloads;
 - owner-only workspace deletion with an exact-name, stale-safe impact preview,
   active-work and operator-hold blockers, content-free audit receipts,
   transactionally scoped authorization, and retryable optional ClickHouse erasure;
@@ -274,6 +275,9 @@ boundary. The practical operator checklist is in
 See [the Kubernetes release ADR](docs/adr/0032-vendor-neutral-kubernetes-release.md)
 and [operator guide](docs/KUBERNETES.md) for migration hooks, external Secret
 ownership, workload isolation, and optional component boundaries.
+See [the Kubernetes network security guide](docs/NETWORK_SECURITY.md) for
+trusted ingress peers, explicit runtime egress, CNI/FQDN limitations, and
+negative connectivity tests.
 See [the workspace-purge ADR](docs/adr/0033-previewed-workspace-purge-and-cross-system-erasure.md)
 and [retention guide](docs/DATA_RETENTION.md) for confirmation, legal holds,
 receipts, analytics erasure, backups, and external-system boundaries.

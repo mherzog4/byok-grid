@@ -176,9 +176,22 @@ ingress:
   tls: []
 
 networkPolicy:
-  # This generic policy isolates the optional runner. Provider egress policy is
-  # cluster/CNI-specific and must be added by the operator.
+  # Isolate every chart-owned runtime pod from unsolicited ingress. Add peers
+  # for the ingress controller and monitoring stack used by the cluster.
   enabled: true
+  ingress:
+    web: []
+    monitoring: []
+  # Standard NetworkPolicy cannot safely identify provider FQDNs. Enabling
+  # egress isolation without explicit rules intentionally blocks all external
+  # traffic from web, worker, and analytics-projector pods. The connector
+  # runner always remains egress-denied.
+  egress:
+    enabled: false
+    shared: []
+    web: []
+    worker: []
+    analyticsProjector: []
 
 nodeSelector: {}
 tolerations: []

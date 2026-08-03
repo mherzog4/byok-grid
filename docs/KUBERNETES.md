@@ -146,15 +146,22 @@ replicas rather than `sum`.
 
 All chart-owned pods run as non-root, drop capabilities, disable privilege
 escalation and service-account token mounts, use the runtime-default seccomp
-profile, and receive only their component-specific secret keys. The optional
-runner additionally has no egress and accepts RPC only from worker pods when
-the cluster implements Kubernetes NetworkPolicy.
+profile, and receive only their component-specific secret keys. Chart-owned
+NetworkPolicies default-deny ingress for the release, then admit only explicitly
+selected ingress-controller and monitoring peers plus worker-to-runner RPC. An
+enabled Ingress without a trusted web peer fails chart rendering. The optional
+runner always has no egress.
 
-Provider egress policy is intentionally not guessed by this chart. BYOK Grid
-can call operator-selected APIs, and portable Kubernetes NetworkPolicy cannot
-express DNS/FQDN rules. Apply a CNI-specific policy for DNS, libSQL, Hatchet,
-approved provider hosts, and observability endpoints. Keep the
-application's DNS-pinned guarded HTTP dispatcher enabled as a second layer.
+Runtime egress isolation is available but requires explicit shared and
+component rules. Provider egress is intentionally not guessed: BYOK Grid can
+call operator-selected APIs, and portable Kubernetes NetworkPolicy cannot
+express DNS/FQDN rules. Apply reviewed standard rules plus CNI-specific policy
+for DNS, libSQL, Hatchet, approved provider hosts, and ClickHouse. A separate
+namespace-level or hook-compatible control must cover the pre-install migration
+Job. Keep the application's DNS-pinned guarded HTTP dispatcher enabled as a
+second layer. The [network security guide](NETWORK_SECURITY.md) defines the
+values contract, selector semantics, migration boundary, and required negative
+tests.
 
 ## Optional components
 

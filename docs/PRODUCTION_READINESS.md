@@ -39,6 +39,10 @@ working tree:
   deployment-wide workflow status, terminal outcomes, active-step age, and
   dispatch backlog without tenant or payload labels;
 - Compose rendering and Helm security/health/migration contract verification;
+- chart-owned default-deny runtime ingress, trusted web and monitoring peer
+  contracts, permanent connector-runner egress denial, opt-in component-scoped
+  runtime egress isolation, and render-time rejection of an exposed Ingress
+  without a trusted peer;
 - local builds of the web, worker, migration, and maintenance image targets;
 - release metadata, Helm chart, connector SDK package, and checksum dry run;
 - digest-aware Helm rendering plus a tested release-asset generator that

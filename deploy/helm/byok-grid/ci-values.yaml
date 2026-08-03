@@ -44,3 +44,54 @@ ingress:
     - secretName: grid-test-tls
       hosts:
         - grid.test.example
+networkPolicy:
+  ingress:
+    web:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: ingress-nginx
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: ingress-nginx
+    monitoring:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: monitoring
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: prometheus
+  egress:
+    shared:
+      - to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: kube-system
+            podSelector:
+              matchLabels:
+                k8s-app: kube-dns
+        ports:
+          - protocol: UDP
+            port: 53
+          - protocol: TCP
+            port: 53
+    web:
+      - to:
+          - ipBlock:
+              cidr: 192.0.2.0/24
+        ports:
+          - protocol: TCP
+            port: 443
+    worker:
+      - to:
+          - ipBlock:
+              cidr: 198.51.100.0/24
+        ports:
+          - protocol: TCP
+            port: 443
+    analyticsProjector:
+      - to:
+          - ipBlock:
+              cidr: 203.0.113.0/24
+        ports:
+          - protocol: TCP
+            port: 443

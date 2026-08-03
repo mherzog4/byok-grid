@@ -7,13 +7,18 @@ full_render="$(mktemp)"
 digest_manifest="$(mktemp)"
 digest_values="$(mktemp)"
 digest_render="$(mktemp)"
-trap 'rm -f "$default_render" "$full_render" "$digest_manifest" "$digest_values" "$digest_render"' EXIT
+egress_render="$(mktemp)"
+trap 'rm -f "$default_render" "$full_render" "$digest_manifest" "$digest_values" "$digest_render" "$egress_render"' EXIT
 
 helm lint --strict "$chart_dir"
 helm template byok-grid "$chart_dir" --namespace byok-grid >"$default_render"
 helm template byok-grid-full "$chart_dir" \
   --namespace byok-grid \
   --values "$chart_dir/ci-values.yaml" >"$full_render"
+helm template byok-grid-egress "$chart_dir" \
+  --namespace byok-grid \
+  --values "$chart_dir/ci-values.yaml" \
+  --set networkPolicy.egress.enabled=true >"$egress_render"
 
 {
   printf '%s\n' 'ghcr.io/mherzog4/byok-grid-web@sha256:1111111111111111111111111111111111111111111111111111111111111111'
@@ -42,7 +47,21 @@ grep -q 'name: app-metrics' "$default_render"
 grep -q 'containerPort: 8002' "$default_render"
 grep -q "body.status !== 'HEALTHY'" "$default_render"
 grep -q 'terminationGracePeriodSeconds: 90' "$default_render"
-grep -q 'kind: NetworkPolicy' "$full_render"
+test "$(grep -c '^kind: NetworkPolicy$' "$default_render")" -eq 3
+test "$(grep -c '^kind: NetworkPolicy$' "$full_render")" -eq 4
+test "$(grep -c '^kind: NetworkPolicy$' "$egress_render")" -eq 8
+grep -q 'name: byok-grid-byok-grid-default-deny-ingress' "$default_render"
+grep -q 'name: byok-grid-byok-grid-web-ingress' "$default_render"
+grep -q 'name: byok-grid-byok-grid-worker-monitoring-ingress' "$default_render"
+grep -q 'name: byok-grid-full-byok-grid-connector-runner' "$full_render"
+grep -q 'kubernetes.io/metadata.name: ingress-nginx' "$full_render"
+grep -q 'kubernetes.io/metadata.name: monitoring' "$full_render"
+grep -q 'name: byok-grid-egress-byok-grid-default-deny-runtime-egress' "$egress_render"
+grep -q 'name: byok-grid-egress-byok-grid-worker-egress' "$egress_render"
+grep -q 'kubernetes.io/metadata.name: kube-system' "$egress_render"
+grep -q 'cidr: 192.0.2.0/24' "$egress_render"
+grep -q 'cidr: 198.51.100.0/24' "$egress_render"
+grep -q 'cidr: 203.0.113.0/24' "$egress_render"
 grep -q 'value: "10000000"' "$full_render"
 grep -q 'name: SQLITE_DATABASE_URL' "$full_render"
 grep -q 'app.kubernetes.io/component: analytics-projector' "$full_render"
@@ -74,6 +93,24 @@ fi
 if helm template conflicting-worker-ports "$chart_dir" \
   --set worker.metrics.port=8001 >/dev/null 2>&1; then
   echo 'expected conflicting worker health and application metrics ports to fail' >&2
+  exit 1
+fi
+
+if helm template missing-ingress-peer "$chart_dir" \
+  --set ingress.enabled=true >/dev/null 2>&1; then
+  echo 'expected ingress without a trusted NetworkPolicy peer to fail' >&2
+  exit 1
+fi
+
+if helm template invalid-egress-port "$chart_dir" \
+  --set networkPolicy.egress.web[0].ports[0].port=0 >/dev/null 2>&1; then
+  echo 'expected an invalid NetworkPolicy egress port to fail schema validation' >&2
+  exit 1
+fi
+
+if helm template network-policy-disabled "$chart_dir" \
+  --set networkPolicy.enabled=false | grep -q '^kind: NetworkPolicy$'; then
+  echo 'expected networkPolicy.enabled=false to omit all NetworkPolicy resources' >&2
   exit 1
 fi
 
