@@ -1,0 +1,55 @@
+.github/workflows/release.yml
+  s_28ae7db8033464::t_d5ed17d0aff219 98
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_66f918d1fc7fce 76-79
+docs/RELEASING.md
+  s_28ae7db8033464::t_66f918d1fc7fce 54-58
+.github/workflows/ci.yml
+  s_28ae7db8033464::t_d5ed17d0aff219 112-114
+deploy/helm/byok-grid/templates/web-deployment.yaml
+  s_28ae7db8033464::t_6ca7e328003d94 1-3,33,49-55,121-127
+package.json
+  s_28ae7db8033464::t_6ca7e328003d94 32
+deploy/helm/byok-grid/values.schema.json
+  s_28ae7db8033464::t_6ca7e328003d94 172-192
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_66f918d1fc7fce 146-165
+deploy/helm/byok-grid/values.yaml
+  s_28ae7db8033464::t_6ca7e328003d94 72-76
+scripts/verify-helm-chart.sh
+  s_28ae7db8033464::t_6ca7e328003d94 40-41,46-47,163-174
+  s_28ae7db8033464::t_191f5314c67518 42-45
+  s_28ae7db8033464::t_6403cd719eb518 175
+docs/adr/0046-web-rollout-draining.md
+  s_28ae7db8033464::t_66f918d1fc7fce 1-61
+  s_28ae7db8033464::t_d5ed17d0aff219 62-63
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_66f918d1fc7fce 9-33
+  s_28ae7db8033464::t_d5ed17d0aff219 3-7
+  s_28ae7db8033464::t_701297e14e6beb 8
+scripts/drill-web-drain.mjs
+  s_28ae7db8033464::t_191f5314c67518 234,241-247,250-254
+  s_28ae7db8033464::t_7f2695b8ecd613 196
+  s_28ae7db8033464::t_6f431cfd10a515 49,64,165,179,181,183,186,188,190-191,195,211
+  s_28ae7db8033464::t_5e4e7bf6740f34 32,76,216-217,222-224,226
+  s_28ae7db8033464::t_55efd429afe10b 20,30,48,50,83,159-160,163,166-178,182,185,189,194,197-205
+  s_28ae7db8033464::t_2f39aaee85781b 44-47,215,229
+  s_28ae7db8033464::t_b5055254b0a964 1-19,21-29,31,33-43,51-54,60-63,65-75,77-82,84-143,145-158,161-162,164,180,184,192-193,207-210,212-214,218-221,225,227-228,230-233,235-240,248-249,255-313
+  s_28ae7db8033464::t_d3297afefb64de 55-59,144,187,206
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "b36d83d3b17ecade898f2df1ef65a6e0f5ec87d0",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
