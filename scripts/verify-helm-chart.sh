@@ -43,7 +43,7 @@ if grep -q 'NEXT_MANUAL_SIG_HANDLE' "$default_render"; then
   echo 'expected the chart to preserve the built-in Next.js signal handler' >&2
   exit 1
 fi
-test "$(grep -c 'startupProbe:' "$default_render")" -eq 1
+test "$(grep -c 'startupProbe:' "$default_render")" -eq 2
 grep -A4 'startupProbe:' "$default_render" | grep -q 'path: /api/live'
 grep -q 'helm.sh/hook: pre-install,pre-upgrade' "$default_render"
 grep -q 'key: sqlite-database-url' "$default_render"
@@ -64,7 +64,10 @@ grep -q 'HATCHET_CLIENT_API_URL: "https://hatchet.example.com"' "$default_render
 grep -q 'BYOK_GRID_METRICS_ENABLED: "true"' "$default_render"
 grep -q 'name: app-metrics' "$default_render"
 grep -q 'containerPort: 8002' "$default_render"
-grep -q "body.status !== 'HEALTHY'" "$default_render"
+test "$(grep -c 'scripts/container/worker-health-probe.mjs' "$default_render")" -eq 3
+test "$(grep -A1 'scripts/container/worker-health-probe.mjs' "$default_render" | grep -c -- '- ready')" -eq 2
+test "$(grep -A1 'scripts/container/worker-health-probe.mjs' "$default_render" | grep -c -- '- live')" -eq 1
+grep -q 'failureThreshold: 40' "$default_render"
 grep -q 'terminationGracePeriodSeconds: 90' "$default_render"
 test "$(grep -c '^kind: NetworkPolicy$' "$default_render")" -eq 3
 test "$(grep -c '^kind: NetworkPolicy$' "$full_render")" -eq 4
@@ -75,7 +78,7 @@ grep -q 'name: byok-grid-byok-grid-worker-monitoring-ingress' "$default_render"
 grep -q 'name: byok-grid-full-byok-grid-connector-runner' "$full_render"
 grep -q 'terminationGracePeriodSeconds: 60' "$full_render"
 grep -q -- '- sleep 5' "$full_render"
-test "$(grep -c 'startupProbe:' "$full_render")" -eq 2
+test "$(grep -c 'startupProbe:' "$full_render")" -eq 3
 grep -q 'kubernetes.io/metadata.name: ingress-nginx' "$full_render"
 grep -q 'kubernetes.io/metadata.name: monitoring' "$full_render"
 grep -q 'name: byok-grid-egress-byok-grid-default-deny-runtime-egress' "$egress_render"

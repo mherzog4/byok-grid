@@ -85,6 +85,10 @@ working tree:
   drill proving listener closure before an in-flight response completes;
 - worker startup rejection before Hatchet connection when its master key is
   malformed;
+- a packaged workflow-worker probe with a bounded 120-second authenticated
+  startup window, strict Hatchet readiness, dependency-tolerant local
+  liveness, default/full Helm render checks, and production-image evidence as
+  the unprivileged runtime user;
 - deterministic lifecycle tests plus a real child-process `SIGTERM` proving
   poller abort, Hatchet drain completion, and database-close ordering;
 - a reproducible local Compose drain drill that signals a persisted in-flight

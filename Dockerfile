@@ -140,6 +140,7 @@ COPY --chown=node:node packages/domain/src packages/domain/src
 COPY --chown=node:node packages/security/package.json packages/security/package.json
 COPY --chown=node:node packages/security/src packages/security/src
 COPY --chown=node:node scripts/container/workflow-worker-entrypoint.sh ./scripts/container/workflow-worker-entrypoint.sh
+COPY --chown=node:node scripts/container/worker-health-probe.mjs ./scripts/container/worker-health-probe.mjs
 COPY --chown=node:node scripts/container/migration-entrypoint.sh ./scripts/container/migration-entrypoint.sh
 COPY --chown=node:node scripts/container/maintenance-entrypoint.sh ./scripts/container/maintenance-entrypoint.sh
 RUN chmod 0555 ./scripts/container/workflow-worker-entrypoint.sh ./scripts/container/migration-entrypoint.sh ./scripts/container/maintenance-entrypoint.sh

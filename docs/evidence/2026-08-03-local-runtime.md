@@ -6,6 +6,32 @@ This record is reproducible repository evidence; it is not a substitute for an
 authenticated production Hatchet, remote libSQL, or reference Kubernetes
 deployment.
 
+## Workflow-worker startup, readiness, and liveness
+
+The packaged worker probe tests exercised all four Hatchet lifecycle states,
+HTTP success and failure differences, malformed and unknown responses, network
+failure, and unsupported modes. Readiness accepted only a successful
+`HEALTHY` response. Liveness accepted every recognized state, including an
+`UNHEALTHY` response using a non-success HTTP status, while rejecting a missing
+or invalid local health server.
+
+Helm lint and the default, full, egress, and digest renders required a
+120-second worker startup bound, two packaged `ready` invocations for startup
+and readiness, and one packaged `live` invocation. Compose configuration also
+resolved the shared readiness helper.
+
+The production workflow-worker image target was built from the working tree.
+Image inspection reported runtime user `node`; a disposable container imported
+the packaged helper and emitted:
+
+```text
+{"marker":"BYOK_GRID_WORKER_PROBE_IMAGE_PASSED","ready":true,"live":true}
+```
+
+The disposable tag and image were removed after inspection. This proves the
+repository and image contract, not authenticated Hatchet startup duration or
+recovery behavior; that external gate remains open.
+
 ## Kubernetes remote-database fail-closed contract
 
 The shared configuration, web runtime, and analytics-projector tests exercised

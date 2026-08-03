@@ -98,16 +98,32 @@ spec:
               containerPort: {{ .Values.worker.metrics.port }}
               protocol: TCP
             {{- end }}
+          startupProbe:
+            exec:
+              command:
+                - node
+                - scripts/container/worker-health-probe.mjs
+                - ready
+            periodSeconds: 3
+            timeoutSeconds: 2
+            failureThreshold: 40
           readinessProbe:
             exec:
               command:
                 - node
-                - -e
-                - >-
-                  fetch('http://127.0.0.1:{{ .Values.worker.health.port }}/health').then(async (response) => { const body = await response.json(); if (body.status !== 'HEALTHY') process.exit(1) }).catch(() => process.exit(1))
-            initialDelaySeconds: 5
+                - scripts/container/worker-health-probe.mjs
+                - ready
             periodSeconds: 10
-            timeoutSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command:
+                - node
+                - scripts/container/worker-health-probe.mjs
+                - live
+            periodSeconds: 20
+            timeoutSeconds: 3
             failureThreshold: 3
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}

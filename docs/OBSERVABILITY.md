@@ -82,6 +82,13 @@ selectors. Add the endpoints to the operator-owned PodMonitor and restrict
 network ingress to its namespace. Set `worker.metrics.enabled=false` only when
 an external collector provides equivalent application-level signals.
 
+Kubernetes startup and readiness use the packaged worker probe in `ready` mode
+and require the Hatchet body status `HEALTHY`. Liveness uses `live` mode and
+accepts every recognized lifecycle status; it is testing whether the local
+health server and event loop can produce a valid response, not whether the
+remote Hatchet control plane is available. Alert on sustained non-healthy
+Hatchet status separately from container restarts.
+
 ## Alert starting points
 
 Thresholds must come from the measured capacity envelope and service-level

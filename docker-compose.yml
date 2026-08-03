@@ -146,12 +146,7 @@ services:
     restart: unless-stopped
     healthcheck:
       test:
-        [
-          'CMD',
-          'node',
-          '-e',
-          "fetch('http://127.0.0.1:8001/health').then(async (response) => { const body = await response.json(); if (body.status !== 'HEALTHY') process.exit(1) }).catch(() => process.exit(1))",
-        ]
+        ['CMD', 'node', 'scripts/container/worker-health-probe.mjs', 'ready']
       interval: 15s
       timeout: 5s
       retries: 4

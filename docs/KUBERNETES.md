@@ -181,6 +181,15 @@ so shutdown control does not inherit a machine-local URL from the client token.
 The default 90-second grace period exceeds the longest built-in provider timeout
 and is configurable up to ten minutes. Monitor Hatchet queue age separately.
 
+Worker startup allows up to 120 seconds for the local health server and
+authenticated Hatchet listener to report `HEALTHY`. Readiness continues to
+require that exact state. Liveness uses the same local server but accepts every
+recognized Hatchet lifecycle state, including `UNHEALTHY`, so an upstream
+incident withdraws the pod without causing a restart storm. An unreachable,
+wedged, malformed, or unknown local response fails liveness. Keep these
+semantics distinct when tuning probe periods; see
+[ADR 0049](adr/0049-worker-kubernetes-probes.md).
+
 The Hatchet health port exposes `/metrics` with worker health, slot, and action
 gauges plus Node.js process, memory, garbage-collection, and event-loop metrics.
 The separate named `app-metrics` port defaults to `8002` and exposes
