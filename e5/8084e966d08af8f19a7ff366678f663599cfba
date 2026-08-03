@@ -1,0 +1,81 @@
+scripts/container/web-entrypoint.sh
+  s_28ae7db8033464::t_0cea0c8fba7cef 4-9
+docs/MULTI_ARCH_IMAGE_SMOKE.md
+  s_28ae7db8033464::t_dc99c7e360ff10 38-44
+  s_28ae7db8033464::t_fcddd49f8528df 1-37,45-79,82-83,85-99
+  s_28ae7db8033464::t_ab883540f05b34 80-81,84
+  s_28ae7db8033464::t_7e6b67a799c281 100-104
+apps/connector-runner/src/main.rs
+  s_28ae7db8033464::t_0cea0c8fba7cef 34-37
+scripts/verify-release-image-smoke.mjs
+  s_28ae7db8033464::t_0cea0c8fba7cef 1-40
+  s_28ae7db8033464::t_84f5d3b2769860 41-44
+README.md
+  s_28ae7db8033464::t_fcddd49f8528df 308-310
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_1dba92c3382e4f 37
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_1dba92c3382e4f 33
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_fcddd49f8528df 67,77-78
+apps/connector-runner/tests/image_smoke.rs
+  s_28ae7db8033464::t_6a8cbc82c3a50c 1-17
+packages/airbyte-destination/src/cli.ts
+  s_28ae7db8033464::t_0cea0c8fba7cef 29-37
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_1dba92c3382e4f 26
+scripts/verify-release-version.mjs
+  s_28ae7db8033464::t_1dba92c3382e4f 114,116,119-122,125-130,135-136
+  s_28ae7db8033464::t_cdf8486e4ce697 115,131-134
+  s_28ae7db8033464::t_dc99c7e360ff10 137-144
+  s_28ae7db8033464::t_ab883540f05b34 117-118,123-124
+docs/VERIFY_RELEASE.md
+  s_28ae7db8033464::t_fcddd49f8528df 31-37
+docs/adr/0053-release-image-runtime-smoke.md
+  s_28ae7db8033464::t_fcddd49f8528df 1-29,34-46
+  s_28ae7db8033464::t_dc99c7e360ff10 30-33
+packages/airbyte-destination/src/cli.test.ts
+  s_28ae7db8033464::t_be6f2407296696 22-34
+scripts/container/workflow-worker-entrypoint.sh
+  s_28ae7db8033464::t_0cea0c8fba7cef 4-9
+docs/RELEASING.md
+  s_28ae7db8033464::t_fcddd49f8528df 68-71,78-79
+scripts/verify-release-image-smoke.test.mjs
+  s_28ae7db8033464::t_545731848e2eba 1-112,114-131,133-174,176-188,196-201
+  s_28ae7db8033464::t_cdf8486e4ce697 175,189
+  s_28ae7db8033464::t_64919d0c9a310c 113,132
+  s_28ae7db8033464::t_dc99c7e360ff10 190-195
+.github/workflows/release.yml
+  s_28ae7db8033464::t_cdf8486e4ce697 199-207
+  s_28ae7db8033464::t_048fef5c76c682 136-140,193-198,208-220
+  s_28ae7db8033464::t_4619bd6bbb2afb 221
+scripts/container/maintenance-entrypoint.sh
+  s_28ae7db8033464::t_0cea0c8fba7cef 4-9
+Dockerfile
+  s_28ae7db8033464::t_dc99c7e360ff10 122-125
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_fcddd49f8528df 147-151,201-203
+apps/analytics-projector/src/index.ts
+  s_28ae7db8033464::t_0cea0c8fba7cef 13-18,20-21,24-71
+scripts/container/migration-entrypoint.sh
+  s_28ae7db8033464::t_0cea0c8fba7cef 4-9
+scripts/verify-release-image-smoke-lib.mjs
+  s_28ae7db8033464::t_0cea0c8fba7cef 1-87
+  s_28ae7db8033464::t_03b7e30aa07462 88-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "e58084e966d08af8f19a7ff366678f663599cfba",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
