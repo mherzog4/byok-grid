@@ -79,7 +79,12 @@
         { "$ref": "#/definitions/workload" },
         {
           "type": "object",
-          "required": ["terminationGracePeriodSeconds", "hatchet", "health"],
+          "required": [
+            "terminationGracePeriodSeconds",
+            "hatchet",
+            "health",
+            "metrics"
+          ],
           "properties": {
             "terminationGracePeriodSeconds": {
               "type": "integer",
@@ -103,6 +108,18 @@
               "type": "object",
               "required": ["port"],
               "properties": {
+                "port": {
+                  "type": "integer",
+                  "minimum": 1024,
+                  "maximum": 65535
+                }
+              }
+            },
+            "metrics": {
+              "type": "object",
+              "required": ["enabled", "port"],
+              "properties": {
+                "enabled": { "type": "boolean" },
                 "port": {
                   "type": "integer",
                   "minimum": 1024,

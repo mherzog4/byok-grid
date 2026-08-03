@@ -1,3 +1,6 @@
+{{- if and .Values.worker.metrics.enabled (eq (int .Values.worker.metrics.port) (int .Values.worker.health.port)) }}
+{{- fail "worker.metrics.port must differ from worker.health.port" }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -82,6 +85,11 @@ spec:
             - name: health
               containerPort: {{ .Values.worker.health.port }}
               protocol: TCP
+            {{- if .Values.worker.metrics.enabled }}
+            - name: app-metrics
+              containerPort: {{ .Values.worker.metrics.port }}
+              protocol: TCP
+            {{- end }}
           readinessProbe:
             exec:
               command:

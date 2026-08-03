@@ -1,0 +1,82 @@
+# Observability
+
+BYOK Grid exposes two cluster-internal worker telemetry endpoints. Hatchet's
+health port defaults to `8001` and serves worker health, slot/action gauges, and
+Node.js process metrics. The application metrics port defaults to `8002` and
+serves database-backed workflow and dispatch state at `/metrics`.
+
+Neither endpoint implements application authorization. Do not route either
+through public ingress. Restrict access to readiness probes and the monitoring
+identity with a NetworkPolicy or equivalent infrastructure control.
+
+## Application metric contract
+
+The application endpoint exports only deployment-wide counts and ages. It does
+not emit workspace IDs, user IDs, provider names, URLs, payloads, or error
+messages.
+
+| Metric                                                      | Meaning                                                       |
+| ----------------------------------------------------------- | ------------------------------------------------------------- |
+| `byok_grid_workflow_runs{status}`                           | Current runs in each lifecycle state                          |
+| `byok_grid_workflow_queue_oldest_age_seconds`               | Age of the oldest queued workflow, or zero                    |
+| `byok_grid_workflow_terminal_runs{status,window_seconds}`   | Terminal outcomes updated during the fixed five-minute window |
+| `byok_grid_workflow_active_steps{status}`                   | Current ready and running workflow steps                      |
+| `byok_grid_workflow_active_step_oldest_age_seconds{status}` | Age of the oldest ready or running step                       |
+| `byok_grid_outbox_unpublished_events`                       | Dispatchable events not yet handed to Hatchet                 |
+| `byok_grid_outbox_unpublished_oldest_age_seconds`           | Age of the oldest dispatchable unpublished event              |
+| `byok_grid_metrics_collection_timestamp_seconds`            | Timestamp of the last successful database collection          |
+
+Analytics-only outbox records are deliberately excluded from dispatch backlog
+metrics. Their independent leases require separate ClickHouse projection
+monitoring.
+
+Every worker replica queries the same authoritative SQLite/libSQL database, so
+these are replicated deployment gauges. Aggregate them across worker pods with
+`max`, not `sum`. A scrape that cannot complete its bounded database read within
+five seconds returns `503` without database error details; Prometheus should
+also alert on its generated `up == 0` signal.
+
+## Kubernetes discovery
+
+The Helm worker pod declares named `health` and `app-metrics` ports. A
+Prometheus Operator `PodMonitor` can scrape both:
+
+```yaml
+podMetricsEndpoints:
+  - port: health
+    path: /metrics
+  - port: app-metrics
+    path: /metrics
+```
+
+The chart intentionally does not install monitoring CRDs or guess namespace
+selectors. Add the endpoints to the operator-owned PodMonitor and restrict
+network ingress to its namespace. Set `worker.metrics.enabled=false` only when
+an external collector provides equivalent application-level signals.
+
+## Alert starting points
+
+Thresholds must come from the measured capacity envelope and service-level
+objectives of the supported deployment. The following expressions demonstrate
+safe cross-replica aggregation; their numeric thresholds are examples, not
+production promises.
+
+```promql
+max(byok_grid_workflow_queue_oldest_age_seconds) > 120
+```
+
+```promql
+max(byok_grid_outbox_unpublished_oldest_age_seconds) > 60
+```
+
+```promql
+max by (status, window_seconds) (
+  byok_grid_workflow_terminal_runs{status=~"succeeded|failed"}
+)
+```
+
+Use the last vector to calculate the failed share only after enforcing a
+minimum completed-run sample size. Alert separately on database latency,
+libSQL/provider availability, Hatchet queue age, provider rate limits,
+connector failures, backup freshness, and optional analytics erasure backlog;
+the application gauges do not claim to replace those service-specific signals.

@@ -1,6 +1,7 @@
 import {
   claimSqliteOutboxEvents,
   completeSqliteOutboxEvent,
+  DISPATCHABLE_OUTBOX_EVENT_TYPES,
   retrySqliteOutboxEvent,
 } from '@byok-grid/db';
 import {
@@ -44,17 +45,7 @@ async function dispatchBatch(): Promise<number> {
   const claimId = randomUUID();
   const events = await claimSqliteOutboxEvents(workflowDb, {
     claimId,
-    eventTypes: [
-      'cell.run_requested',
-      'column.bulk_run_requested',
-      'table.csv_import_requested',
-      'table.ingestion_batch_requested',
-      'table.row_settled',
-      'table.source_run_requested',
-      'table.webhook_delivery_requested',
-      'table.writeback_delivery_requested',
-      'workflow.run_requested',
-    ],
+    eventTypes: DISPATCHABLE_OUTBOX_EVENT_TYPES,
     limit: 10,
   });
   for (const event of events) {

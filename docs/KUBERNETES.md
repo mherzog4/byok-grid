@@ -134,13 +134,15 @@ so shutdown control does not inherit a machine-local URL from the client token.
 The default 90-second grace period exceeds the longest built-in provider timeout
 and is configurable up to ten minutes. Monitor Hatchet queue age separately.
 
-The same worker port exposes `/metrics` with Hatchet health, slot, and action
+The Hatchet health port exposes `/metrics` with worker health, slot, and action
 gauges plus Node.js process, memory, garbage-collection, and event-loop metrics.
-The image includes Hatchet's optional `prom-client` peer so this endpoint is not
-a 503 placeholder. Discover pods with your monitoring stack's PodMonitor or set
-`worker.podAnnotations`, for example `prometheus.io/scrape: "true"`,
-`prometheus.io/port: "8001"`, and `prometheus.io/path: "/metrics"`. Keep the
-port cluster-internal and restrict ingress to the monitoring namespace.
+The separate named `app-metrics` port defaults to `8002` and exposes
+low-cardinality workflow, active-step, and dispatch backlog gauges from one
+bounded database read. Discover both named ports with the monitoring stack's
+PodMonitor. Keep them cluster-internal and restrict ingress to the monitoring
+namespace. The [`observability guide`](OBSERVABILITY.md) defines the complete
+metric contract and explains why database-wide gauges use `max` across worker
+replicas rather than `sum`.
 
 All chart-owned pods run as non-root, drop capabilities, disable privilege
 escalation and service-account token mounts, use the runtime-default seccomp

@@ -27,13 +27,16 @@ timeout. Evidence emitted by the command:
 
 ```text
 {"marker":"BYOK_GRID_DRAIN_DRILL_IN_FLIGHT","rowCount":500,...}
-{"drainMs":1488,"marker":"BYOK_GRID_DRAIN_SIGNAL_COMPLETE"}
+{"drainMs":2161,"marker":"BYOK_GRID_DRAIN_SIGNAL_COMPLETE"}
 {"marker":"BYOK_GRID_DRAIN_DRILL_PASSED","rows":500,"steps":100}
 ```
 
 The E2E assertion proved the run and all 100 steps succeeded. The drill also
 proved worker exit code 0, no OOM kill, Hatchet pending-task drain confirmation,
 no REST pause failure, and successful worker health after automatic restart.
+The current drill additionally requires the private application metrics
+endpoint before signaling and after recovery, including workflow status, queue
+age, and dispatch backlog series.
 The runtime command uses `node --import tsx`, making the application Node
 process container PID 1; a pre-fix drill with the `tsx` launcher correctly
 failed with exit 143 and an abandoned lease, which is why PID topology is part

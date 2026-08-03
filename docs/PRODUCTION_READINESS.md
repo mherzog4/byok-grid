@@ -35,6 +35,9 @@ working tree:
   explicit rather than inherited from its token;
 - Hatchet `/metrics` runtime support through the installed `prom-client` peer,
   with container verification that the production dependency is present;
+- a separate graceful-lifecycle application metrics endpoint covering
+  deployment-wide workflow status, terminal outcomes, active-step age, and
+  dispatch backlog without tenant or payload labels;
 - Compose rendering and Helm security/health/migration contract verification;
 - local builds of the web, worker, migration, and maintenance image targets;
 - release metadata, Helm chart, connector SDK package, and checksum dry run;

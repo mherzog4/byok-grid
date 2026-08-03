@@ -176,9 +176,13 @@ Hatchet's native health status and performs a graceful drain on termination.
 Neither check proves provider reachability or that queue age is within its SLO.
 Production monitoring must cover queued-work age, workflow failure rate,
 database saturation, and provider error/limit rates separately.
-The worker's health port also serves Prometheus metrics at `/metrics`; it
-contains process and worker-capacity data, not application authorization, and
-must remain on a trusted monitoring network rather than a public ingress.
+The worker health port serves Hatchet/process Prometheus metrics at `/metrics`.
+A separate application endpoint on port `8002` exposes low-cardinality
+workflow, step, and dispatch backlog gauges backed by one bounded SQLite read.
+Neither endpoint implements application authorization; both must remain on a
+trusted monitoring network rather than public ingress. See the
+[`observability guide`](OBSERVABILITY.md) for the metric contract, replica-safe
+aggregation, discovery, and alert starting points.
 
 ## Production Kubernetes
 

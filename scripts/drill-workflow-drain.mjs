@@ -33,6 +33,7 @@ try {
   }
 
   await waitForWorkerHealth();
+  await verifyOperationalMetrics();
   const drillStartedAt = new Date().toISOString();
   await run('docker', [
     'build',
@@ -182,6 +183,12 @@ try {
       process.stderr.write(`Worker health recovery failed: ${error.message}\n`);
       process.exitCode = 1;
     });
+    await verifyOperationalMetrics().catch((error) => {
+      process.stderr.write(
+        `Worker application metrics recovery failed: ${error.message}\n`
+      );
+      process.exitCode = 1;
+    });
   }
 }
 
@@ -220,6 +227,22 @@ async function waitForWorkerHealth() {
     await new Promise((resolvePromise) => setTimeout(resolvePromise, 1_000));
   }
   throw new Error('The worker did not become healthy within 30 seconds.');
+}
+
+async function verifyOperationalMetrics() {
+  await run(
+    'docker',
+    [
+      'compose',
+      'exec',
+      '--no-TTY',
+      'workflow-worker',
+      'node',
+      '-e',
+      "fetch('http://127.0.0.1:8002/metrics').then(async response => { const body = await response.text(); const required = ['byok_grid_workflow_runs', 'byok_grid_workflow_queue_oldest_age_seconds', 'byok_grid_outbox_unpublished_events']; process.exit(response.ok && required.every(name => body.includes(name)) ? 0 : 1) }).catch(() => process.exit(1))",
+    ],
+    { quiet: true }
+  );
 }
 
 async function output(command, args, options = {}) {

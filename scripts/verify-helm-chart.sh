@@ -37,6 +37,9 @@ grep -q 'key: sqlite-database-url' "$default_render"
 test "$(grep -c 'name: BYOK_GRID_MASTER_KEY' "$default_render")" -eq 2
 grep -q "HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED: 'true'" "$default_render"
 grep -q 'HATCHET_CLIENT_API_URL: "https://hatchet.example.com"' "$default_render"
+grep -q 'BYOK_GRID_METRICS_ENABLED: "true"' "$default_render"
+grep -q 'name: app-metrics' "$default_render"
+grep -q 'containerPort: 8002' "$default_render"
 grep -q "body.status !== 'HEALTHY'" "$default_render"
 grep -q 'terminationGracePeriodSeconds: 90' "$default_render"
 grep -q 'kind: NetworkPolicy' "$full_render"
@@ -65,6 +68,12 @@ fi
 if helm template invalid-hatchet-api "$chart_dir" \
   --set worker.hatchet.apiUrl=http://hatchet.example.com >/dev/null 2>&1; then
   echo 'expected a plaintext production Hatchet API URL to fail chart validation' >&2
+  exit 1
+fi
+
+if helm template conflicting-worker-ports "$chart_dir" \
+  --set worker.metrics.port=8001 >/dev/null 2>&1; then
+  echo 'expected conflicting worker health and application metrics ports to fail' >&2
   exit 1
 fi
 

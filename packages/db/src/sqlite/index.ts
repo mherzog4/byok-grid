@@ -18,6 +18,7 @@ export * from './ingestion';
 export * from './migrate';
 export * from './migration-status';
 export * from './outbox';
+export * from './operational-metrics';
 export * from './row-automations';
 export * from './row-mutations';
 export * from './schema';

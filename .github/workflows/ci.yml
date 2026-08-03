@@ -122,6 +122,7 @@ jobs:
           docker run --rm --entrypoint node byok-grid-workflow-worker:ci -e "let leaked=false; try { require.resolve('postgres'); leaked=true } catch {} if (leaked) process.exit(1)"
           docker run --rm --entrypoint node byok-grid-analytics-projector:ci -e "let leaked=false; try { require.resolve('postgres'); leaked=true } catch {} if (leaked) process.exit(1)"
           docker run --rm --entrypoint node byok-grid-workflow-worker:ci --import tsx --input-type=module -e "await import('./packages/connectors/src/sandbox-schema.ts')"
+          docker run --rm --entrypoint node byok-grid-workflow-worker:ci --import tsx --input-type=module -e "await import('./packages/db/src/sqlite/operational-metrics.ts'); await import('./apps/workflow-worker/src/operational-metrics.ts')"
           docker run --rm --entrypoint node byok-grid-workflow-worker:ci -e "require.resolve('prom-client')"
           docker volume create "$maintenance_volume"
           docker run --rm --volume "$maintenance_volume:/data" -e SQLITE_DATABASE_URL=file:/data/ci.sqlite byok-grid-migration:ci

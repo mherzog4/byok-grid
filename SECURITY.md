@@ -57,10 +57,12 @@ mutable replacements. Digest updates are security changes: review upstream
 provenance and release notes, confirm both amd64 and arm64 manifests, rebuild
 every target, and rerun image scanning before accepting them.
 
-The workflow worker's Hatchet health port also exposes Prometheus metrics. The
-endpoint contains runtime and worker-capacity data but is unauthenticated; do
-not publish it through application ingress. Limit access to readiness probes
-and the cluster monitoring identity with network policy.
+The workflow worker exposes unauthenticated Prometheus endpoints for Hatchet
+health/process data and database-backed application gauges on separate ports.
+The application endpoint deliberately omits tenant labels, payloads, provider
+details, and errors, but both endpoints are operational metadata and must not
+be published through application ingress. Limit access to readiness probes and
+the cluster monitoring identity with network policy.
 
 The SHA-pinned security workflow runs CodeQL dataflow analysis for
 JavaScript/TypeScript and a locked Rust build on pushes, pull requests, and a

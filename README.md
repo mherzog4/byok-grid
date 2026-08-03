@@ -284,6 +284,9 @@ See [the release process](docs/RELEASING.md) and
 [release verification guide](docs/VERIFY_RELEASE.md) for version gates, image
 digests, generated digest-pinned Helm values, checksums, SBOM/provenance, and
 GitHub attestations.
+See [the observability guide](docs/OBSERVABILITY.md) for private worker
+telemetry, the low-cardinality application metric contract, and replica-safe
+alert aggregation.
 The current pass/fail evidence and the remaining stable-release blockers are in
 [the production-readiness ledger](docs/PRODUCTION_READINESS.md).
 See [the recoverable schema lifecycle ADR](docs/adr/0019-recoverable-schema-lifecycle.md)

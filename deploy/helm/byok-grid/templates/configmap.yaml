@@ -12,6 +12,8 @@ data:
   HATCHET_CLIENT_TLS_STRATEGY: {{ .Values.worker.hatchet.tlsStrategy | quote }}
   HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED: 'true'
   HATCHET_CLIENT_WORKER_HEALTHCHECK_PORT: {{ .Values.worker.health.port | quote }}
+  BYOK_GRID_METRICS_ENABLED: {{ .Values.worker.metrics.enabled | quote }}
+  BYOK_GRID_METRICS_PORT: {{ .Values.worker.metrics.port | quote }}
   BULK_RUN_MAX_ROWS: {{ .Values.web.bulkRunLimits.maxRows | quote }}
   BULK_RUN_MAX_PROVIDER_REQUESTS: {{ .Values.web.bulkRunLimits.maxProviderRequests | quote }}
   BULK_RUN_MAX_OUTPUT_TOKENS: {{ .Values.web.bulkRunLimits.maxOutputTokens | quote }}

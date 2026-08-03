@@ -87,6 +87,9 @@ worker:
     tlsStrategy: tls
   health:
     port: 8001
+  metrics:
+    enabled: true
+    port: 8002
   limits:
     bulkRunExpansionChunkSize: 50
     automaticRunMaxPerRowChange: 10

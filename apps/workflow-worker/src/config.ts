@@ -36,6 +36,13 @@ export const workflowWorkerConfig = z
       .min(1)
       .max(100)
       .default(50),
+    BYOK_GRID_METRICS_ENABLED: z.enum(['true', 'false']).default('true'),
+    BYOK_GRID_METRICS_PORT: z.coerce
+      .number()
+      .int()
+      .min(1024)
+      .max(65_535)
+      .default(8002),
     BYOK_GRID_MASTER_KEY: z.string().min(1),
     BYOK_GRID_MASTER_KEY_ID: z.string().min(1),
     CONNECTOR_RUNNER_SHARED_SECRET: z.preprocess(
@@ -80,6 +87,19 @@ export const workflowWorkerConfig = z
       .default(1_000),
   })
   .superRefine((value, context) => {
+    if (
+      value.BYOK_GRID_METRICS_ENABLED === 'true' &&
+      value.BYOK_GRID_METRICS_PORT ===
+        value.HATCHET_CLIENT_WORKER_HEALTHCHECK_PORT
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message:
+          'The BYOK Grid application metrics port must differ from Hatchet health port.',
+        path: ['BYOK_GRID_METRICS_PORT'],
+      });
+    }
+
     try {
       parseMasterKey(value.BYOK_GRID_MASTER_KEY_ID, value.BYOK_GRID_MASTER_KEY);
     } catch {
