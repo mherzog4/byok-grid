@@ -1,0 +1,40 @@
+scripts/worker-health-probe.test.mjs
+  s_28ae7db8033464::t_1a5c8358c0755a 1-73
+scripts/verify-helm-chart.sh
+  s_28ae7db8033464::t_1a5c8358c0755a 46,67-70,81
+Dockerfile
+  s_28ae7db8033464::t_1a5c8358c0755a 143
+scripts/container/worker-health-probe.mjs
+  s_28ae7db8033464::t_1a5c8358c0755a 1-54
+  s_28ae7db8033464::t_409bea38f091b5 55-56
+deploy/helm/byok-grid/templates/worker-deployment.yaml
+  s_28ae7db8033464::t_1a5c8358c0755a 101-109,114-115,117-126
+docs/adr/0049-worker-kubernetes-probes.md
+  s_28ae7db8033464::t_0767505fa07196 1-60
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_0767505fa07196 184-192
+docs/evidence/2026-08-03-local-runtime.md
+  s_28ae7db8033464::t_0767505fa07196 9-34
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_0767505fa07196 88-91
+docs/OBSERVABILITY.md
+  s_28ae7db8033464::t_0767505fa07196 85-91
+docker-compose.yml
+  s_28ae7db8033464::t_9c625f7ad4fee4 149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "a613699ee41201c2d2735eec563abfe14a2e7bf7",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
