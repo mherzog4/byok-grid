@@ -164,6 +164,37 @@ if (releaseWorkflow.includes('type=raw,value=${{ env.VERSION }}')) {
   fail('Version image tags must not be published before every scan passes.');
 }
 
+if (
+  rootPackage.scripts?.['release:publish-image-tags'] !==
+  'node scripts/publish-release-image-tags.mjs'
+) {
+  fail('The release image tag publisher must remain a public command.');
+}
+
+for (const imagePublicationContract of [
+  'npm run release:publish-image-tags --',
+  'BYOK_GRID_GHCR_ACTOR: ${{ github.actor }}',
+  'BYOK_GRID_GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}',
+  '--digests-dir release-digests',
+  "--owner '${{ github.repository_owner }}'",
+]) {
+  if (!releaseWorkflow.includes(imagePublicationContract)) {
+    fail('Release image version tags must use the conflict-safe publisher.');
+  }
+}
+
+const publishImagesJob = releaseWorkflow.match(
+  /^  publish_images:\n(?<source>[\s\S]*?)(?=^  publish:)/mu
+)?.groups?.source;
+if (
+  !publishImagesJob ||
+  publishImagesJob.includes('docker buildx imagetools create') ||
+  !publishImagesJob.includes('persist-credentials: false') ||
+  !publishImagesJob.includes('node-version: 24')
+) {
+  fail('The release image publication job must retain its hardened contract.');
+}
+
 if (!releaseWorkflow.includes('needs: [verify, images, publish_images]')) {
   fail('Release files must wait for verified image version tags.');
 }

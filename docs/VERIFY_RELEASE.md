@@ -39,6 +39,15 @@ same byte length and SHA-256 digest for each of the exact six locally packaged
 assets. Confirm the public release API still reports `immutable: true`; an
 immutable release or its tag must never be replaced to correct a failure.
 
+Before release-file publication, the workflow emits
+`BYOK_GRID_RELEASE_IMAGE_TAGS_VERIFIED` only after preflighting all seven GHCR
+version tags, reading every newly created tag back, and verifying the complete
+tag set in a final digest pass. A rerun accepts an existing version tag only
+when its registry digest is already identical; any conflicting digest stops
+publication without moving the tag. This marker protects the publication
+process, while `IMAGE_DIGESTS.txt` remains the authoritative identity operators
+must verify and deploy.
+
 Verify a downloaded chart or SDK package against the repository identity:
 
 ```text
