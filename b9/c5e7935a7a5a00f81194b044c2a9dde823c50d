@@ -1,0 +1,61 @@
+package.json
+  s_28ae7db8033464::t_e8b889c9a586a6 53,64
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_827dade2ead77b 96-99
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_827dade2ead77b 149-153,289-290
+scripts/native-image-smoke-lib.mjs
+  s_28ae7db8033464::t_2312fc0ab07b03 5,123-125,143,149-152,175,228-231,352-355,391-394,447-449,453-456,459-462
+  s_28ae7db8033464::t_549577d7bf7b74 1-4,6-122,126-142,144-148,153-155,159-174,176-227,232-351,356-390,395-446,450-452,457-458,463-574
+  s_28ae7db8033464::t_9694cf40cc2ead 156-158
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_e8b889c9a586a6 37-40
+scripts/native-image-smoke.test.mjs
+  s_28ae7db8033464::t_33f0536239b7d5 5,303
+  s_28ae7db8033464::t_2312fc0ab07b03 45-47,187,212-213,219-220
+  s_28ae7db8033464::t_c409a4bfaa0398 100,111,114
+  s_28ae7db8033464::t_8f71565e9fbae7 1-4,6-44,48-99,101-110,112-113,115-186,188-211,214-218,221-302,304-313,337-424
+  s_28ae7db8033464::t_c7df921c9b0f51 314-336
+scripts/collect-native-image-smoke.mjs
+  s_28ae7db8033464::t_a292cc4769b0ff 1-12,14-89,129-163
+  s_28ae7db8033464::t_2312fc0ab07b03 13,90-128
+docs/RELEASING.md
+  s_28ae7db8033464::t_827dade2ead77b 149-151
+docs/VERIFY_RELEASE.md
+  s_28ae7db8033464::t_827dade2ead77b 78-80
+docs/MULTI_ARCH_IMAGE_SMOKE.md
+  s_28ae7db8033464::t_827dade2ead77b 76-77,83-90,97-101,115-117,124-145,147-150
+  s_28ae7db8033464::t_eac451d6f98307 78-81,91-96
+  s_28ae7db8033464::t_606a73a749243d 82
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_e8b889c9a586a6 33-36
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_e8b889c9a586a6 82
+docs/adr/0060-native-multi-architecture-smoke-evidence.md
+  s_28ae7db8033464::t_827dade2ead77b 1-22,27-48
+  s_28ae7db8033464::t_eac451d6f98307 23-26
+scripts/verify-release-version.mjs
+  s_28ae7db8033464::t_2312fc0ab07b03 273-274,294,298-300
+  s_28ae7db8033464::t_d1e7ca1700d5f3 40-55,262-272,275-293,295-297,301-320
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_e8b889c9a586a6 26-29
+  s_28ae7db8033464::t_33f0536239b7d5 129-137
+scripts/verify-native-image-smoke.mjs
+  s_28ae7db8033464::t_a292cc4769b0ff 1-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "b9c5e7935a7a5a00f81194b044c2a9dde823c50d",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
