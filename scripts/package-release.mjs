@@ -189,8 +189,10 @@ export function packageRelease({
   const parent = dirname(output);
   mkdirSync(parent, { recursive: true });
   const staging = mkdtempSync(join(parent, `.${basename(output)}.tmp-`));
+  let npmCache;
 
   try {
+    npmCache = mkdtempSync(join(parent, `.${basename(output)}.npm-cache.tmp-`));
     const releaseConfig = JSON.parse(
       readFileSync(join(root, 'release-images.json'), 'utf8')
     );
@@ -224,6 +226,8 @@ export function packageRelease({
     runCommand(
       'npm',
       [
+        '--cache',
+        npmCache,
         'pack',
         '--workspace=@byok-grid/connector-sdk',
         '--pack-destination',
@@ -231,6 +235,8 @@ export function packageRelease({
       ],
       root
     );
+    rmSync(npmCache, { force: true, recursive: true });
+    npmCache = undefined;
 
     requireArtifact(staging, `byok-grid-${version}.tgz`);
     const sdkPackages = readdirSync(staging).filter((name) =>
@@ -250,6 +256,8 @@ export function packageRelease({
   } catch (error) {
     rmSync(staging, { force: true, recursive: true });
     throw error;
+  } finally {
+    if (npmCache) rmSync(npmCache, { force: true, recursive: true });
   }
 }
 
