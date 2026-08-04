@@ -1,0 +1,68 @@
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_651dfac90fcda9 133-134
+  s_28ae7db8033464::t_b14d153ff7edeb 144-148
+scripts/package-release.mjs
+  s_28ae7db8033464::t_b2930eadfe831c 309
+  s_28ae7db8033464::t_86cf2ffa065475 4-5,14,29,197,217-222,227,237-238,273,278-308,310-315
+  s_6a26cb5de54f9a::t_eb88519dbf700b 316
+.github/workflows/ci.yml
+  s_28ae7db8033464::t_66cba15d1cfb43 97-98
+scripts/verify-release-version.mjs
+  s_28ae7db8033464::t_b14d153ff7edeb 213
+  s_28ae7db8033464::t_2cb622f81e859b 38,212,223-237
+  s_28ae7db8033464::t_c01d5617a1c365 40-47,238,240-245,269,287-288,297-324
+  s_6a26cb5de54f9a::t_d0ecc8c8fb3d10 239,325
+scripts/publish-github-release-lib.mjs
+  s_28ae7db8033464::t_7d95bdae44476b 1-343
+scripts/publish-github-release.mjs
+  s_28ae7db8033464::t_7d95bdae44476b 1-191
+  s_28ae7db8033464::t_d8ffc6daebbe02 192
+.github/workflows/release.yml
+  s_28ae7db8033464::t_66cba15d1cfb43 91-92
+  s_28ae7db8033464::t_c01d5617a1c365 358,363-368
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_b14d153ff7edeb 40-41
+docs/VERIFY_RELEASE.md
+  s_28ae7db8033464::t_b14d153ff7edeb 42-48
+docs/RELEASING.md
+  s_28ae7db8033464::t_651dfac90fcda9 70-79
+  s_28ae7db8033464::t_b14d153ff7edeb 80-91
+package.json
+  s_28ae7db8033464::t_c01d5617a1c365 55
+scripts/verify-release-bundle.test.mjs
+  s_28ae7db8033464::t_9a19360320e51a 174-176,178-187
+scripts/package-release.test.mjs
+  s_28ae7db8033464::t_0f53c126cb6850 293,295,300,354-384
+  s_28ae7db8033464::t_b2930eadfe831c 8,12-13,23,257-291,397-407
+scripts/publish-github-release.test.mjs
+  s_28ae7db8033464::t_8825d3f76aa398 4,7,19-27,31,267-268,270
+  s_28ae7db8033464::t_4c8eb50538d588 1-3,5-6,8-18,28-30,32-266,269,271-328
+  s_28ae7db8033464::t_8e4e0a6702a81c 329
+docs/adr/0059-idempotent-immutable-github-release-publication.md
+  s_28ae7db8033464::t_b14d153ff7edeb 1-27,31-59
+  s_28ae7db8033464::t_651dfac90fcda9 28-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "d4bddd12bf15df5e251fb748cc2a6ebe4e558133",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    },
+    "s_6a26cb5de54f9a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fce56-8047-7b01-abd3-9b98eb4639af",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
