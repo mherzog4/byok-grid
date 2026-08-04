@@ -63,7 +63,7 @@ its contents.
 | `remote-libsql-recovery`       | Provider backup/loss/restore operation and both remote-drill markers                                                            |
 | `reference-deployment`         | Digest-pinned Helm release, TLS, external secrets, network policy, centralized telemetry, alerts, and rollback ownership        |
 | `public-ingress-and-proxy`     | Canonical deployment marker plus real proxy-chain, direct-access denial, and multi-network edge/application rate-limit evidence |
-| `smtp-delivery`                | TLS verification/recovery delivery, SPF/DKIM/DMARC alignment, and provider failure monitoring                                   |
+| `smtp-delivery`                | TLS verification/recovery delivery, SPF/DKIM/DMARC alignment, exact SMTP verification marker, and provider failure monitoring   |
 | `multi-architecture-smoke`     | Attested fourteen-record release asset plus native-host boot records for published `linux/amd64` and `linux/arm64` digests      |
 | `release-tag-protection`       | Protected release tags/ruleset and strongest available GHCR immutability evidence                                               |
 | `production-capacity`          | Passing declared-envelope marker, provider/ingress metrics, supported limit, alert threshold, and saturation response           |
@@ -79,6 +79,8 @@ These marker arrays are exact:
 - `remote-libsql-recovery`:
   `BYOK_GRID_REMOTE_LIBSQL_DRILL_PREPARED` and
   `BYOK_GRID_REMOTE_LIBSQL_RESTORE_VERIFIED`;
+- `smtp-delivery`:
+  `BYOK_GRID_SMTP_DELIVERY_AUTHENTICATION_VERIFIED`;
 - `public-ingress-and-proxy`:
   `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED`; and
 - `production-capacity`: `BYOK_GRID_PRODUCTION_CAPACITY_VERIFIED`.

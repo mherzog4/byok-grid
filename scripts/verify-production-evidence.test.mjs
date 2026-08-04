@@ -30,6 +30,7 @@ const EXPECTED_MARKERS = {
     'BYOK_GRID_REMOTE_LIBSQL_DRILL_PREPARED',
     'BYOK_GRID_REMOTE_LIBSQL_RESTORE_VERIFIED',
   ],
+  'smtp-delivery': ['BYOK_GRID_SMTP_DELIVERY_AUTHENTICATION_VERIFIED'],
 };
 
 describe('production evidence verifier', () => {

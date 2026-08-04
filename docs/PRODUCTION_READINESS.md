@@ -34,6 +34,15 @@ working tree:
   a bounded anti-enumeration response-time floor, session revocation after
   reset, SQLite integration coverage, private reset-page headers, and a
   compiled-standalone drill using real SMTP protocol delivery;
+- a dependency-free production SMTP evidence verifier that reads bounded raw
+  verification and recovery messages from one controlled inbox without
+  emitting their addresses, bodies, links, or Message-IDs; requires recent,
+  distinct deliveries with one trusted `Authentication-Results` authority;
+  cross-checks the actual DKIM signature and application automation header;
+  proves aligned SPF, DKIM, and DMARC pass results against live DNS; rejects
+  missing DKIM keys, non-enforcing DMARC, and permissive unmatched-sender SPF;
+  and binds the sanitized record to the candidate commit and raw-message
+  digests;
 - fail-closed authentication client identity that ignores forwarded IP headers
   by default, validated opt-in trusted proxy CIDRs, right-to-left proxy-chain
   resolution, database-backed integration coverage against spoofed left hops,
@@ -220,7 +229,9 @@ dated evidence linked from a release issue or runbook record:
 - exercise the chosen authenticated SMTP service over TLS, prove verification
   and recovery delivery to controlled inboxes, configure and validate SPF,
   DKIM, and DMARC alignment, and monitor deferrals, rejections, bounces,
-  complaints, and authentication failures;
+  complaints, and authentication failures; retain the exact marker from
+  [`SMTP_PRODUCTION_DRILL.md`](SMTP_PRODUCTION_DRILL.md) plus the provider
+  monitoring evidence;
 - independently repeat the digest-bound image smoke on native `linux/amd64` and
   native `linux/arm64` hosts, retaining those records with the release
   workflow's attested fourteen-record `IMAGE_SMOKE.jsonl` asset;

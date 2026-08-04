@@ -93,7 +93,7 @@
     {
       "artifactSha256": "<64-character-lowercase-SHA-256>",
       "id": "smtp-delivery",
-      "markers": [],
+      "markers": ["BYOK_GRID_SMTP_DELIVERY_AUTHENTICATION_VERIFIED"],
       "reference": "https://evidence.example.com/releases/<version>/smtp-delivery",
       "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
     }

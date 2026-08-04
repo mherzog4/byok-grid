@@ -302,6 +302,9 @@ durable workflow-completion evidence.
 See [the production capacity drill](docs/PRODUCTION_CAPACITY_DRILL.md) for a
 declared HTTPS, remote-libSQL, and workflow concurrency envelope with
 operator-owned latency and contention thresholds.
+See [the production SMTP drill](docs/SMTP_PRODUCTION_DRILL.md) for bounded
+controlled-inbox verification/recovery evidence and live SPF, DKIM, and DMARC
+authentication checks that do not expose message bodies or account links.
 See [the stable production evidence contract](docs/PRODUCTION_EVIDENCE.md) for
 the versioned external-gate manifest, candidate-source binding, observation
 window, rollback proof, and named operator acceptance required by stable tags.
