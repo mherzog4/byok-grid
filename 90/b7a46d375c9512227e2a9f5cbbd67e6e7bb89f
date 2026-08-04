@@ -1,0 +1,62 @@
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_01e351fdfed68c 113
+scripts/drill-kubernetes-rollback.test.mjs
+  s_28ae7db8033464::t_be20fc739b94a9 1-5,7-14,16-65,82-94,110-162,166-171,175-193,195-202,220-416
+  s_28ae7db8033464::t_59735a21bd443f 15,163-165,172-174,203-219
+  s_28ae7db8033464::t_0cfaf9146f0e2c 6,95-109
+  s_28ae7db8033464::t_4edec434454e22 66-81,194
+docs/KUBERNETES_ROLLBACK_DRILL.md
+  s_28ae7db8033464::t_59735a21bd443f 23-24,38-39
+  s_28ae7db8033464::t_529ae8ae867dec 1-22,25-37,40-91,93-119
+  s_28ae7db8033464::t_4edec434454e22 92
+scripts/verify-connector-sdk-package.test.mjs
+  s_28ae7db8033464::t_4c6471928758c9 1-90
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_01e351fdfed68c 138,144-150
+scripts/drill-kubernetes-rollback.mjs
+  s_28ae7db8033464::t_961d566656882a 1-5,7-18,23-60,62-69,76,79-171
+  s_28ae7db8033464::t_0cfaf9146f0e2c 6,19-22,61,70-75,77-78
+scripts/drill-kubernetes-rollback-lib.mjs
+  s_28ae7db8033464::t_0cfaf9146f0e2c 125-138
+  s_28ae7db8033464::t_961d566656882a 1-7,9-62,66-85,87-107,112-124,139-196,201-298,301,303-356,358-408,428-443,445-468,472-532,534-630
+  s_28ae7db8033464::t_4edec434454e22 8,63-65,300,357,413-415
+  s_28ae7db8033464::t_59735a21bd443f 86,108-111,197-200,299,302,409-412,416-427,444,469-471,533
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_4c6471928758c9 126-128
+  s_28ae7db8033464::t_529ae8ae867dec 171-176,248-250
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_0cfaf9146f0e2c 60-63
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_529ae8ae867dec 133-134,154-158
+  s_28ae7db8033464::t_2733c853ae635e 159
+package.json
+  s_28ae7db8033464::t_01e351fdfed68c 35
+  s_28ae7db8033464::t_4c6471928758c9 50
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_01e351fdfed68c 125-131,386
+README.md
+  s_28ae7db8033464::t_529ae8ae867dec 311-313
+scripts/verify-connector-sdk-package.mjs
+  s_28ae7db8033464::t_4c6471928758c9 1-145
+docs/adr/0055-live-kubernetes-rollback-evidence.md
+  s_28ae7db8033464::t_59735a21bd443f 28-30
+  s_28ae7db8033464::t_529ae8ae867dec 1-27,31-53
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_529ae8ae867dec 28-29,93-97,116-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "90b7a46d375c9512227e2a9f5cbbd67e6e7bb89f",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
