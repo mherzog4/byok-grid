@@ -1,0 +1,19 @@
+docs/evidence/2026-08-03-github-hosted-state.md
+  s_28ae7db8033464::t_20708fca6cf86f 3-6,10-11,13-48,52-60,62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "3458c041f63ca653f158486751a01b95a7d43275",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
