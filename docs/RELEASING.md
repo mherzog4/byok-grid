@@ -147,7 +147,8 @@ security policy names supported versions, and the release candidate has run
 through its observation window without an unresolved release blocker.
 
 Stable versions additionally require the closed, versioned manifest described
-in `docs/PRODUCTION_EVIDENCE.md`. Commit the manifest and only the allowed
+in `docs/PRODUCTION_EVIDENCE.md`. Commit the manifest, the curated
+version-bound stable release notes, and only the allowed
 version/readiness/security metadata after the observed RC. Then run
 `npm run release:verify-production-evidence` and
 `npm run release:verify-version -- <stable-version>` from that committed state.

@@ -278,16 +278,21 @@ export function assertStablePromotionPaths(paths, releaseVersion) {
     fail('Stable promotion needs a bounded candidate-to-release path list.');
   }
   const evidencePath = `docs/evidence/${releaseVersion}-production.json`;
+  const releaseNotesPath = `docs/releases/v${releaseVersion}.md`;
   const allowed = new Set([
     'SECURITY.md',
     'deploy/helm/byok-grid/Chart.yaml',
     'docs/PRODUCTION_READINESS.md',
     evidencePath,
+    releaseNotesPath,
     'package-lock.json',
     'package.json',
   ]);
   if (!paths.includes(evidencePath)) {
     fail('Stable promotion must add its versioned production evidence file.');
+  }
+  if (!paths.includes(releaseNotesPath)) {
+    fail('Stable promotion must add its version-bound release notes file.');
   }
   if (new Set(paths).size !== paths.length) {
     fail('Stable promotion paths must be unique.');
