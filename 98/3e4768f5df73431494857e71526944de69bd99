@@ -1,0 +1,58 @@
+docs/VERIFY_KUBERNETES_SECRET_PROVENANCE.md
+  s_28ae7db8033464::t_b34216b1941b9d 1-81,84-137
+  s_28ae7db8033464::t_3f053dd92179e6 82-83
+docs/RELEASING.md
+  s_28ae7db8033464::t_62e253080585b6 117-118,120-121
+package.json
+  s_28ae7db8033464::t_e2ef2c69a8ab61 57
+README.md
+  s_28ae7db8033464::t_62e253080585b6 299-301
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_62e253080585b6 147-149
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_62e253080585b6 57-59
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_e2ef2c69a8ab61 30
+docs/VERIFY_KUBERNETES_RUNTIME.md
+  s_28ae7db8033464::t_62e253080585b6 73-76
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_62e253080585b6 159-163,234-235,239
+scripts/verify-kubernetes-secret-provenance-lib.mjs
+  s_28ae7db8033464::t_3f053dd92179e6 492-495
+  s_28ae7db8033464::t_48a261c9f0b686 34,87,142-154,280,394,435-447,453,473-478,571-574,712-723
+  s_28ae7db8033464::t_2de15ef96f9fd4 214-216
+  s_28ae7db8033464::t_9bc87e010558ac 1-33,35-86,88-141,155-213,217-279,281-318,321-344,349-393,395-434,448-452,454-472,479-481,529-561,565-570,575-711,724-773
+  s_28ae7db8033464::t_e03f6b075db710 319-320,345-348,482-491,496-528,562-564
+scripts/verify-kubernetes-secret-provenance.test.mjs
+  s_28ae7db8033464::t_878da2db322056 343-349,359
+  s_28ae7db8033464::t_6502840f51bdc2 1-28,30-47,66-91,96-108,110-130,132-167,169-215,217-227,229-234,241-269,271-273,281-313,315-342,350-358,360-382,384-389,394-400,404-406,410-448,450-459,464-569,572-586,591-607,609-622,643-694
+  s_28ae7db8033464::t_3f053dd92179e6 235-238,276-279
+  s_28ae7db8033464::t_dea8b0d36e4c70 29,48-65,92-95,109,168,228,239-240,270,314,383,390-393,401-403,407-409,449,460-463,570,587-590
+  s_28ae7db8033464::t_2de15ef96f9fd4 131,275
+  s_28ae7db8033464::t_e03f6b075db710 216,274,280,571,608,623-642
+scripts/verify-kubernetes-secret-provenance.mjs
+  s_28ae7db8033464::t_9bc87e010558ac 1-151
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_e2ef2c69a8ab61 37
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_e2ef2c69a8ab61 64-71,87-88
+  s_28ae7db8033464::t_4e93e1c36dedf4 58-63
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_e2ef2c69a8ab61 66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "983e4768f5df73431494857e71526944de69bd99",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
