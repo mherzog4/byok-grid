@@ -1,0 +1,99 @@
+name: Bug report
+description: Report a reproducible defect in BYOK Grid
+title: 'bug: '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve BYOK Grid. Never include API keys, tokens, cookies, private URLs, customer data, provider payloads, or other secrets. Suspected vulnerabilities must use the private security-reporting link below instead of this public form.
+  - type: input
+    id: version
+    attributes:
+      label: BYOK Grid version
+      description: Provide an immutable release tag plus image digest, or an exact commit SHA.
+      placeholder: v0.1.0-rc.1 / sha256:… or 40-character commit SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment profile
+      options:
+        - Local source development
+        - Compose evaluation profile
+        - Kubernetes with remote libSQL
+        - Other or custom deployment
+    validations:
+      required: true
+  - type: dropdown
+    id: database
+    attributes:
+      label: Authoritative database
+      options:
+        - Local SQLite file
+        - Remote libSQL
+        - Historical PostgreSQL compatibility path
+        - Unknown or not applicable
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Defect summary
+      description: Describe what is broken and the user-visible impact.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: List the smallest deterministic sequence that reproduces the defect.
+      placeholder: |
+        1. Start …
+        2. Create …
+        3. Observe …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence
+      description: Include bounded logs, request IDs, screenshots, or failing commands only after removing all secrets and tenant data.
+      render: shell
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: Runtime environment
+      description: Include OS, architecture, Node.js version, browser if relevant, and provider product/version without credentials.
+      placeholder: Ubuntu 24.04, linux/amd64, Node.js 24.x, Chromium …
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues and documentation for this defect.
+          required: true
+        - label: I removed credentials, tokens, cookies, private URLs, customer data, provider payloads, and other secrets.
+          required: true
+        - label: This is not a suspected security vulnerability.
+          required: true
+        - label: I agree to follow [the Code of Conduct](https://github.com/mherzog4/byok-grid/blob/main/CODE_OF_CONDUCT.md).
+          required: true

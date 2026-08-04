@@ -11,6 +11,7 @@
   "scripts": {
     "benchmark:grid": "npm run benchmark:grid --workspace=@byok-grid/db",
     "build": "turbo run build",
+    "ci:verify-community": "node scripts/verify-community-health.mjs",
     "ci:verify-workflows": "node scripts/verify-workflows.mjs",
     "connector:keygen": "tsx packages/connectors/src/registry-signing-cli.ts keygen",
     "connector:sign-registry": "tsx packages/connectors/src/registry-signing-cli.ts sign",
@@ -53,7 +54,7 @@
     "release:verify-deployment": "node scripts/verify-public-deployment.mjs",
     "release:verify-published": "node scripts/verify-published-release.mjs",
     "release:verify-version": "node scripts/verify-release-version.mjs",
-    "test": "npm run test:release-tools && turbo run test",
+    "test": "npm run ci:verify-community && npm run test:release-tools && turbo run test",
     "test:connector-runner": "cargo test --locked --package byok-grid-connector-runner",
     "test:release-tools": "node --test scripts/*.test.mjs",
     "typecheck": "turbo run typecheck"

@@ -1,0 +1,65 @@
+name: Feature request
+description: Propose a product or platform capability
+title: 'feat: '
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Explain the user problem before proposing an implementation. BYOK Grid keeps SQLite/libSQL authoritative, metered work outside web requests, and untrusted connectors outside the application process.
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Who is blocked, what are they trying to accomplish, and why do existing capabilities not solve it?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe observable behavior rather than a specific internal implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include current workarounds and why they are insufficient.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Primary area
+      options:
+        - Grid and data modeling
+        - Visual workflows and nodes
+        - Sources and ingestion
+        - Connectors and BYOK credentials
+        - Writebacks and webhooks
+        - Authentication and collaboration
+        - Deployment and operations
+        - Connector SDK and community ecosystem
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Architectural and operational impact
+      description: Note effects on tenant isolation, SQLite/libSQL authority, retries/idempotency, provider cost, egress, secrets, migrations, backup/restore, or release compatibility.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues and documentation for this request.
+          required: true
+        - label: I removed credentials, tokens, cookies, private URLs, customer data, provider payloads, and other secrets.
+          required: true
+        - label: I agree to follow [the Code of Conduct](https://github.com/mherzog4/byok-grid/blob/main/CODE_OF_CONDUCT.md).
+          required: true

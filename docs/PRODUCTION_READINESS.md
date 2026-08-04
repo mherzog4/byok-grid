@@ -4,7 +4,7 @@ This ledger separates repository evidence from environment-specific evidence.
 Passing the local and CI gates makes a release candidate reproducible; it does
 not by itself prove that a particular deployment is production-ready.
 
-Last repository evidence review: 2026-08-03. Target version: `0.1.0-rc.1`.
+Last repository evidence review: 2026-08-04. Target version: `0.1.0-rc.1`.
 
 ## Repository and local-runtime evidence
 
@@ -160,6 +160,11 @@ working tree:
   evidence artifacts, version tags blocked on any platform failure, and a
   revalidated fourteen-record `IMAGE_SMOKE.jsonl` asset covered by release
   checksums and attestation.
+- a fail-closed public community contract with a recognized Contributor
+  Covenant and private enforcement channel, explicit best-effort support
+  boundaries, structured bug/feature/support intake, private vulnerability
+  routing, a production-impact pull-request checklist, and a dependency-free
+  verifier included in the ordinary test gate;
 - public hosted CI and Security evidence on the promoted candidate, including
   JavaScript/TypeScript and Rust CodeQL with zero open alerts, dependency review
   through protected pull request
