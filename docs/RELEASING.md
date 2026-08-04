@@ -58,6 +58,15 @@ and smoke-record counts. The verifier streams archive hashing and rejects any
 extra asset, checksum drift, digest/value mismatch, or noncanonical smoke
 evidence.
 
+The repository has immutable GitHub Releases enabled. After the CLI assembles
+the release as a draft, uploads every file, and publishes it, the workflow reads
+the public release back and runs `release:verify-published`. That verifier
+requires GitHub's `immutable: true` state, the exact version/title/prerelease
+identity, the reviewed release-note body, exactly six uploaded assets, matching
+byte sizes, canonical download URLs, and a server-computed SHA-256 digest equal
+to every packaged file. A failure requires a new release-candidate version;
+never alter or delete an immutable published release.
+
 Maintainers can exercise the real local Helm/npm packaging toolchain without
 publishing anything:
 
@@ -94,7 +103,9 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    revalidate the seven two-record `release-smoke-<target>` artifacts into the
    checksummed `IMAGE_SMOKE.jsonl` release asset, independently verify the
    complete bundle, attest it, and create the GitHub Release. Do not manually
-   replace failed assets or move the tag.
+   replace failed assets or move the tag. The final workflow step reads the
+   published release back and proves GitHub made it immutable with the exact
+   packaged asset bytes.
 6. Verify every released file and image using `docs/VERIFY_RELEASE.md`, then
    install a digest-pinned candidate in the reference environment by applying
    the release's generated `values.digests.yaml` after operator values.

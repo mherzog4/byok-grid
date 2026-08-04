@@ -32,6 +32,13 @@ canonical checksums, archive hashes, seven-image digest manifest, generated
 Helm values, and fourteen digest-bound smoke records. It complements—not
 replaces—the GitHub attestations and registry vulnerability scan.
 
+The release workflow also emits `BYOK_GRID_PUBLISHED_RELEASE_VERIFIED` only
+after reading the published GitHub Release back. That marker proves GitHub
+reported the release immutable, retained the reviewed notes, and reported the
+same byte length and SHA-256 digest for each of the exact six locally packaged
+assets. Confirm the public release API still reports `immutable: true`; an
+immutable release or its tag must never be replaced to correct a failure.
+
 Verify a downloaded chart or SDK package against the repository identity:
 
 ```text
