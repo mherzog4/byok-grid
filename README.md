@@ -414,5 +414,10 @@ RUN_SQLITE_WEB_E2E=1 TEST_APP_URL=http://127.0.0.1:3000 \
   npm test --workspace=@byok-grid/web -- src/workflow-sqlite.e2e.test.ts
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change and
-[SECURITY.md](SECURITY.md) before reporting a vulnerability.
+## Community and support
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change and the
+[support policy](SUPPORT.md) before asking for help or reporting a defect.
+Participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
+Suspected vulnerabilities must follow the private process in
+[SECURITY.md](SECURITY.md), never a public issue.

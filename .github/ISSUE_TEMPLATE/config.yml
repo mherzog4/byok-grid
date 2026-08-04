@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability privately
+    url: https://github.com/mherzog4/byok-grid/security/advisories/new
+    about: Never disclose a suspected vulnerability in a public issue.
+  - name: Read the support policy
+    url: https://github.com/mherzog4/byok-grid/blob/main/SUPPORT.md
+    about: Review supported channels, required context, and secret-handling rules.

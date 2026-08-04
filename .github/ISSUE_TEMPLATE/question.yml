@@ -1,0 +1,62 @@
+name: Question or support request
+description: Ask about installation, configuration, or usage
+title: 'support: '
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Support is community best effort. Read SUPPORT.md first. Never paste credentials, tokens, cookies, private URLs, customer data, or unredacted provider output.
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What have you tried?
+      description: Link the documentation followed and include safe, redacted commands or configuration.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: BYOK Grid version
+      placeholder: Release tag and digest, or exact commit SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment profile
+      options:
+        - Local source development
+        - Compose evaluation profile
+        - Kubernetes with remote libSQL
+        - Other or custom deployment
+    validations:
+      required: true
+  - type: textarea
+    id: safe_context
+    attributes:
+      label: Additional redacted context
+      description: Include relevant OS, architecture, provider versions, and bounded output with all sensitive data removed.
+      render: shell
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched the documentation and existing issues.
+          required: true
+        - label: I removed credentials, tokens, cookies, private URLs, customer data, provider payloads, and other secrets.
+          required: true
+        - label: This is not a suspected security vulnerability or a private conduct report.
+          required: true
+        - label: I agree to follow [the Code of Conduct](https://github.com/mherzog4/byok-grid/blob/main/CODE_OF_CONDUCT.md).
+          required: true
