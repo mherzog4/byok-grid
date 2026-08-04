@@ -1,0 +1,53 @@
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_929f45656fd322 29
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_bb87c1a19fc845 58-63,65-71,85
+  s_28ae7db8033464::t_929f45656fd322 64,86-87
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_929f45656fd322 143-150
+package.json
+  s_28ae7db8033464::t_929f45656fd322 55
+scripts/verify-kubernetes-runtime-lib.mjs
+  s_28ae7db8033464::t_40f8a02ac9de22 670-673,680,728-740,743-754
+  s_28ae7db8033464::t_c4babf3bbb273a 1-106,108-218,220-285,287-408,411-430,434-439,443-444,449-533,540,545-549,556-602,605-643,648-664,667-669,674-676,682-683,686-693,697-707,713-722,725-727,741-742,755-770,774-776,778-780,782-804,809-871,875-890,893-971,975-1002,1007-1049,1053-1061
+  s_28ae7db8033464::t_d522dadce163de 107,219,286,409-410,431-433,440-442,445-448,534-539,541-544,550-555,603-604,644-647,665-666,677-679,681,684-685,694-696,708-712,723-724,771-773,777,781,805-808,872-874,891-892,972-974,1003-1006,1050-1052
+docs/VERIFY_KUBERNETES_RUNTIME.md
+  s_28ae7db8033464::t_929f45656fd322 1-69
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_929f45656fd322 65
+README.md
+  s_28ae7db8033464::t_929f45656fd322 293-295
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_929f45656fd322 36
+scripts/verify-kubernetes-runtime.mjs
+  s_28ae7db8033464::t_c4babf3bbb273a 1-115
+  s_28ae7db8033464::t_bbf2b14d2f0fa6 116-117
+scripts/verify-kubernetes-runtime.test.mjs
+  s_28ae7db8033464::t_d7a0b2beffc4e9 2-9,265-293
+  s_28ae7db8033464::t_a370db3e33e917 143-145,396
+  s_28ae7db8033464::t_6952fc8235bb68 546-550,552-554,573-585
+  s_28ae7db8033464::t_6a70eeb4b2b4ba 1,10-95,103-123,158-169,175-190,196-264,294-311,313-314,320-324,326-385,421-450,453-503,506-540,551,555-572,586-695
+  s_28ae7db8033464::t_5998567cfdd703 96-102,124-142,146-157,170-174,191-195,312,315-319,325,386-395,397-420,451-452,504-505,541-545
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_929f45656fd322 223-226
+docs/RELEASING.md
+  s_28ae7db8033464::t_929f45656fd322 115-118
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_929f45656fd322 50-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "59513a1c7f7cf03ea2fa163ab481e543265824bd",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
