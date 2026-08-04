@@ -128,16 +128,29 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
 
 The image job initially publishes only commit-scoped staging tags. Each image
 is scanned at its immutable digest and attested only after the scan passes. A
-separate aggregate job creates version tags only when all seven images pass, so
-one failed matrix entry cannot leave a partially approved version set. Fixable
-High and Critical vulnerabilities and end-of-life base operating systems block
-the release. Review and update `docs/PRODUCTION_READINESS.md` with the resulting
-run and deployment evidence.
+separate aggregate job preflights the complete seven-tag set and creates version
+tags only when all seven images pass. An absent tag is created from its verified
+digest, an existing tag at that same digest is an idempotent no-op, and an
+existing tag at any other digest fails before the first write. Each newly
+created tag is read back through the OCI registry, and the complete seven-tag
+set must report its expected top-level digests in a final pass before the
+workflow can publish release files. Success emits
+`BYOK_GRID_RELEASE_IMAGE_TAGS_VERIFIED` with the created, existing, and total
+image counts. This makes workflow reruns safe without treating a mutable tag as
+the image identity; `IMAGE_DIGESTS.txt` remains authoritative. Fixable High and
+Critical vulnerabilities and end-of-life base operating systems block the
+release. Review and update `docs/PRODUCTION_READINESS.md` with the resulting run
+and deployment evidence.
 
 Protect release tags with a repository ruleset and enable GHCR tag immutability
-when the registry supports it. The digest manifest is authoritative regardless
-of tag policy. A failed partial release must be investigated; never point an
-existing version tag at a different commit.
+when the registry supports it. Repository workflow concurrency plus immediate
+pre-write and post-write registry checks narrow the non-atomic registry update
+window, but registry tags remain pointers unless the registry itself enforces
+immutability. A final closed-set readback detects changes during the job but
+cannot make mutable registry pointers atomic after that read. The digest
+manifest is authoritative regardless of tag policy. A failed partial release
+must be investigated; never point an existing version tag at a different
+commit.
 
 ## Stable release gate
 

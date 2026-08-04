@@ -194,7 +194,13 @@ working tree:
   a read-only/capability-free boundary, bounded host parsing, two-record JSONL
   evidence artifacts, version tags blocked on any platform failure, and a
   revalidated fourteen-record `IMAGE_SMOKE.jsonl` asset covered by release
-  checksums and attestation.
+  checksums and attestation;
+- a dependency-free GHCR version-tag publisher that validates the exact digest
+  inventory, preflights all seven tags before mutation, treats identical tags
+  as idempotent rerun state, rejects conflicting digests, rechecks immediately
+  before creation, verifies every created tag plus the final complete tag set by
+  OCI digest readback, and keeps registry credentials and provider errors out of
+  logs.
 - a fail-closed public community contract with a recognized Contributor
   Covenant and private enforcement channel, explicit best-effort support
   boundaries, structured bug/feature/support intake, private vulnerability
