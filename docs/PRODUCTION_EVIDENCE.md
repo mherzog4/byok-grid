@@ -36,16 +36,17 @@ The final required path set is deliberately narrow:
 - root entries in `package-lock.json`;
 - `deploy/helm/byok-grid/Chart.yaml`;
 - `docs/evidence/<stable-version>-production.json`;
-- `docs/PRODUCTION_READINESS.md`; and
+- `docs/PRODUCTION_READINESS.md`;
+- `docs/releases/v<stable-version>.md`; and
 - `SECURITY.md`.
 
-All six files must change and no other path may change. This proves the stable
-version contract, manifest, readiness record, and supported-version policy were
-actually updated. Any application, dependency, container, chart template/value,
-workflow, verifier, or general documentation change requires a new RC,
-deployment, and observation window. The `candidate-source-equivalence` record
-retains the human review of the allowed promotion-only diff; the Git path check
-independently enforces its boundary.
+All seven files must change and no other path may change. This proves the stable
+version contract, manifest, readiness record, curated version-bound release
+notes, and supported-version policy were actually updated. Any application,
+dependency, container, chart template/value, workflow, verifier, or general
+documentation change requires a new RC, deployment, and observation window. The
+`candidate-source-equivalence` record retains the human review of the allowed
+promotion-only diff; the Git path check independently enforces its boundary.
 
 ## Required evidence gates
 
@@ -127,8 +128,9 @@ stable support promises.
    strings or fragments.
 6. Record operator acceptance only after the window and rollback test finish.
 7. Bump only the root/lock/chart version contract, set Artifact Hub prerelease
-   to `false`, update the readiness ledger and `SECURITY.md`, and add the
-   manifest. Do not change runtime or release machinery.
+   to `false`, add the curated stable release notes, update the readiness ledger
+   and `SECURITY.md`, and add the manifest. Do not change runtime or release
+   machinery.
 8. Commit those promotion-only files, then verify the committed state.
 
 Verify the manifest directly:

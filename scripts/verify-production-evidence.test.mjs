@@ -354,6 +354,7 @@ describe('production evidence verifier', () => {
           'deploy/helm/byok-grid/Chart.yaml',
           'docs/PRODUCTION_READINESS.md',
           'docs/evidence/0.1.0-production.json',
+          'docs/releases/v0.1.0.md',
           'package-lock.json',
           'package.json',
         ],
@@ -363,7 +364,11 @@ describe('production evidence verifier', () => {
     assert.throws(
       () =>
         assertStablePromotionPaths(
-          ['apps/web/src/app/page.tsx', 'docs/evidence/0.1.0-production.json'],
+          [
+            'apps/web/src/app/page.tsx',
+            'docs/evidence/0.1.0-production.json',
+            'docs/releases/v0.1.0.md',
+          ],
           '0.1.0'
         ),
       /outside the release-only allowlist/u
@@ -376,8 +381,24 @@ describe('production evidence verifier', () => {
       () =>
         assertStablePromotionPaths(
           [
+            'SECURITY.md',
+            'deploy/helm/byok-grid/Chart.yaml',
+            'docs/PRODUCTION_READINESS.md',
+            'docs/evidence/0.1.0-production.json',
+            'package-lock.json',
+            'package.json',
+          ],
+          '0.1.0'
+        ),
+      /must add its version-bound release notes/u
+    );
+    assert.throws(
+      () =>
+        assertStablePromotionPaths(
+          [
             'deploy/helm/byok-grid/Chart.yaml',
             'docs/evidence/0.1.0-production.json',
+            'docs/releases/v0.1.0.md',
             'package-lock.json',
             'package.json',
           ],
