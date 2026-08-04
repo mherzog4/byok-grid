@@ -144,7 +144,9 @@ After the rollout succeeds, run the read-only live-cluster check in
 [`VERIFY_KUBERNETES_RUNTIME.md`](VERIFY_KUBERNETES_RUNTIME.md) before the
 retained migration Job expires. Its structured marker binds Deployment images
 and actual Pod `imageID` values to the release digest manifest. Pair it with the
-network guide's CNI enforcement tests, external-secret controller evidence,
+network guide's CNI enforcement tests, the read-only External Secrets Operator
+provenance verifier in
+[`VERIFY_KUBERNETES_SECRET_PROVENANCE.md`](VERIFY_KUBERNETES_SECRET_PROVENANCE.md),
 telemetry and alert records, and a tested rollback path; the live-object check
 does not make those provider-specific claims.
 

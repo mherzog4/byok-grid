@@ -70,3 +70,7 @@ raw Secret objects, kubeconfig files, or bearer tokens in an evidence bundle.
 Use the isolated behavioral procedure in
 [`KUBERNETES_NETWORK_POLICY_DRILL.md`](KUBERNETES_NETWORK_POLICY_DRILL.md) for
 the complementary CNI enforcement marker.
+Use
+[`VERIFY_KUBERNETES_SECRET_PROVENANCE.md`](VERIFY_KUBERNETES_SECRET_PROVENANCE.md)
+to bind the hashed Secret reference to a recent External Secrets Operator v1
+sync and immutable controller image without fetching Secret data.

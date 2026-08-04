@@ -54,6 +54,7 @@
     "release:verify-production-evidence": "node scripts/verify-production-evidence.mjs",
     "release:verify-deployment": "node scripts/verify-public-deployment.mjs",
     "release:verify-kubernetes-runtime": "node scripts/verify-kubernetes-runtime.mjs",
+    "release:verify-kubernetes-secret-provenance": "node scripts/verify-kubernetes-secret-provenance.mjs",
     "release:verify-published": "node scripts/verify-published-release.mjs",
     "release:verify-smtp-delivery": "node scripts/verify-smtp-delivery.mjs",
     "release:verify-version": "node scripts/verify-release-version.mjs",

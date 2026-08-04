@@ -296,6 +296,9 @@ TCP paths with same-target availability controls.
 See [the live Kubernetes verifier](docs/VERIFY_KUBERNETES_RUNTIME.md) for a
 read-only digest, rollout, pod-security, ingress, and policy-shape evidence
 record bound to a release candidate.
+See [the Kubernetes secret-provenance verifier](docs/VERIFY_KUBERNETES_SECRET_PROVENANCE.md)
+for a read-only External Secrets Operator v1 sync, store-health, and immutable
+controller record that never fetches Secret data.
 See [the workspace-purge ADR](docs/adr/0033-previewed-workspace-purge-and-cross-system-erasure.md)
 and [retention guide](docs/DATA_RETENTION.md) for confirmation, legal holds,
 receipts, analytics erasure, backups, and external-system boundaries.
