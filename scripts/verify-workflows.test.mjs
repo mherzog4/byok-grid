@@ -87,6 +87,43 @@ test('rejects job-wide GitHub token exposure', () => {
   assert.match(result.issues.join('\n'), /scope GitHub tokens to the step/u);
 });
 
+test('rejects unsupported manual CodeQL builds for Rust matrix entries', () => {
+  const workflow = `${validWorkflow}
+  codeql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        include:
+          - language: javascript-typescript
+            build-mode: manual
+          - language: rust
+            build-mode: manual
+    steps:
+      - run: true
+`;
+  const result = verifyWorkflowSource(workflow);
+  assert.match(result.issues.join('\n'), /Rust must use build-mode none/u);
+});
+
+test('accepts no-build CodeQL mode for Rust matrix entries', () => {
+  const workflow = `${validWorkflow}
+  codeql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        include:
+          - language: javascript-typescript
+            build-mode: none
+          - language: rust
+            build-mode: none
+    steps:
+      - run: true
+`;
+  assert.deepEqual(verifyWorkflowSource(workflow).issues, []);
+});
+
 test('the verifier contains no runtime package imports', async () => {
   const source = await readFile(
     resolve(import.meta.dirname, 'verify-workflows.mjs'),

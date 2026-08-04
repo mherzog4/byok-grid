@@ -48,7 +48,7 @@ jobs:
           - language: javascript-typescript
             build-mode: none
           - language: rust
-            build-mode: manual
+            build-mode: none
     steps:
       - name: Check out source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -60,10 +60,6 @@ jobs:
         with:
           build-mode: ${{ matrix.build-mode }}
           languages: ${{ matrix.language }}
-
-      - name: Build locked Rust workspace
-        if: matrix.language == 'rust'
-        run: cargo build --locked --workspace
 
       - name: Analyze
         uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0

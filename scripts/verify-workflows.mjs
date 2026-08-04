@@ -25,6 +25,11 @@ export function verifyWorkflowSource(source, filename = '<workflow>') {
   if (!/^concurrency:\s*$/mu.test(policySource)) {
     issues.push(`${filename}: a top-level concurrency policy is required.`);
   }
+  if (rustMatrixUsesManualBuildMode(lines)) {
+    issues.push(
+      `${filename}: CodeQL Rust must use build-mode none; manual mode is unsupported.`
+    );
+  }
 
   const workflowPermissions = /^permissions:\s*$/mu.test(policySource);
   const jobs = workflowJobs(lines);
@@ -132,6 +137,27 @@ function actionReference(line) {
     line
   );
   return match?.[1] ?? match?.[2] ?? match?.[3];
+}
+
+function rustMatrixUsesManualBuildMode(lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const entry = /^(\s*)-\s+language:\s*['"]?rust['"]?\s*$/u.exec(
+      stripYamlComment(lines[index] ?? '')
+    );
+    if (!entry) continue;
+    const entryIndent = entry[1]?.length ?? 0;
+    for (let next = index + 1; next < lines.length; next += 1) {
+      const line = stripYamlComment(lines[next] ?? '');
+      if (!line.trim()) continue;
+      const currentIndent = indentation(line);
+      if (currentIndent < entryIndent) break;
+      if (currentIndent === entryIndent && line.trimStart().startsWith('-')) {
+        break;
+      }
+      if (/^\s*build-mode:\s*['"]?manual['"]?\s*$/u.test(line)) return true;
+    }
+  }
+  return false;
 }
 
 function checkoutDisablesCredentialPersistence(lines, usesIndex) {
