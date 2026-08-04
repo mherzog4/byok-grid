@@ -1,17 +1,40 @@
 import { describe, expect, it } from 'vitest';
-import { createOperationalMetricsTask } from './operational-metrics';
+import {
+  createOperationalMetrics,
+  createOperationalMetricsTask,
+} from './operational-metrics';
 
 describe('workflow operational metrics server', () => {
-  it('coalesces concurrent scrapes, exposes bounded series, and stops on abort', async () => {
-    const controller = new AbortController();
-    const listening = deferred<number>();
+  it('coalesces overlapping metrics collections', async () => {
+    const collectionStarted = deferred<void>();
+    const finishCollection = deferred<void>();
     let collectionCount = 0;
-    const task = createOperationalMetricsTask({
-      collect: async () => {
+    const metrics = createOperationalMetrics(
+      async () => {
         collectionCount += 1;
-        await new Promise((resolve) => setTimeout(resolve, 20));
+        collectionStarted.resolve();
+        await finishCollection.promise;
         return snapshot();
       },
+      () => ({ acquisitionExhaustions: 1, acquisitionRetries: 3 })
+    );
+
+    const first = metrics.scrape();
+    await collectionStarted.promise;
+    const second = metrics.scrape();
+    expect(collectionCount).toBe(1);
+    finishCollection.resolve();
+
+    const [firstBody, secondBody] = await Promise.all([first, second]);
+    expect(secondBody).toBe(firstBody);
+    expect(collectionCount).toBe(1);
+  });
+
+  it('exposes bounded series and stops on abort', async () => {
+    const controller = new AbortController();
+    const listening = deferred<number>();
+    const task = createOperationalMetricsTask({
+      collect: async () => snapshot(),
       collectContention: () => ({
         acquisitionExhaustions: 1,
         acquisitionRetries: 3,
@@ -24,12 +47,8 @@ describe('workflow operational metrics server', () => {
 
     try {
       const port = await listening.promise;
-      const [first, second] = await Promise.all([
-        fetch(`http://127.0.0.1:${port}/metrics`),
-        fetch(`http://127.0.0.1:${port}/metrics`),
-      ]);
+      const first = await fetch(`http://127.0.0.1:${port}/metrics`);
       expect(first.status).toBe(200);
-      expect(second.status).toBe(200);
       expect(first.headers.get('cache-control')).toBe('no-store');
       expect(first.headers.get('content-type')).toContain(
         'text/plain; version=0.0.4'
@@ -49,7 +68,6 @@ describe('workflow operational metrics server', () => {
         'byok_grid_sqlite_write_acquisition_events{outcome="exhausted"} 1'
       );
       expect(body).not.toContain('workspace-');
-      expect(collectionCount).toBe(1);
 
       const missing = await fetch(`http://127.0.0.1:${port}/health`);
       expect(missing.status).toBe(404);

@@ -630,9 +630,9 @@ function expectSecurityHeaders(headers: Headers): string {
 }
 
 function expectRenderedScriptNonces(html: string, nonce: string): void {
-  const scripts = html.match(/<script\b[^>]*>/gu) ?? [];
+  const scripts = html.match(/<script\b[^>]*>/giu) ?? [];
   expect(scripts.length).toBeGreaterThan(0);
   for (const script of scripts) {
-    expect(script.match(/\bnonce="([^"]+)"/u)?.[1]).toBe(nonce);
+    expect(script.match(/\bnonce="([^"]+)"/iu)?.[1]).toBe(nonce);
   }
 }

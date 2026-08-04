@@ -43,7 +43,7 @@ export function createOperationalMetricsTask(
   };
 }
 
-function createOperationalMetrics(
+export function createOperationalMetrics(
   collect: () => Promise<SqliteOperationalMetricsSnapshot>,
   collectContention: () => SqliteWriteContentionSnapshot
 ) {
