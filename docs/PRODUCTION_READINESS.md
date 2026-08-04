@@ -155,6 +155,15 @@ working tree:
   evidence artifacts, version tags blocked on any platform failure, and a
   revalidated fourteen-record `IMAGE_SMOKE.jsonl` asset covered by release
   checksums and attestation.
+- public hosted CI and Security evidence on the promoted candidate, including
+  JavaScript/TypeScript and Rust CodeQL with zero open alerts, dependency review
+  through protected pull request
+  [`#5`](https://github.com/mherzog4/byok-grid/pull/5), Dependabot vulnerability
+  alerts and security updates, secret scanning and push protection, private
+  vulnerability reporting, repository-level action SHA pinning, a no-bypass
+  `main` ruleset requiring current CI/security results and blocking
+  High-or-higher CodeQL findings, an immutable `v*` tag ruleset, and AGPL-3.0
+  license detection.
 
 The dated local runtime, drain, SQLite recovery, and ClickHouse projection
 record is in
@@ -176,10 +185,6 @@ dated evidence linked from a release issue or runbook record:
 
 - run the tag workflow in this public repository and independently verify its
   seven digest-pinned images, chart, SDK package, checksums, and attestations;
-- run the SHA-pinned CodeQL JavaScript/TypeScript and Rust jobs plus dependency
-  review in the public repository; enable code scanning, dependency graph,
-  Dependabot alerts, secret scanning, and push protection, then require the
-  applicable CI/security checks through a ruleset;
 - run an authenticated Hatchet worker against the supported production Hatchet
   version, prove health registration, then send `SIGTERM` during an in-flight
   workflow and prove lease-safe completion or recovery inside the 90-second
@@ -207,8 +212,9 @@ dated evidence linked from a release issue or runbook record:
 - independently repeat the digest-bound image smoke on native `linux/amd64` and
   native `linux/arm64` hosts, retaining those records with the release
   workflow's attested fourteen-record `IMAGE_SMOKE.jsonl` asset;
-- enable and verify protected release tags or a repository ruleset and the
-  strongest available GHCR tag immutability controls;
+- verify the strongest available GHCR tag immutability controls against the
+  first candidate publication; the active no-bypass `v*` repository tag
+  ruleset already prevents release-tag update and deletion;
 - measure web/API latency and SQLite/libSQL contention at the intended tenant,
   row, mutation, and workflow concurrency envelope; record a capacity limit and
   alert threshold using
