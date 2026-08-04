@@ -212,12 +212,17 @@ working tree:
   before creation, verifies every created tag plus the final complete tag set by
   OCI digest readback, and keeps registry credentials and provider errors out of
   logs;
+- a dependency-free anonymous GHCR verifier that requests only public pull
+  tokens, reads all seven version tags and immutable digest references, requires
+  both identities to return the checksummed digest, and blocks GitHub Release
+  publication while any package remains private;
 - a dependency-free read-only release-protection verifier that discovers the
   active tag ruleset inventory, requires exact no-bypass mutation and
   owner-only creation rules, peels a GitHub-verified signed annotated tag to the
   candidate commit, confirms repository and published-release immutability,
-  reads all seven GHCR version tags back at the checksummed release digests, and
-  writes one exclusive private marker-bound evidence record;
+  reads all seven GHCR version tags back at the checksummed release digests
+  through both authenticated and anonymous paths, and writes one exclusive
+  private marker-bound evidence record;
 - a fail-closed public community contract with a recognized Contributor
   Covenant and private enforcement channel, explicit best-effort support
   boundaries, structured bug/feature/support intake, private vulnerability
@@ -244,7 +249,8 @@ The tag workflow repeats repository checks, legacy PostgreSQL compatibility
 tests, dependency audit, multi-platform image builds, fixable High/Critical
 vulnerability and base-OS lifecycle scans, SBOM/provenance generation, digest
 attestation, checksums, and release-file attestation. Version tags are created
-from digests only after the complete image matrix passes.
+from digests only after the complete image matrix passes, and the GitHub Release
+remains blocked until all seven tags and digests are anonymously readable.
 
 ## Release-candidate gates still requiring external evidence
 
@@ -300,8 +306,9 @@ dated evidence linked from a release issue or runbook record:
   first candidate publication and retain
   `BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED`; the active no-bypass `v*`
   mutation rules, owner-only creation rule, signed tag, immutable GitHub
-  Release, and seven GHCR digest identities are all required while the digest
-  manifest remains authoritative;
+  Release, seven GHCR digest identities, and anonymous public access to every
+  tag and digest are all required while the digest manifest remains
+  authoritative;
 - measure web/API latency and SQLite/libSQL contention at the intended tenant,
   row, mutation, and workflow concurrency envelope; record a capacity limit and
   alert threshold using

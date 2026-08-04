@@ -289,6 +289,14 @@ jobs:
           --digests-dir release-digests
           --owner '${{ github.repository_owner }}'
 
+      - name: Verify anonymous public image access
+        shell: bash
+        run: >-
+          npm run release:verify-public-images --
+          --version "$VERSION"
+          --digests-dir release-digests
+          --owner '${{ github.repository_owner }}'
+
   publish:
     needs: [verify, images, publish_images]
     runs-on: ubuntu-latest

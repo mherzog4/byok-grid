@@ -67,7 +67,7 @@ its contents.
 | `public-ingress-and-proxy`     | Canonical deployment marker plus real proxy-chain, direct-access denial, and multi-network edge/application rate-limit evidence                        |
 | `smtp-delivery`                | TLS verification/recovery delivery, SPF/DKIM/DMARC alignment, exact SMTP verification marker, and provider failure monitoring                          |
 | `multi-architecture-smoke`     | Attested fourteen-record release asset plus native-host boot records for published `linux/amd64` and `linux/arm64` digests                             |
-| `release-tag-protection`       | Exact no-bypass mutation and owner-only creation rules, signed candidate tag, immutable GitHub Release state, and seven GHCR tag-to-digest checks      |
+| `release-tag-protection`       | Exact tag rules, signed candidate tag, immutable GitHub Release state, and seven authenticated plus anonymous GHCR tag/digest checks                   |
 | `production-capacity`          | Passing declared-envelope marker, provider/ingress metrics, supported limit, alert threshold, and saturation response                                  |
 | `observation-window`           | Start/end record and zero unresolved security, correctness, restore, or data-loss blockers                                                             |
 | `candidate-source-equivalence` | Reviewed diff from observed candidate to the proposed stable commit                                                                                    |
@@ -112,7 +112,8 @@ Produce the release-tag protection record only after RC publication by following
 [`VERIFY_RELEASE_PROTECTION.md`](VERIFY_RELEASE_PROTECTION.md). The verifier is
 read-only: it proves the current repository rules, signed annotated tag,
 immutable release state, and exact GHCR version-tag digests without attempting
-an overwrite. Digest references remain authoritative because registry tags are
+an overwrite. It also proves that every tag and immutable digest is anonymously
+readable. Digest references remain authoritative because registry tags are
 pointers unless the registry independently enforces immutability.
 
 ## Optional production surface

@@ -49,6 +49,7 @@ describe('release protection verification', () => {
       immutableRelease: true,
       marker: RELEASE_PROTECTION_MARKER,
       mutationRulesetId: 20346817,
+      publicImagesVerified: true,
       releaseId: 123,
       repository: REPOSITORY,
       signedTagVerified: true,
@@ -161,6 +162,13 @@ describe('release protection verification', () => {
     await assert.rejects(
       verifyReleaseProtection(drifted),
       /does not match its immutable digest/u
+    );
+
+    const privateImages = validInput();
+    privateImages.inspectPublicTag = async () => ({ status: 'absent' });
+    await assert.rejects(
+      verifyReleaseProtection(privateImages),
+      /not anonymously readable/u
     );
   });
 
@@ -399,6 +407,10 @@ function validInput() {
       )
       .digest('hex'),
     immutableReleases: { enabled: true, enforced_by_owner: false },
+    inspectPublicTag: async (record) => ({
+      digest: record.digest,
+      status: 'present',
+    }),
     inspectTag: async (record) => ({
       digest: record.digest,
       status: 'present',
