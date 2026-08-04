@@ -1,0 +1,52 @@
+scripts/verify-release-protection.test.mjs
+  s_28ae7db8033464::t_656771e2172541 52,166-172,410-413
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_2f51340ea439b3 44-45
+scripts/verify-release-version.mjs
+  s_28ae7db8033464::t_a8664edd2edca4 60-67,227-277,421
+  s_28ae7db8033464::t_2351cbf4168204 278-280,407-408
+scripts/verify-public-release-images.mjs
+  s_28ae7db8033464::t_c927caa601ee6b 1-72
+scripts/verify-release-protection.mjs
+  s_28ae7db8033464::t_656771e2172541 4,35,40,51-52
+scripts/verify-public-release-images.test.mjs
+  s_28ae7db8033464::t_c927caa601ee6b 1-188
+  s_28ae7db8033464::t_6f6e0eb7994318 189-194
+docs/RELEASING.md
+  s_28ae7db8033464::t_1039d9bf0bd10a 134-140,170-179,187-188
+docs/VERIFY_RELEASE.md
+  s_28ae7db8033464::t_2f51340ea439b3 58-64,72-74
+docs/VERIFY_RELEASE_PROTECTION.md
+  s_28ae7db8033464::t_2f51340ea439b3 54-56,61-65,71-72
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_4b90426afbf3a3 215-218,223-225,252-253,309-311
+package.json
+  s_28ae7db8033464::t_c927caa601ee6b 58
+docs/adr/0062-anonymous-public-ghcr-release-gate.md
+  s_28ae7db8033464::t_4b90426afbf3a3 1-51
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_20fa92bbcbdb08 70,115-116
+scripts/verify-release-protection-lib.mjs
+  s_28ae7db8033464::t_656771e2172541 37,63-67,97-113,124
+scripts/verify-public-release-images-lib.mjs
+  s_28ae7db8033464::t_c927caa601ee6b 1-267
+  s_28ae7db8033464::t_92b989c0ab3543 268-269
+.github/workflows/release.yml
+  s_28ae7db8033464::t_c927caa601ee6b 292-299
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "0bdb92c52391d3599e484f46cef08a49d121e3aa",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
