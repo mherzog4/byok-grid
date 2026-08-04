@@ -1,0 +1,63 @@
+docs/VERIFY_RELEASE.md
+  s_28ae7db8033464::t_0fed7dda62206b 58-67
+docs/adr/0061-machine-verifiable-release-protection.md
+  s_28ae7db8033464::t_1bbdc6e7a818b8 28-29
+  s_28ae7db8033464::t_04c07def9b6f75 1-27,30-47
+scripts/verify-release-protection.mjs
+  s_28ae7db8033464::t_aa745f192d97f4 10,43
+  s_28ae7db8033464::t_aaea6213ae4e7b 2,4-6,8-9,11-15,18-36,38,40-42,44-57,59-73,78-97,119,127-130,132
+  s_28ae7db8033464::t_53e8ed5115e7e7 16,37,39
+  s_28ae7db8033464::t_5622609ffcb7d0 1,3,7,17,58,74-77,98-118,120-126,131
+scripts/verify-release-version.mjs
+  s_28ae7db8033464::t_698610d7b7fa32 343
+  s_28ae7db8033464::t_1bbdc6e7a818b8 337
+  s_28ae7db8033464::t_38abede87a63e0 52-59,329-336,338-342,344-369
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_0fed7dda62206b 41-44
+package.json
+  s_28ae7db8033464::t_e02edd0a012fc7 66
+scripts/verify-release-protection-lib.mjs
+  s_28ae7db8033464::t_aa745f192d97f4 2-4,344-367
+  s_28ae7db8033464::t_53e8ed5115e7e7 1,37,40-42,98,103,106,234,259-262
+  s_28ae7db8033464::t_5622609ffcb7d0 163-167,183-233,235-258,263-264,379-381,414-418,462-463
+  s_28ae7db8033464::t_aaea6213ae4e7b 5-36,38-39,43-97,99-102,104-105,107-162,168-182,265-343,368-378,382-413,419-461,464-622
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_fbfafb239c7de7 117
+  s_28ae7db8033464::t_0fed7dda62206b 70,79-80,111-116
+scripts/verify-release-protection.test.mjs
+  s_28ae7db8033464::t_bfd53ae071262a 3,47,52,55,177-186,393-400
+  s_28ae7db8033464::t_33e8015e592772 2,4-10,317-366
+  s_28ae7db8033464::t_1d697cc67ccbda 18,62,147,164-176,188-208,282
+  s_28ae7db8033464::t_26f53820a55af9 1,11-17,19-46,48-51,53-54,56-61,63-146,148-163,187,209-281,283-316,367-392,401-476
+docs/VERIFY_RELEASE_PROTECTION.md
+  s_28ae7db8033464::t_eaa166dc194775 33
+  s_28ae7db8033464::t_04c07def9b6f75 1-32,34-57,64-69
+  s_28ae7db8033464::t_1bbdc6e7a818b8 58-63
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_e02edd0a012fc7 44,165-169
+  s_28ae7db8033464::t_e66813968f7aad 170-172
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_e02edd0a012fc7 92
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_0fed7dda62206b 214-220,298-304
+docs/RELEASING.md
+  s_28ae7db8033464::t_0fed7dda62206b 170-175
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_e02edd0a012fc7 51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "7e27d6e5bf2d2e86329d5bc330b8948cea69f28a",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
