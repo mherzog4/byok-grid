@@ -1,0 +1,51 @@
+scripts/verify-community-health.mjs
+  s_28ae7db8033464::t_c6bae45d4c6979 1-49,76-119,122-130,136-254,265-288
+  s_28ae7db8033464::t_2b709ab12f8879 50-75,120-121,131-135,255-264
+SUPPORT.md
+  s_28ae7db8033464::t_c6bac30c1add5c 1-51
+.github/ISSUE_TEMPLATE/config.yml
+  s_28ae7db8033464::t_c6bac30c1add5c 1-8
+.github/ISSUE_TEMPLATE/question.yml
+  s_28ae7db8033464::t_c6bac30c1add5c 1-2,4-56,58-60,62
+  s_28ae7db8033464::t_e334a3938ce0db 57
+  s_28ae7db8033464::t_c6bae45d4c6979 3,61
+.github/ISSUE_TEMPLATE/bug_report.yml
+  s_28ae7db8033464::t_e334a3938ce0db 94
+  s_28ae7db8033464::t_c6bac30c1add5c 1-2,4-93,95-97,99
+  s_28ae7db8033464::t_c6bae45d4c6979 3,98
+package.json
+  s_28ae7db8033464::t_c6bae45d4c6979 14,57
+scripts/verify-community-health.test.mjs
+  s_28ae7db8033464::t_c6bae45d4c6979 1-62,77-101
+  s_28ae7db8033464::t_2b709ab12f8879 63-76
+.github/ISSUE_TEMPLATE/feature_request.yml
+  s_28ae7db8033464::t_c6bac30c1add5c 1-2,4-61,63,65
+  s_28ae7db8033464::t_e334a3938ce0db 62
+  s_28ae7db8033464::t_c6bae45d4c6979 3,64
+CODE_OF_CONDUCT.md
+  s_28ae7db8033464::t_c6bac30c1add5c 1-129
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_ba525e3c52d250 43-45,79-83
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_ba525e3c52d250 7,163-167
+.github/pull_request_template.md
+  s_28ae7db8033464::t_c6bac30c1add5c 1-42
+README.md
+  s_28ae7db8033464::t_c6bac30c1add5c 417-423
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "88470d49a4cce8e15a9def852fb46692142882cd",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
