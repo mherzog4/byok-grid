@@ -46,12 +46,15 @@ release-candidate source. The audited default branch was `main` at
   [`20346817`](https://github.com/mherzog4/byok-grid/rules/20346817) protects
   `refs/tags/v*` without a bypass actor and prevents release-tag update,
   deletion, and non-fast-forward movement after creation.
+- Protected pull request
+  [`#5`](https://github.com/mherzog4/byok-grid/pull/5) passed `verify`,
+  `Workflow policy`, both CodeQL language checks, and the pull-request-only
+  `Dependency review` check before merge. This exercised the ruleset without an
+  owner bypass and supplied the hosted dependency-review evidence that a push
+  event cannot produce.
 
 ## Hosted gates not yet satisfied
 
-- `Dependency review` runs only for pull requests. The protected pull request
-  carrying this evidence record must pass that check before merge; until then,
-  the dependency-review and end-to-end ruleset gate remains open.
 - The repository has no GitHub Release. No seven-image release matrix,
   checksums, SBOM/provenance, release bundle, or attestations have been
   published and independently verified.
