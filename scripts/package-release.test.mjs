@@ -123,10 +123,16 @@ test('rejects mismatched, duplicate, and truncated smoke evidence', () => {
 test('assembles a complete release atomically with portable checksums', () => {
   withFixture(({ root, digests, smoke }) => {
     const output = join(root, 'dist', 'release');
+    let npmCache;
     const runCommand = (command, args) => {
       const destinationFlag =
         command === 'helm' ? '--destination' : '--pack-destination';
       const destination = args[args.indexOf(destinationFlag) + 1];
+      if (command === 'npm') {
+        npmCache = args[args.indexOf('--cache') + 1];
+        assert.equal(existsSync(npmCache), true);
+        assert.match(npmCache, /\.npm-cache\.tmp-/u);
+      }
       const filename =
         command === 'helm'
           ? 'byok-grid-0.1.0-rc.1.tgz'
@@ -151,6 +157,7 @@ test('assembles a complete release atomically with portable checksums', () => {
       'byok-grid-connector-sdk-0.2.0.tgz',
       'values.digests.yaml',
     ]);
+    assert.equal(existsSync(npmCache), false);
     const checksums = readFileSync(join(output, 'SHA256SUMS'), 'utf8');
     const chartHash = createHash('sha256')
       .update('helm-artifact')
