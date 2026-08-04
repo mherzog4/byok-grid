@@ -1,0 +1,23 @@
+apps/workflow-worker/src/operational-metrics.test.ts
+  s_28ae7db8033464::t_3a1a5568c8e4c7 2-5,8-10,12-13,15-16,19-37,50
+apps/web/src/workflow-sqlite.e2e.test.ts
+  s_28ae7db8033464::t_3a1a5568c8e4c7 633,636
+apps/workflow-worker/src/operational-metrics.ts
+  s_28ae7db8033464::t_3a1a5568c8e4c7 46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "dfeebe2bc704d05c4c3599cc4dbfc1d8ddfdf3fc",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
