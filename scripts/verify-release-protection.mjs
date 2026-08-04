@@ -1,6 +1,7 @@
 import { lstatSync, readFileSync } from 'node:fs';
 
 import { createGhcrTagInspector } from './publish-release-image-tags-lib.mjs';
+import { createAnonymousGhcrTagInspector } from './verify-public-release-images-lib.mjs';
 import {
   createGitHubApiReader,
   readLiveReleaseProtectionState,
@@ -31,10 +32,12 @@ try {
     actor: process.env.BYOK_GRID_GHCR_ACTOR,
     token: process.env.BYOK_GRID_GHCR_TOKEN,
   });
+  const inspectPublicTag = createAnonymousGhcrTagInspector();
   const result = await verifyReleaseProtection({
     ...state,
     candidate: options.candidate,
     digestManifestSha256: manifest.digestManifestSha256,
+    inspectPublicTag,
     inspectTag,
     records: manifest.records,
     repository: options.repository,
@@ -45,7 +48,8 @@ try {
 } catch (error) {
   const message =
     error instanceof ReleaseProtectionError ||
-    error?.name === 'ReleaseImageTagsError'
+    error?.name === 'ReleaseImageTagsError' ||
+    error?.name === 'PublicReleaseImagesError'
       ? error.message
       : 'Release protection verification failed unexpectedly.';
   process.stderr.write(`Release protection verification failed: ${message}\n`);

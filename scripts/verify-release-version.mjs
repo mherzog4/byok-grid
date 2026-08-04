@@ -57,6 +57,14 @@ const releaseProtectionLibrary = readFileSync(
   'scripts/verify-release-protection-lib.mjs',
   'utf8'
 );
+const publicReleaseImagesVerifier = readFileSync(
+  'scripts/verify-public-release-images.mjs',
+  'utf8'
+);
+const publicReleaseImagesLibrary = readFileSync(
+  'scripts/verify-public-release-images-lib.mjs',
+  'utf8'
+);
 const productionEvidenceLibrary = readFileSync(
   'scripts/verify-production-evidence-lib.mjs',
   'utf8'
@@ -216,6 +224,60 @@ for (const imagePublicationContract of [
   }
 }
 
+if (
+  rootPackage.scripts?.['release:verify-public-images'] !==
+  'node scripts/verify-public-release-images.mjs'
+) {
+  fail('Anonymous release image verification must remain a public command.');
+}
+for (const publicImageContract of [
+  'npm run release:verify-public-images --',
+  '--digests-dir release-digests',
+  "--owner '${{ github.repository_owner }}'",
+]) {
+  if (!releaseWorkflow.includes(publicImageContract)) {
+    fail('Release publication must prove anonymous access to every image.');
+  }
+}
+const imageTagPublicationIndex = releaseWorkflow.indexOf(
+  'npm run release:publish-image-tags --'
+);
+const publicImageVerificationIndex = releaseWorkflow.indexOf(
+  'npm run release:verify-public-images --'
+);
+const githubReleaseJobIndex = releaseWorkflow.indexOf('\n  publish:\n');
+if (
+  publicImageVerificationIndex <= imageTagPublicationIndex ||
+  githubReleaseJobIndex <= publicImageVerificationIndex
+) {
+  fail(
+    'Anonymous image access must pass after version tags and before the GitHub Release.'
+  );
+}
+for (const publicImageLibraryContract of [
+  'BYOK_GRID_PUBLIC_RELEASE_IMAGES_VERIFIED',
+  'https://ghcr.io/token',
+  'reference: record.version',
+  'reference: record.digest',
+  "method: 'HEAD'",
+  "redirect: 'error'",
+  'docker-content-digest',
+]) {
+  if (!publicReleaseImagesLibrary.includes(publicImageLibraryContract)) {
+    fail(
+      'Anonymous image verification must retain its closed digest contract.'
+    );
+  }
+}
+if (
+  publicReleaseImagesVerifier.includes('BYOK_GRID_GHCR_TOKEN') ||
+  publicReleaseImagesVerifier.includes('secrets.GITHUB_TOKEN') ||
+  publicReleaseImagesLibrary.includes('BYOK_GRID_GHCR_TOKEN') ||
+  publicReleaseImagesLibrary.includes('secrets.GITHUB_TOKEN')
+) {
+  fail('Anonymous image verification must not accept registry credentials.');
+}
+
 const publishImagesJob = releaseWorkflow.match(
   /^  publish_images:\n(?<source>[\s\S]*?)(?=^  publish:)/mu
 )?.groups?.source;
@@ -342,6 +404,8 @@ for (const releaseProtectionContract of [
   "annotatedTag.verification.reason !== 'valid'",
   "'non_fast_forward'",
   "['creation']",
+  'inspectPublicTag',
+  'publicImagesVerified: true',
   "flag: 'wx'",
   'mode: 0o600',
 ]) {
@@ -354,6 +418,7 @@ for (const releaseProtectionCliContract of [
   'BYOK_GRID_GHCR_ACTOR',
   'BYOK_GRID_GHCR_TOKEN',
   "['--digest-manifest', 'digestManifest']",
+  'createAnonymousGhcrTagInspector',
   'writeReleaseProtectionEvidence',
 ]) {
   if (!releaseProtectionVerifier.includes(releaseProtectionCliContract)) {

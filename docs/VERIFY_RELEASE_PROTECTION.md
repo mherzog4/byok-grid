@@ -51,19 +51,22 @@ and requires exactly:
 5. a signed annotated Git tag that GitHub reports as valid and that peels to
    the exact candidate commit; and
 6. the exact seven canonical release images, with every GHCR version tag
-   resolving to the digest in `IMAGE_DIGESTS.txt`.
+   resolving to the digest in `IMAGE_DIGESTS.txt`; and
+7. anonymous GHCR access to every version tag and immutable digest, with both
+   references returning that same recorded digest.
 
 Success writes and prints one bounded record containing
 `BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED`, the candidate and version, both
 ruleset IDs, the immutable release ID, signed tag-object SHA, repository
-identity, SHA-256 of `IMAGE_DIGESTS.txt`, and the seven-image count. Hash the
-exact output file, retain it in the controlled evidence store, and use that
-digest and immutable HTTPS reference for the stable production manifest. The
-record's digest-manifest hash must equal `candidate.digestManifestSha256` in
-that manifest.
+identity, SHA-256 of `IMAGE_DIGESTS.txt`, the seven-image count, and
+`publicImagesVerified: true`. Hash the exact output file, retain it in the
+controlled evidence store, and use that digest and immutable HTTPS reference
+for the stable production manifest. The record's digest-manifest hash must
+equal `candidate.digestManifestSha256` in that manifest.
 
 The result is a point-in-time readback. GitHub immutable releases and the
 repository tag rules protect the Git release identity. GHCR version tags remain
 pointers unless GitHub exposes and enforces a separate registry immutability
 control, so `IMAGE_DIGESTS.txt` and digest-pinned deployment remain
-authoritative.
+authoritative. Anonymous access is checked without either package credential;
+the authenticated token cannot make a private package satisfy the public gate.

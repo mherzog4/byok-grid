@@ -34,6 +34,7 @@ export async function verifyReleaseProtection({
   release,
   records,
   inspectTag,
+  inspectPublicTag,
   digestManifestSha256,
 }) {
   const identity = validateIdentity({ candidate, repository, version });
@@ -59,8 +60,11 @@ export async function verifyReleaseProtection({
   if (!Array.isArray(records) || records.length !== 7) {
     fail('Release protection requires the exact seven-image inventory.');
   }
-  if (typeof inspectTag !== 'function') {
-    fail('A read-only GHCR tag inspector is required.');
+  if (
+    typeof inspectTag !== 'function' ||
+    typeof inspectPublicTag !== 'function'
+  ) {
+    fail('Authenticated and anonymous read-only GHCR inspectors are required.');
   }
 
   const destinations = new Set();
@@ -90,6 +94,23 @@ export async function verifyReleaseProtection({
     ) {
       fail('A release image version tag does not match its immutable digest.');
     }
+
+    let publicState;
+    try {
+      publicState = await inspectPublicTag(record);
+    } catch (error) {
+      throw new ReleaseProtectionError(
+        'A release image could not be inspected anonymously.',
+        { cause: error }
+      );
+    }
+    if (
+      publicState?.status !== 'present' ||
+      publicState.digest !== record.digest ||
+      Object.keys(publicState).sort(compareAscii).join(',') !== 'digest,status'
+    ) {
+      fail('A release image is not anonymously readable at its exact digest.');
+    }
   }
 
   return {
@@ -100,6 +121,7 @@ export async function verifyReleaseProtection({
     immutableRelease: true,
     marker: RELEASE_PROTECTION_MARKER,
     mutationRulesetId: mutation.id,
+    publicImagesVerified: true,
     releaseId: release.id,
     repository,
     signedTagVerified: true,

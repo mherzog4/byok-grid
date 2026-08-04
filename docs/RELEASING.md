@@ -131,6 +131,13 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    replace failed assets or move the tag. The final workflow step reads the
    published release back and proves GitHub made it immutable with the exact
    packaged asset bytes.
+   On the first release, GHCR creates personal-account packages as private.
+   The workflow intentionally stops before the GitHub Release unless all seven
+   version tags and immutable digests are anonymously readable. After the
+   staging packages exist, the owner must open each package's settings, change
+   visibility to **Public**, confirm the irreversible change, and rerun the
+   same workflow attempt. Never weaken or skip the anonymous gate; public GHCR
+   visibility cannot later be changed back to private.
 6. Verify every released file and image using `docs/VERIFY_RELEASE.md`, then
    install a digest-pinned candidate in the reference environment by applying
    the release's generated `values.digests.yaml` after operator values.
@@ -160,11 +167,16 @@ created tag is read back through the OCI registry, and the complete seven-tag
 set must report its expected top-level digests in a final pass before the
 workflow can publish release files. Success emits
 `BYOK_GRID_RELEASE_IMAGE_TAGS_VERIFIED` with the created, existing, and total
-image counts. This makes workflow reruns safe without treating a mutable tag as
-the image identity; `IMAGE_DIGESTS.txt` remains authoritative. Fixable High and
-Critical vulnerabilities and end-of-life base operating systems block the
-release. Review and update `docs/PRODUCTION_READINESS.md` with the resulting run
-and deployment evidence.
+image counts. The next credential-free step requests anonymous GHCR pull tokens
+and reads every version tag and immutable digest directly. It emits
+`BYOK_GRID_PUBLIC_RELEASE_IMAGES_VERIFIED` only when all seven pairs return the
+recorded digest; a private package blocks the dependent GitHub Release job.
+This makes workflow reruns safe without treating a mutable tag as the image
+identity or authenticated access as proof of public distribution;
+`IMAGE_DIGESTS.txt` remains authoritative. Fixable High and Critical
+vulnerabilities and end-of-life base operating systems block the release.
+Review and update `docs/PRODUCTION_READINESS.md` with the resulting run and
+deployment evidence.
 
 Protect release tags with a repository ruleset and enable GHCR tag immutability
 when the registry supports it. After publication, follow
@@ -172,6 +184,8 @@ when the registry supports it. After publication, follow
 `BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED` record. It requires the exact
 no-bypass mutation rule, owner-only creation rule, GitHub-verified signed tag,
 immutable release state, and all seven version tags at the release digests.
+Each version tag and digest must also be readable through the anonymous GHCR
+path used by public self-hosters.
 Repository workflow concurrency plus immediate
 pre-write and post-write registry checks narrow the non-atomic registry update
 window, but registry tags remain pointers unless the registry itself enforces

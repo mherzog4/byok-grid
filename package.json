@@ -55,6 +55,7 @@
     "release:package": "node scripts/package-release.mjs",
     "release:publish-github": "node scripts/publish-github-release.mjs",
     "release:publish-image-tags": "node scripts/publish-release-image-tags.mjs",
+    "release:verify-public-images": "node scripts/verify-public-release-images.mjs",
     "release:verify-bundle": "node scripts/verify-release-bundle.mjs",
     "release:verify-production-evidence": "node scripts/verify-production-evidence.mjs",
     "release:verify-deployment": "node scripts/verify-public-deployment.mjs",
