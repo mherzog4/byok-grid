@@ -124,6 +124,13 @@ helm template byok-grid deploy/helm/byok-grid \
   --values values.digests.yaml
 ```
 
+After installing the digest-pinned release in an isolated candidate
+environment, run the behavioral procedure in
+[`KUBERNETES_NETWORK_POLICY_DRILL.md`](KUBERNETES_NETWORK_POLICY_DRILL.md).
+The drill proves the named TCP allow and deny paths with same-target
+availability controls; the rendered policy and live-object checks alone do not
+prove CNI enforcement.
+
 In a disposable namespace with the production CNI, prove all of the following:
 
 1. an unlabelled pod cannot reach web, worker telemetry, or the runner;

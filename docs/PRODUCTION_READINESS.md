@@ -152,6 +152,10 @@ working tree:
   500-row workflow, and verifies clean previous termination, one restart,
   renewed Hatchet health, drain logs, durable completion, and returned-idle
   application metrics without emitting credentials or transport errors;
+- a fail-closed Kubernetes NetworkPolicy enforcement drill with a closed claim
+  set, isolated source namespaces, immutable token-free NotReady probe pods,
+  allowed-before-blocked same-target controls, exact cleanup, target-redacted
+  candidate-bound evidence, and optional-component coverage;
 - an environment-bound production capacity harness with mandatory dataset,
   replica, concurrency, count, p95, and worker-retry limits; it measures grid,
   FTS, optimistic-write, workflow-enqueue, and durable-completion paths through
@@ -221,8 +225,11 @@ dated evidence linked from a release issue or runbook record:
   manager, default-deny network policy, provider-specific egress, centralized
   logs, metrics, alert routing, and an operator-owned rollback decision path;
   retain `BYOK_GRID_KUBERNETES_RUNTIME_VERIFIED` from the read-only live-object
-  check in [`VERIFY_KUBERNETES_RUNTIME.md`](VERIFY_KUBERNETES_RUNTIME.md), CNI
-  negative-test and external-secret provenance evidence, plus a passing
+  check in [`VERIFY_KUBERNETES_RUNTIME.md`](VERIFY_KUBERNETES_RUNTIME.md),
+  `BYOK_GRID_KUBERNETES_NETWORK_POLICY_ENFORCEMENT_VERIFIED` from the isolated
+  CNI drill in
+  [`KUBERNETES_NETWORK_POLICY_DRILL.md`](KUBERNETES_NETWORK_POLICY_DRILL.md),
+  external-secret provenance evidence, plus a passing
   `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` record from the canonical ingress;
 - capture the production ingress `X-Forwarded-For` chain, prove the proxy
   overwrites or predictably appends it, deny direct web access, configure only
