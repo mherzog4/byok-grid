@@ -1,0 +1,22 @@
+scripts/package-release.test.mjs
+  s_28ae7db8033464::t_22671e057e1a0a 126,131-135,160
+scripts/package-release.mjs
+  s_28ae7db8033464::t_cb96bc30db1977 195,238-239
+  s_28ae7db8033464::t_22671e057e1a0a 192,229-230,259-260
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "be51f3799fe1e7206be90beaa4ea1aeec2f17e9e",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
