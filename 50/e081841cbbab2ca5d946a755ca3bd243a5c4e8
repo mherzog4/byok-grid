@@ -1,0 +1,96 @@
+scripts/drill-ingress-client-lib.mjs
+  s_28ae7db8033464::t_d83902b9c32cee 2-5,15-18,27-29,34-36,40-42,90-92,101-103,153-154,157-161,211,217-219,245-248,295-297,375-378,391-394,412-413,415-416
+  s_28ae7db8033464::t_f6f57956337640 1,6-13,19-26,30-33,37-39,43,50-57,59-72,76-89,93-95,97-100,104-110,112-117,119,121-126,128-145,147-152,163-174,186-199,201-210,212-216,220-244,249-257,259-294,298-302,304-325,327-331,333-341,343-351,353-354,359-361,363-366,368-374,379-390,395-411,414,417,426-434
+  s_28ae7db8033464::t_619e3cb6055ddd 14,44-49,58,73-75,96,111,118,120,127,146,155-156,200,258,303,332,342,352,362,367,418-425
+  s_28ae7db8033464::t_52cb5169ff34e6 162,175-178,184-185
+  s_28ae7db8033464::t_a39950c84a8bb2 179-183,326,355-358
+scripts/verify-ingress-boundary-lib.mjs
+  s_28ae7db8033464::t_ab4776e401e364 1-12,14-23,28-43,47,54,59-81,86-88,100-106,128-131,133-145,149-159,163-172,177-188,191,194-197,200-216,220-225
+  s_28ae7db8033464::t_a39950c84a8bb2 13,125-127
+  s_28ae7db8033464::t_be28a3cd6854cf 24-27,44-46,51-53,55-58,82-85,89-99,107-124,132,146-148,160-162,173-176,189-190,192-193,198-199,217-219
+  s_28ae7db8033464::t_dd9caa0f74575b 48-50
+docs/ingress-boundary.template.json
+  s_28ae7db8033464::t_523206eb02530f 1-5,7-11,13-18,20-33,35-39,41-46,48-72
+  s_28ae7db8033464::t_1c72a887cd88fc 6,12,19,34,40,47
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_f77d2bd597fd6a 76-77,101-104
+  s_28ae7db8033464::t_1fd5db11c5b5e0 88
+apps/web/src/lib/rate-limit-response.ts
+  s_28ae7db8033464::t_a684cd47ddad3c 1-13
+scripts/verify-ingress-boundary.test.mjs
+  s_28ae7db8033464::t_a39950c84a8bb2 112,115
+  s_28ae7db8033464::t_d83902b9c32cee 175-179,182-183
+  s_28ae7db8033464::t_a203075eee6793 98-101
+  s_28ae7db8033464::t_93781fe808d0bd 110-111
+  s_28ae7db8033464::t_6d0010568b0574 5,120-122,139-151,170-173
+  s_28ae7db8033464::t_eeb32666110081 1-4,6-31,33-50,58-70,78-97,102-104,116-119,123-138,152-169,174,184-224,226-230,232-237,239-251
+  s_28ae7db8033464::t_dd9caa0f74575b 51-57
+  s_28ae7db8033464::t_d4002b479a6559 32,71-77,105-109,113-114,180-181,225,231,238
+scripts/drill-ingress-client.mjs
+  s_28ae7db8033464::t_f6f57956337640 1-25
+  s_28ae7db8033464::t_e58872c74e94b8 26-27
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_f77d2bd597fd6a 44-47
+  s_28ae7db8033464::t_1af0adf6ae4b81 35-38
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_f77d2bd597fd6a 79-82
+  s_28ae7db8033464::t_1af0adf6ae4b81 58-61
+docs/adr/0056-machine-verifiable-ingress-boundary.md
+  s_28ae7db8033464::t_98efa693a079c7 33,38
+  s_28ae7db8033464::t_1fd5db11c5b5e0 1-32,34-37,44-59
+  s_28ae7db8033464::t_f0abcd4afbe545 39-43
+docs/INGRESS_BOUNDARY_DRILL.md
+  s_28ae7db8033464::t_98efa693a079c7 47-51,60,82-84
+  s_28ae7db8033464::t_dd9caa0f74575b 95-96
+  s_28ae7db8033464::t_1fd5db11c5b5e0 1-46,54-59,61-81,85-92,97-119,123-145
+  s_28ae7db8033464::t_f0abcd4afbe545 52-53,120-122
+  s_28ae7db8033464::t_523206eb02530f 93-94
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_1fd5db11c5b5e0 64-66
+package.json
+  s_28ae7db8033464::t_1af0adf6ae4b81 33,58
+apps/web/src/app/api/auth/[...all]/route.ts
+  s_28ae7db8033464::t_a684cd47ddad3c 7,30
+docs/API_SECURITY.md
+  s_28ae7db8033464::t_1fd5db11c5b5e0 201-206
+README.md
+  s_28ae7db8033464::t_1fd5db11c5b5e0 314-316
+scripts/verify-ingress-boundary.mjs
+  s_28ae7db8033464::t_ab4776e401e364 1-30
+  s_28ae7db8033464::t_e0a9decaea0622 31-32
+apps/web/src/lib/rate-limit-response.test.ts
+  s_28ae7db8033464::t_d83902b9c32cee 1-2,32-39
+  s_28ae7db8033464::t_a684cd47ddad3c 3-31,40-41
+  s_28ae7db8033464::t_64784e070f8604 42-43
+scripts/drill-signup-policy.mjs
+  s_28ae7db8033464::t_273e5260a759ae 152-159
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_dd9caa0f74575b 149-153
+  s_28ae7db8033464::t_1fd5db11c5b5e0 147-148,261-264
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_1af0adf6ae4b81 28-31,147-148
+  s_28ae7db8033464::t_f77d2bd597fd6a 37-40,142-146
+  s_28ae7db8033464::t_d83902b9c32cee 126-134,149-150
+  s_28ae7db8033464::t_c79158fe8e5c02 151
+scripts/drill-ingress-client.test.mjs
+  s_28ae7db8033464::t_af136961811af8 168,177-183
+  s_28ae7db8033464::t_fe59ffb18315f6 169-176
+  s_28ae7db8033464::t_86ff6745cd0a31 1-22,24-28,30-54,56-62,65-88,90-103,105-110,112-125,127-156,161-163,184-188,193-199,201-206,211-216,218-222,224-229,231-243
+  s_28ae7db8033464::t_70669ff324f566 23,29,55,63-64,89,104,111,126,157-160,164-167,189-192,200,207-210,217,223,230
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "50e081841cbbab2ca5d946a755ca3bd243a5c4e8",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
