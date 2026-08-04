@@ -82,7 +82,9 @@ working tree:
 - an explicit Helm web rollout contract with a process-only startup probe,
   database-aware readiness, endpoint-withdrawal pre-stop delay, bounded total
   grace period, invalid-value rejection, and a compiled standalone `SIGTERM`
-  drill proving listener closure before an in-flight response completes;
+  drill that immediately observes listener refusal/reset while the process and
+  in-flight response remain active, with deterministic timing-race and
+  cross-platform socket-result coverage;
 - worker startup rejection before Hatchet connection when its master key is
   malformed;
 - a packaged workflow-worker probe with a bounded 120-second authenticated

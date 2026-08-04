@@ -7,6 +7,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
+import {
+  isConnectionRejection,
+  observeListenerClosure,
+} from './drill-web-drain-lib.mjs';
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const standaloneServer = join(
@@ -34,17 +38,13 @@ try {
     throw new Error('The standalone web process could not receive SIGTERM.');
   }
 
-  await delay(250);
-  if (runtime.child.exitCode !== null || runtime.child.signalCode !== null) {
-    throw new Error(
-      'The standalone web process exited before its in-flight request completed.'
-    );
-  }
-
-  const listenerCloseMilliseconds = await waitForListenerToClose(
-    runtime,
-    signalStartedAt
-  );
+  const listenerCloseMilliseconds = await observeListenerClosure({
+    canConnect: () => canConnect(runtime.port),
+    isProcessExited: () =>
+      runtime.child.exitCode !== null || runtime.child.signalCode !== null,
+    isRequestSettled: delayedRequest.isSettled,
+    startedAt: signalStartedAt,
+  });
   const response = await delayedRequest.response();
   const status = response.status;
   if (status < 200 || status >= 500) {
@@ -192,6 +192,7 @@ async function startDelayedRequest(input) {
 
   return {
     destroy: () => controller.abort(),
+    isSettled: () => settled,
     response: () =>
       Promise.race([
         pendingResponse.then((response) => {
@@ -212,24 +213,6 @@ async function startDelayedRequest(input) {
   };
 }
 
-async function waitForListenerToClose(input, startedAt) {
-  const deadline = startedAt + 10_000;
-  while (performance.now() < deadline) {
-    if (input.child.exitCode !== null || input.child.signalCode !== null) {
-      throw new Error(
-        'The web process exited instead of waiting for its in-flight request.'
-      );
-    }
-    if (!(await canConnect(input.port))) {
-      return Math.round(performance.now() - startedAt);
-    }
-    await delay(50);
-  }
-  throw new Error(
-    `The web listener continued accepting new connections for ${Math.round(performance.now() - startedAt)}ms after SIGTERM.`
-  );
-}
-
 function canConnect(port) {
   return new Promise((resolve, reject) => {
     const socket = createConnection({ host: '127.0.0.1', port });
@@ -239,7 +222,7 @@ function canConnect(port) {
       resolve(true);
     });
     socket.once('error', (error) => {
-      if (error.code === 'ECONNREFUSED') {
+      if (isConnectionRejection(error)) {
         resolve(false);
         return;
       }
