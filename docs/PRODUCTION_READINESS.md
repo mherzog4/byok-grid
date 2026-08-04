@@ -122,6 +122,11 @@ working tree:
   streams checksum validation, semantically binds digest-pinned Helm values and
   fourteen image-smoke records, emits a bounded success marker, and runs before
   release-file attestation;
+- repository-level immutable GitHub Releases plus a dependency-free
+  post-publication readback verifier that requires immutable release state,
+  exact version/title/prerelease metadata, the reviewed release-note body, the
+  closed six-asset set, matching byte sizes and download identities, and
+  GitHub-computed SHA-256 digests equal to every packaged file;
 - a bounded, read-only public deployment verifier for exact live/ready bodies,
   redirect rejection, unique request correlation, ingress-preserved security
   headers, and distinct response-bound CSP script nonces, reused by the

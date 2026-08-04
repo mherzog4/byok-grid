@@ -352,3 +352,23 @@ jobs:
           else
             gh release create "v$VERSION" dist/release/* --verify-tag --notes-file "docs/releases/v$VERSION.md" --title "BYOK Grid $VERSION" --latest
           fi
+
+      - name: Read back published GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          gh api
+          "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION"
+          --header "Accept: application/vnd.github+json"
+          --header "X-GitHub-Api-Version: 2026-03-10"
+          > dist/github-release.json
+
+      - name: Verify immutable published release
+        shell: bash
+        run: >-
+          npm run release:verify-published --
+          --version "$VERSION"
+          --directory dist/release
+          --release-json dist/github-release.json
+          --notes-file "docs/releases/v$VERSION.md"

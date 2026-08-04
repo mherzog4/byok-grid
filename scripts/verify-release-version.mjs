@@ -187,6 +187,14 @@ if (
 ) {
   fail('The release bundle verifier must remain a public repository command.');
 }
+if (
+  rootPackage.scripts?.['release:verify-published'] !==
+  'node scripts/verify-published-release.mjs'
+) {
+  fail(
+    'The published release verifier must remain a public repository command.'
+  );
+}
 
 const packageIndex = releaseWorkflow.indexOf('npm run release:package --');
 const bundleVerificationIndex = releaseWorkflow.indexOf(
@@ -195,12 +203,33 @@ const bundleVerificationIndex = releaseWorkflow.indexOf(
 const releaseAttestationIndex = releaseWorkflow.indexOf(
   '- name: Attest release files'
 );
+const releasePublicationIndex = releaseWorkflow.indexOf(
+  '- name: Publish GitHub Release'
+);
+const publishedVerificationIndex = releaseWorkflow.indexOf(
+  'npm run release:verify-published --'
+);
 if (
   bundleVerificationIndex <= packageIndex ||
   releaseAttestationIndex <= bundleVerificationIndex ||
+  releasePublicationIndex <= releaseAttestationIndex ||
+  publishedVerificationIndex <= releasePublicationIndex ||
   !releaseWorkflow.includes('--directory dist/release')
 ) {
-  fail('Release files must be independently verified before attestation.');
+  fail(
+    'Release files must be verified before attestation and after publication.'
+  );
+}
+
+for (const publishedReleaseContract of [
+  'repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION',
+  'X-GitHub-Api-Version: 2026-03-10',
+  '--release-json dist/github-release.json',
+  '--notes-file "docs/releases/v$VERSION.md"',
+]) {
+  if (!releaseWorkflow.includes(publishedReleaseContract)) {
+    fail('The release workflow must read back the immutable GitHub Release.');
+  }
 }
 
 for (const evidencePackagingContract of [
