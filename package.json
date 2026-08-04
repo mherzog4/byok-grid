@@ -53,6 +53,7 @@
     "release:verify-production-evidence": "node scripts/verify-production-evidence.mjs",
     "release:verify-deployment": "node scripts/verify-public-deployment.mjs",
     "release:verify-published": "node scripts/verify-published-release.mjs",
+    "release:verify-smtp-delivery": "node scripts/verify-smtp-delivery.mjs",
     "release:verify-version": "node scripts/verify-release-version.mjs",
     "test": "npm run ci:verify-community && npm run test:release-tools && turbo run test",
     "test:connector-runner": "cargo test --locked --package byok-grid-connector-runner",

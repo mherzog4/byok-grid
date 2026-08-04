@@ -96,7 +96,10 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    `docs/KUBERNETES_WORKER_DRAIN_DRILL.md` after signalling an in-flight run in
    the isolated reference deployment. For stable promotion, retain the passing
    declared-envelope record and supporting provider/ingress metrics from
-   `docs/PRODUCTION_CAPACITY_DRILL.md`.
+   `docs/PRODUCTION_CAPACITY_DRILL.md`. Retain the sanitized
+   verification/recovery delivery and DNS-authentication marker from
+   `docs/SMTP_PRODUCTION_DRILL.md` with the separate provider monitoring
+   record.
 4. Create and push a signed annotated tag such as `v0.1.0-rc.1`.
 5. Let `.github/workflows/release.yml` verify source, build images, publish
    attestations, smoke every immutable image on `linux/amd64` and `linux/arm64`,

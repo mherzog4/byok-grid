@@ -197,7 +197,10 @@ npm run email:verify
 
 Success emits only `BYOK_GRID_SMTP_CONNECTION_VERIFIED`. This proves SMTP
 connection and authentication, not inbox placement; follow it with a real
-verification and password-reset delivery to a controlled account.
+verification and password-reset delivery to a controlled account. Before a
+stable production promotion, analyze the two received messages and live sender
+DNS with the bounded procedure in
+[`SMTP_PRODUCTION_DRILL.md`](SMTP_PRODUCTION_DRILL.md).
 
 ## Session lifecycle
 
