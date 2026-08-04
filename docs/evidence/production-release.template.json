@@ -110,6 +110,7 @@
   "releaseVersion": "<stable-version>",
   "rollback": {
     "artifactSha256": "<64-character-lowercase-SHA-256>",
+    "markers": ["BYOK_GRID_KUBERNETES_ROLLBACK_VERIFIED"],
     "reference": "https://evidence.example.com/releases/<version>/rollback",
     "testedAt": "<canonical-millisecond-UTC-timestamp-inside-observation-window>"
   },

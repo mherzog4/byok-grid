@@ -123,7 +123,9 @@ working tree:
   lease-safe shutdown, real child-process `SIGTERM`, bounded Helm probes and
   grace period, invalid topology rejection, and production-image health proof;
 - local builds of the web, worker, migration, and maintenance image targets;
-- release metadata, Helm chart, connector SDK package, and checksum dry run;
+- release metadata, Helm chart, connector SDK package, and checksum dry run,
+  with the standalone SDK inventory check isolated from and independent of the
+  operator's global npm cache;
 - digest-aware Helm rendering plus a tested release-asset generator that
   rejects missing, duplicate, mutable, or unexpected image records;
 - atomic, cross-platform release packaging that removes failed staging output
@@ -166,6 +168,12 @@ working tree:
   FTS, optimistic-write, workflow-enqueue, and durable-completion paths through
   HTTPS and remote libSQL, rejects mutable images or worker churn, and proves
   exact isolated-fixture cleanup;
+- a fail-closed Kubernetes rollback-and-restoration drill that binds a named
+  prior Helm revision and the current candidate to separate immutable digest
+  manifests, verifies stable restart-free workloads and the canonical public
+  endpoint in all three phases, restores the candidate after any post-mutation
+  failure when possible, and emits an exact marker only after the original
+  candidate is restored and reverified;
 - a dependency-free stable-promotion evidence verifier with a closed external
   gate set, exact drill markers, retained-artifact hashes, canonical timing,
   blocker-free 24-hour observation, rollback and operator acceptance ordering,
@@ -237,7 +245,9 @@ dated evidence linked from a release issue or runbook record:
   CNI drill in
   [`KUBERNETES_NETWORK_POLICY_DRILL.md`](KUBERNETES_NETWORK_POLICY_DRILL.md),
   plus a passing
-  `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` record from the canonical ingress;
+  `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` record from the canonical ingress and
+  an in-window `BYOK_GRID_KUBERNETES_ROLLBACK_VERIFIED` record from
+  [`KUBERNETES_ROLLBACK_DRILL.md`](KUBERNETES_ROLLBACK_DRILL.md);
 - capture the production ingress `X-Forwarded-For` chain, prove the proxy
   overwrites or predictably appends it, deny direct web access, configure only
   the observed proxy IP/CIDR boundary, and exercise both application and edge

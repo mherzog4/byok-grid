@@ -122,6 +122,13 @@ describe('production evidence verifier', () => {
       () => verifyProductionEvidence(inventedMarker, { now: NOW }),
       /incorrect structured markers/u
     );
+
+    const missingRollbackMarker = manifest();
+    missingRollbackMarker.rollback.markers = [];
+    assert.throws(
+      () => verifyProductionEvidence(missingRollbackMarker, { now: NOW }),
+      /exact Kubernetes rollback marker/u
+    );
   });
 
   it('requires a completed 24-hour blocker-free observation window', () => {
@@ -376,6 +383,7 @@ function manifest() {
     releaseVersion: '0.1.0',
     rollback: {
       artifactSha256: DIGEST,
+      markers: ['BYOK_GRID_KUBERNETES_ROLLBACK_VERIFIED'],
       reference: 'https://example.com/evidence/rollback',
       testedAt: '2026-08-01T12:00:00.000Z',
     },
