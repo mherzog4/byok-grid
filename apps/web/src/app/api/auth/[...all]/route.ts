@@ -4,6 +4,7 @@ import {
   cloneRequestWithBoundedBody,
   MAXIMUM_AUTH_REQUEST_BODY_BYTES,
 } from '@/lib/request-body';
+import { markApplicationRateLimitResponse } from '@/lib/rate-limit-response';
 import { toNextJsHandler } from 'better-auth/next-js';
 import { setTimeout as delay } from 'node:timers/promises';
 
@@ -26,5 +27,5 @@ export async function POST(request: Request): Promise<Response> {
     performance.now() - startedAt
   );
   if (remainingDelay > 0) await delay(remainingDelay);
-  return response;
+  return markApplicationRateLimitResponse(response);
 }

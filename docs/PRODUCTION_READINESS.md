@@ -144,6 +144,13 @@ working tree:
   redirect rejection, unique request correlation, ingress-preserved security
   headers, and distinct response-bound CSP script nonces, reused by the
   compiled-standalone drill without treating loopback as ingress evidence;
+- an explicitly confirmed ingress client drill that distinguishes
+  application-generated and edge-generated rate limits, performs no account or
+  tenant mutation, hashes the client-network and shared-challenge identities,
+  and combines exactly two synchronized independent-network records with
+  candidate-bound public health, hashed proxy chain/configuration evidence,
+  direct-origin denial, and one 24-hour evidence window before emitting the
+  stable ingress-boundary marker;
 - a fail-closed, isolated-database remote libSQL drill that requires
   authentication and current migrations, rejects application data, kills a
   committed writer, observes the challenge from a second process, and compares
@@ -251,7 +258,10 @@ dated evidence linked from a release issue or runbook record:
 - capture the production ingress `X-Forwarded-For` chain, prove the proxy
   overwrites or predictably appends it, deny direct web access, configure only
   the observed proxy IP/CIDR boundary, and exercise both application and edge
-  rate limits from multiple real client networks;
+  rate limits from two real client networks using
+  [`INGRESS_BOUNDARY_DRILL.md`](INGRESS_BOUNDARY_DRILL.md); retain both
+  `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` and
+  `BYOK_GRID_INGRESS_BOUNDARY_VERIFIED`;
 - exercise the chosen authenticated SMTP service over TLS, prove verification
   and recovery delivery to controlled inboxes, configure and validate SPF,
   DKIM, and DMARC alignment, and monitor deferrals, rejections, bounces,

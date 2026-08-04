@@ -25,11 +25,18 @@ const EXPECTED_MARKERS = {
   'authenticated-worker-drain': ['BYOK_GRID_KUBERNETES_WORKER_DRAIN_VERIFIED'],
   'multi-architecture-smoke': ['BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED'],
   'production-capacity': ['BYOK_GRID_PRODUCTION_CAPACITY_VERIFIED'],
-  'public-ingress-and-proxy': ['BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED'],
+  'public-ingress-and-proxy': [
+    'BYOK_GRID_INGRESS_BOUNDARY_VERIFIED',
+    'BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED',
+  ],
   'reference-deployment': [
     'BYOK_GRID_KUBERNETES_EXTERNAL_SECRET_PROVENANCE_VERIFIED',
     'BYOK_GRID_KUBERNETES_NETWORK_POLICY_ENFORCEMENT_VERIFIED',
     'BYOK_GRID_KUBERNETES_RUNTIME_VERIFIED',
+  ],
+  'release-assets': [
+    'BYOK_GRID_PUBLISHED_RELEASE_VERIFIED',
+    'BYOK_GRID_RELEASE_BUNDLE_VERIFIED',
   ],
   'remote-libsql-recovery': [
     'BYOK_GRID_REMOTE_LIBSQL_DRILL_PREPARED',
@@ -116,10 +123,29 @@ describe('production evidence verifier', () => {
       /incorrect structured markers/u
     );
 
+    const incompleteIngressProof = manifest();
+    findEvidence(incompleteIngressProof, 'public-ingress-and-proxy').markers = [
+      'BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED',
+    ];
+    assert.throws(
+      () => verifyProductionEvidence(incompleteIngressProof, { now: NOW }),
+      /incorrect structured markers/u
+    );
+
     const inventedMarker = manifest();
     findEvidence(inventedMarker, 'release-assets').markers = ['PASSED'];
     assert.throws(
       () => verifyProductionEvidence(inventedMarker, { now: NOW }),
+      /incorrect structured markers/u
+    );
+
+    const incompleteReleaseVerification = manifest();
+    findEvidence(incompleteReleaseVerification, 'release-assets').markers = [
+      'BYOK_GRID_RELEASE_BUNDLE_VERIFIED',
+    ];
+    assert.throws(
+      () =>
+        verifyProductionEvidence(incompleteReleaseVerification, { now: NOW }),
       /incorrect structured markers/u
     );
 

@@ -311,6 +311,9 @@ durable workflow-completion evidence.
 See [the Kubernetes rollback drill](docs/KUBERNETES_ROLLBACK_DRILL.md) for a
 controlled rollback to a named digest-pinned Helm revision and restoration of
 the exact candidate with live workload and public-ingress verification.
+See [the production ingress boundary drill](docs/INGRESS_BOUNDARY_DRILL.md) for
+layer-distinguishable application and edge rate limits, two-network public
+probes, hashed proxy-chain evidence, and direct-origin denial.
 See [the production capacity drill](docs/PRODUCTION_CAPACITY_DRILL.md) for a
 declared HTTPS, remote-libSQL, and workflow concurrency envelope with
 operator-owned latency and contention thresholds.
