@@ -23,7 +23,10 @@ const DIGEST = 'c'.repeat(64);
 const NOW = new Date('2026-08-05T00:00:00.000Z');
 const EXPECTED_MARKERS = {
   'authenticated-worker-drain': ['BYOK_GRID_KUBERNETES_WORKER_DRAIN_VERIFIED'],
-  'multi-architecture-smoke': ['BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED'],
+  'multi-architecture-smoke': [
+    'BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED',
+    'BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED',
+  ],
   'production-capacity': ['BYOK_GRID_PRODUCTION_CAPACITY_VERIFIED'],
   'public-ingress-and-proxy': [
     'BYOK_GRID_INGRESS_BOUNDARY_VERIFIED',
@@ -120,6 +123,15 @@ describe('production evidence verifier', () => {
     findEvidence(missingMarker, 'production-capacity').markers = [];
     assert.throws(
       () => verifyProductionEvidence(missingMarker, { now: NOW }),
+      /incorrect structured markers/u
+    );
+
+    const incompleteNativeSmoke = manifest();
+    findEvidence(incompleteNativeSmoke, 'multi-architecture-smoke').markers = [
+      'BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED',
+    ];
+    assert.throws(
+      () => verifyProductionEvidence(incompleteNativeSmoke, { now: NOW }),
       /incorrect structured markers/u
     );
 

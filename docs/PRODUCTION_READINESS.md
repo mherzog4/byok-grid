@@ -146,6 +146,11 @@ working tree:
   safely no-ops only on a byte-identical immutable release, recovers ambiguous
   CLI outcomes through bounded exact readback, and rejects drafts, conflicts,
   provider errors, or oversized responses without logging credentials;
+- a dependency-free native multi-architecture image-smoke collector and
+  offline combiner that reject host/daemon architecture drift, exercise all
+  seven immutable digests on real `amd64` and `arm64` Linux Docker servers with
+  the release isolation boundary, and require the exact combined fourteen
+  records to match the checksummed release smoke manifest within 24 hours;
 - a bounded, read-only public deployment verifier for exact live/ready bodies,
   redirect rejection, unique request correlation, ingress-preserved security
   headers, and distinct response-bound CSP script nonces, reused by the
@@ -281,7 +286,8 @@ dated evidence linked from a release issue or runbook record:
   [`SMTP_PRODUCTION_DRILL.md`](SMTP_PRODUCTION_DRILL.md) plus the provider
   monitoring evidence;
 - independently repeat the digest-bound image smoke on native `linux/amd64` and
-  native `linux/arm64` hosts, retaining those records with the release
+  native `linux/arm64` hosts, retaining the two host records and the combined
+  `BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED` record with the release
   workflow's attested fourteen-record `IMAGE_SMOKE.jsonl` asset;
 - verify the strongest available GHCR tag immutability controls against the
   first candidate publication; the active no-bypass `v*` repository tag

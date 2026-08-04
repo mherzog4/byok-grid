@@ -146,7 +146,9 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    `docs/VERIFY_DEPLOYMENT.md` against the canonical TLS origin and retain its
    structured success record with the deployment evidence.
    Before stable promotion, repeat the isolated image smoke from
-   `docs/MULTI_ARCH_IMAGE_SMOKE.md` on native hosts for both architectures.
+   `docs/MULTI_ARCH_IMAGE_SMOKE.md` on native hosts for both architectures,
+   then retain the closed fourteen-record
+   `BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED` artifact.
 
 The image job initially publishes only commit-scoped staging tags. Each image
 is scanned at its immutable digest and attested only after the scan passes. A

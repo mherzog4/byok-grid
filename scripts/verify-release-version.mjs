@@ -37,6 +37,22 @@ const ciWorkflow = readFileSync('.github/workflows/ci.yml', 'utf8');
 const compose = readFileSync('docker-compose.yml', 'utf8');
 const releasePackager = readFileSync('scripts/package-release.mjs', 'utf8');
 const releaseWorkflow = readFileSync('.github/workflows/release.yml', 'utf8');
+const nativeSmokeCollector = readFileSync(
+  'scripts/collect-native-image-smoke.mjs',
+  'utf8'
+);
+const nativeSmokeVerifier = readFileSync(
+  'scripts/verify-native-image-smoke.mjs',
+  'utf8'
+);
+const nativeSmokeLibrary = readFileSync(
+  'scripts/native-image-smoke-lib.mjs',
+  'utf8'
+);
+const productionEvidenceLibrary = readFileSync(
+  'scripts/verify-production-evidence-lib.mjs',
+  'utf8'
+);
 const githubReleasePublisher = readFileSync(
   'scripts/publish-github-release.mjs',
   'utf8'
@@ -242,6 +258,65 @@ if (
   'node scripts/publish-github-release.mjs'
 ) {
   fail('The GitHub Release publisher must remain a public repository command.');
+}
+if (
+  rootPackage.scripts?.['release:collect-native-smoke'] !==
+    'node scripts/collect-native-image-smoke.mjs' ||
+  rootPackage.scripts?.['release:verify-native-smoke'] !==
+    'node scripts/verify-native-image-smoke.mjs'
+) {
+  fail('Native multi-architecture evidence must retain public commands.');
+}
+
+for (const nativeCollectorContract of [
+  'runtimePlatform()',
+  "runGit(['rev-parse', 'HEAD'])",
+  "'--porcelain=v1'",
+  "flag: 'wx'",
+  'mode: 0o600',
+  "stdio: ['ignore', 'pipe', 'pipe']",
+]) {
+  if (!nativeSmokeCollector.includes(nativeCollectorContract)) {
+    fail('The native image-smoke collector must retain its private boundary.');
+  }
+}
+
+for (const nativeEvidenceContract of [
+  'BYOK_GRID_NATIVE_IMAGE_SMOKE_HOST_VERIFIED',
+  'BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED',
+  "'--pull=always'",
+  "'--network=none'",
+  "'--read-only'",
+  "'--cap-drop=ALL'",
+  "'--security-opt=no-new-privileges'",
+  "'--pids-limit=64'",
+  'verifyReleaseImageSmokeManifest',
+  'releaseSmokeMarker: RELEASE_IMAGE_SMOKE_MARKER',
+  'MAXIMUM_COLLECTION_SPAN_MS',
+]) {
+  if (!nativeSmokeLibrary.includes(nativeEvidenceContract)) {
+    fail(
+      'Native image-smoke evidence must retain its closed verification set.'
+    );
+  }
+}
+
+for (const nativeVerifierContract of [
+  'verifyNativeImageSmokeBundleFiles',
+  "flag: 'wx'",
+  'mode: 0o600',
+]) {
+  if (!nativeSmokeVerifier.includes(nativeVerifierContract)) {
+    fail('The native evidence combiner must retain exclusive output.');
+  }
+}
+
+if (
+  !productionEvidenceLibrary.includes(
+    'BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED'
+  )
+) {
+  fail('Stable promotion must require native multi-architecture evidence.');
 }
 if (
   rootPackage.scripts?.['release:verify-bundle'] !==
