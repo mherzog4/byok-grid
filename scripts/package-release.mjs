@@ -1,6 +1,8 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
+  chmodSync,
+  copyFileSync,
   existsSync,
   lstatSync,
   mkdirSync,
@@ -9,6 +11,7 @@ import {
   readdirSync,
   renameSync,
   rmSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
@@ -23,6 +26,7 @@ import {
 const semverPattern =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|[A-Za-z-][0-9A-Za-z-]*))*))?$/;
 const smokePlatforms = Object.freeze(['linux/amd64', 'linux/arm64']);
+const reproducibleTimestamp = new Date('1985-10-26T08:15:00.000Z');
 
 export function collectReleaseDigests(digestsDirectory, releaseConfig) {
   const entries = validateReleaseConfig(releaseConfig);
@@ -190,6 +194,7 @@ export function packageRelease({
   mkdirSync(parent, { recursive: true });
   const staging = mkdtempSync(join(parent, `.${basename(output)}.tmp-`));
   let npmCache;
+  let chartCopy;
 
   try {
     npmCache = mkdtempSync(join(parent, `.${basename(output)}.npm-cache.tmp-`));
@@ -209,11 +214,17 @@ export function packageRelease({
       'utf8'
     );
 
+    chartCopy = mkdtempSync(join(parent, `.${basename(output)}.chart.tmp-`));
+    const reproducibleChart = join(chartCopy, 'byok-grid');
+    copyReproducibleChart(
+      join(root, 'deploy/helm/byok-grid'),
+      reproducibleChart
+    );
     runCommand(
       'helm',
       [
         'package',
-        'deploy/helm/byok-grid',
+        reproducibleChart,
         '--destination',
         staging,
         '--version',
@@ -223,6 +234,8 @@ export function packageRelease({
       ],
       root
     );
+    rmSync(chartCopy, { force: true, recursive: true });
+    chartCopy = undefined;
     runCommand(
       'npm',
       [
@@ -257,8 +270,48 @@ export function packageRelease({
     rmSync(staging, { force: true, recursive: true });
     throw error;
   } finally {
+    if (chartCopy) rmSync(chartCopy, { force: true, recursive: true });
     if (npmCache) rmSync(npmCache, { force: true, recursive: true });
   }
+}
+
+export function copyReproducibleChart(sourceDirectory, targetDirectory) {
+  const source = resolve(sourceDirectory);
+  const target = resolve(targetDirectory);
+  const sourceMetadata = lstatSync(source);
+  if (!sourceMetadata.isDirectory() || sourceMetadata.isSymbolicLink()) {
+    throw new Error('The release chart source must be a real directory.');
+  }
+  copyReproducibleDirectory(source, target);
+}
+
+function copyReproducibleDirectory(source, target) {
+  const metadata = lstatSync(source);
+  if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
+    throw new Error('The release chart may contain only real directories.');
+  }
+  mkdirSync(target, { mode: metadata.mode & 0o777 });
+  const names = readdirSync(source).sort(compareAscii);
+  for (const name of names) {
+    const sourcePath = join(source, name);
+    const targetPath = join(target, name);
+    const entry = lstatSync(sourcePath);
+    if (entry.isSymbolicLink()) {
+      throw new Error('The release chart must not contain symbolic links.');
+    }
+    if (entry.isDirectory()) {
+      copyReproducibleDirectory(sourcePath, targetPath);
+      continue;
+    }
+    if (!entry.isFile()) {
+      throw new Error('The release chart may contain only regular files.');
+    }
+    copyFileSync(sourcePath, targetPath);
+    chmodSync(targetPath, entry.mode & 0o777);
+    utimesSync(targetPath, reproducibleTimestamp, reproducibleTimestamp);
+  }
+  chmodSync(target, metadata.mode & 0o777);
+  utimesSync(target, reproducibleTimestamp, reproducibleTimestamp);
 }
 
 function validateReleaseConfig(config) {

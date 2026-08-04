@@ -171,7 +171,20 @@ async function withBundle(callback) {
   const output = join(root, 'dist', 'release');
   mkdirSync(digests, { recursive: true });
   mkdirSync(smoke, { recursive: true });
+  mkdirSync(join(root, 'deploy', 'helm', 'byok-grid', 'templates'), {
+    recursive: true,
+  });
   mkdirSync(join(root, 'packages', 'connector-sdk'), { recursive: true });
+  writeFileSync(
+    join(root, 'deploy', 'helm', 'byok-grid', 'Chart.yaml'),
+    'apiVersion: v2\nname: byok-grid\nversion: 0.1.0-rc.1\n',
+    'utf8'
+  );
+  writeFileSync(
+    join(root, 'deploy', 'helm', 'byok-grid', 'templates', 'web.yaml'),
+    'kind: Deployment\n',
+    'utf8'
+  );
   writeFileSync(
     join(root, 'release-images.json'),
     `${JSON.stringify(releaseConfig)}\n`,

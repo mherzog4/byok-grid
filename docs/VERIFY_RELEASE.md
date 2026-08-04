@@ -39,6 +39,13 @@ same byte length and SHA-256 digest for each of the exact six locally packaged
 assets. Confirm the public release API still reports `immutable: true`; an
 immutable release or its tag must never be replaced to correct a failure.
 
+The preceding `BYOK_GRID_GITHUB_RELEASE_PUBLICATION_VERIFIED` marker records
+whether the workflow created the release or safely reused an already-identical
+immutable release during a rerun. Reuse never uploads, edits, or replaces remote
+state: it succeeds only after comparing the rebuilt local bundle and reviewed
+notes with the complete public release response. A conflicting or draft release
+is a hard failure and requires operator investigation rather than mutation.
+
 Before release-file publication, the workflow emits
 `BYOK_GRID_RELEASE_IMAGE_TAGS_VERIFIED` only after preflighting all seven GHCR
 version tags, reading every newly created tag back, and verifying the complete

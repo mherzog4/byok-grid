@@ -67,6 +67,28 @@ byte sizes, canonical download URLs, and a server-computed SHA-256 digest equal
 to every packaged file. A failure requires a new release-candidate version;
 never alter or delete an immutable published release.
 
+Release assembly is reproducible across fresh checkouts of the same source.
+Before Helm packaging, the packager copies the reviewed chart into a private
+tree, rejects symbolic links and special files, sorts traversal, preserves
+reviewed modes, and normalizes file and directory timestamps to a fixed release
+epoch. Hosted CI packages the real chart and SDK twice with an elapsed-time
+boundary and requires every one of the six resulting assets—including
+`SHA256SUMS`—to be byte-identical. This reproducibility is what allows an
+immutable release rerun to compare exact bytes rather than weakening the
+verification contract.
+
+GitHub Release publication is retry-safe without editing an existing release.
+The publisher verifies the complete local bundle before its first API request,
+then treats only an authenticated API `404` as absence. An existing release is
+an idempotent no-op only when the independent verifier proves it is published,
+immutable, version-bound, note-identical, and contains the exact same six asset
+names, sizes, download identities, and GitHub-computed SHA-256 digests. Any
+draft, mutable, incomplete, or byte-conflicting release fails closed. If the CLI
+reports a creation failure after GitHub actually published the release, a
+bounded readback may recover only by proving that same immutable identity.
+Success emits `BYOK_GRID_GITHUB_RELEASE_PUBLICATION_VERIFIED`; the separate
+workflow step then verifies the recorded response again.
+
 Maintainers can exercise the real local Helm/npm packaging toolchain without
 publishing anything:
 

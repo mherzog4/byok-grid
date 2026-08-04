@@ -130,7 +130,8 @@ working tree:
   rejects missing, duplicate, mutable, or unexpected image records;
 - atomic, cross-platform release packaging that removes failed staging output
   and creates checksums only after the chart, SDK, digest manifest, and Helm
-  digest values all exist;
+  digest values all exist, with a link-free fixed-timestamp chart staging copy
+  and hosted two-build proof that all six release assets are byte-reproducible;
 - a dependency-free release-bundle verifier that requires the exact six assets,
   streams checksum validation, semantically binds digest-pinned Helm values and
   fourteen image-smoke records, emits a bounded success marker, and runs before
@@ -140,6 +141,11 @@ working tree:
   exact version/title/prerelease metadata, the reviewed release-note body, the
   closed six-asset set, matching byte sizes and download identities, and
   GitHub-computed SHA-256 digests equal to every packaged file;
+- a dependency-free GitHub Release publisher that verifies the local bundle
+  before API access, treats only authenticated `404` as absence, creates once,
+  safely no-ops only on a byte-identical immutable release, recovers ambiguous
+  CLI outcomes through bounded exact readback, and rejects drafts, conflicts,
+  provider errors, or oversized responses without logging credentials;
 - a bounded, read-only public deployment verifier for exact live/ready bodies,
   redirect rejection, unique request correlation, ingress-preserved security
   headers, and distinct response-bound CSP script nonces, reused by the

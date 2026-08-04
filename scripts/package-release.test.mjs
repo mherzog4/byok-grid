@@ -5,9 +5,12 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  lstatSync,
   readFileSync,
   readdirSync,
   rmSync,
+  symlinkSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -17,6 +20,7 @@ import test from 'node:test';
 import {
   collectReleaseDigests,
   collectReleaseSmokeEvidence,
+  copyReproducibleChart,
   createChecksumManifest,
   packageRelease,
 } from './package-release.mjs';
@@ -250,14 +254,50 @@ test('rejects non-canonical numeric prerelease identifiers', () => {
   });
 });
 
+test('copies chart sources with normalized metadata and rejects links', () => {
+  const root = mkdtempSync(join(tmpdir(), 'byok-grid-chart-copy-'));
+  const source = join(root, 'source');
+  const target = join(root, 'target');
+  mkdirSync(join(source, 'templates'), { recursive: true });
+  writeFileSync(join(source, 'Chart.yaml'), 'name: byok-grid\n', 'utf8');
+  writeFileSync(join(source, 'templates', 'web.yaml'), 'kind: Deployment\n');
+  utimesSync(join(source, 'Chart.yaml'), new Date(0), new Date(0));
+  utimesSync(
+    join(source, 'templates', 'web.yaml'),
+    new Date('2026-08-04T00:00:00Z'),
+    new Date('2026-08-04T00:00:00Z')
+  );
+
+  try {
+    copyReproducibleChart(source, target);
+    assert.equal(
+      lstatSync(join(target, 'Chart.yaml')).mtime.toISOString(),
+      '1985-10-26T08:15:00.000Z'
+    );
+    assert.equal(
+      lstatSync(join(target, 'templates', 'web.yaml')).mtime.toISOString(),
+      '1985-10-26T08:15:00.000Z'
+    );
+
+    symlinkSync(join(source, 'Chart.yaml'), join(source, 'linked.yaml'));
+    assert.throws(
+      () => copyReproducibleChart(source, join(root, 'linked-target')),
+      /must not contain symbolic links/u
+    );
+  } finally {
+    rmSync(root, { force: true, recursive: true });
+  }
+});
+
 test(
-  'assembles real Helm and npm packages with the local toolchain',
+  'assembles reproducible real Helm and npm packages with the local toolchain',
   { skip: process.env.BYOK_GRID_RELEASE_INTEGRATION !== '1' },
-  () => {
+  async () => {
     const directory = mkdtempSync(join(tmpdir(), 'byok-grid-real-release-'));
     const digests = join(directory, 'release-digests');
     const smoke = join(directory, 'release-smoke');
     const output = join(directory, 'release');
+    const secondOutput = join(directory, 'release-second');
     mkdirSync(digests, { recursive: true });
     mkdirSync(smoke, { recursive: true });
     writeDigestFixtures(digests);
@@ -311,6 +351,37 @@ test(
           .length,
         5
       );
+
+      await new Promise((resolve) => setTimeout(resolve, 1_100));
+      const secondResult = spawnSync(
+        process.execPath,
+        [
+          'scripts/package-release.mjs',
+          '--version',
+          '0.1.0-rc.1',
+          '--digests-dir',
+          digests,
+          '--smoke-dir',
+          smoke,
+          '--output-dir',
+          secondOutput,
+        ],
+        { encoding: 'utf8' }
+      );
+      assert.equal(
+        secondResult.status,
+        0,
+        `${secondResult.stdout}\n${secondResult.stderr}`
+      );
+      const firstNames = readdirSync(output).sort();
+      assert.deepEqual(readdirSync(secondOutput).sort(), firstNames);
+      for (const name of firstNames) {
+        assert.deepEqual(
+          readFileSync(join(secondOutput, name)),
+          readFileSync(join(output, name)),
+          `${name} must be reproducible for immutable release reruns`
+        );
+      }
     } finally {
       rmSync(directory, { force: true, recursive: true });
     }
@@ -323,6 +394,17 @@ function withFixture(callback) {
   const smoke = join(root, 'release-smoke');
   mkdirSync(digests, { recursive: true });
   mkdirSync(smoke, { recursive: true });
+  mkdirSync(join(root, 'deploy/helm/byok-grid/templates'), { recursive: true });
+  writeFileSync(
+    join(root, 'deploy/helm/byok-grid/Chart.yaml'),
+    'apiVersion: v2\nname: byok-grid\nversion: 0.1.0-rc.1\n',
+    'utf8'
+  );
+  writeFileSync(
+    join(root, 'deploy/helm/byok-grid/templates', 'web.yaml'),
+    'kind: Deployment\n',
+    'utf8'
+  );
   writeFileSync(
     join(root, 'release-images.json'),
     `${JSON.stringify(releaseConfig)}\n`,

@@ -52,6 +52,7 @@
     "release:matrix": "node scripts/verify-release-version.mjs --matrix",
     "release:helm-digests": "node scripts/generate-helm-digest-values.mjs",
     "release:package": "node scripts/package-release.mjs",
+    "release:publish-github": "node scripts/publish-github-release.mjs",
     "release:publish-image-tags": "node scripts/publish-release-image-tags.mjs",
     "release:verify-bundle": "node scripts/verify-release-bundle.mjs",
     "release:verify-production-evidence": "node scripts/verify-production-evidence.mjs",
