@@ -11,7 +11,10 @@ validated fourteen-record image-smoke manifest.
 The root `package.json`, root entries in `package-lock.json`, Helm `version`, and
 Helm `appVersion` must match the tag without its leading `v`. Artifact Hub's
 prerelease annotation must be `true` for a prerelease and `false` for a stable
-version. Validate the contract locally with:
+version. A reviewed, version-bound release note must exist at
+`docs/releases/v<VERSION>.md`; the verifier checks its exact title, machine
+marker, required operator-facing sections, and final newline. Validate the
+contract locally with:
 
 ```text
 npm run release:verify-version -- 0.1.0-rc.1
@@ -66,6 +69,9 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
 
 1. Work from a clean, reviewed commit on `main` with required CI checks green.
 2. Set the version contract and retain the prerelease annotation for an RC.
+   Draft the matching curated release note before review; the release workflow
+   publishes that committed file verbatim rather than inferring product status
+   from the pull-request history.
 3. Run all repository checks plus the backup/restore, migration, rollout,
    rollback-compatibility, signal-drain, and external-service failure drills.
    For the local Compose drain gate, start the app profile and run

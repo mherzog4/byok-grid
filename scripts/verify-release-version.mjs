@@ -5,6 +5,10 @@ import {
   assertStablePromotionPaths,
   verifyProductionEvidenceFile,
 } from './verify-production-evidence-lib.mjs';
+import {
+  ReleaseNotesError,
+  verifyReleaseNotes,
+} from './verify-release-notes-lib.mjs';
 
 const releaseImages = readJson('release-images.json');
 const rootPackage = readJson('package.json');
@@ -32,6 +36,13 @@ const dockerfile = readFileSync('Dockerfile', 'utf8');
 const ciWorkflow = readFileSync('.github/workflows/ci.yml', 'utf8');
 const compose = readFileSync('docker-compose.yml', 'utf8');
 const releaseWorkflow = readFileSync('.github/workflows/release.yml', 'utf8');
+const releaseNotesPath = `docs/releases/v${requestedVersion}.md`;
+let releaseNotes;
+try {
+  releaseNotes = readFileSync(releaseNotesPath, 'utf8');
+} catch {
+  fail(`Curated release notes are required at ${releaseNotesPath}.`);
+}
 const workflowSources = readdirSync('.github/workflows')
   .filter((name) => name.endsWith('.yml') || name.endsWith('.yaml'))
   .map((name) => ({
@@ -57,6 +68,13 @@ assertEqual(
   prereleaseAnnotation,
   expectedPrerelease
 );
+
+try {
+  verifyReleaseNotes(releaseNotes, requestedVersion);
+} catch (error) {
+  if (error instanceof ReleaseNotesError) fail(error.message);
+  throw error;
+}
 
 if (expectedPrerelease === 'false') {
   verifyStableProductionEvidence(requestedVersion);
@@ -148,6 +166,15 @@ if (releaseWorkflow.includes('type=raw,value=${{ env.VERSION }}')) {
 
 if (!releaseWorkflow.includes('needs: [verify, images, publish_images]')) {
   fail('Release files must wait for verified image version tags.');
+}
+
+if (
+  !releaseWorkflow.includes(
+    '--notes-file "docs/releases/v$VERSION.md" --title "BYOK Grid $VERSION"'
+  ) ||
+  releaseWorkflow.includes('--generate-notes')
+) {
+  fail('The release must publish its reviewed, version-bound notes file.');
 }
 
 if (!releaseWorkflow.includes('npm run release:package --')) {

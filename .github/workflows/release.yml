@@ -348,7 +348,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ "$VERSION" == *-* ]]; then
-            gh release create "v$VERSION" dist/release/* --verify-tag --generate-notes --prerelease --latest=false
+            gh release create "v$VERSION" dist/release/* --verify-tag --notes-file "docs/releases/v$VERSION.md" --title "BYOK Grid $VERSION" --prerelease --latest=false
           else
-            gh release create "v$VERSION" dist/release/* --verify-tag --generate-notes --latest
+            gh release create "v$VERSION" dist/release/* --verify-tag --notes-file "docs/releases/v$VERSION.md" --title "BYOK Grid $VERSION" --latest
           fi
