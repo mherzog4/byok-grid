@@ -156,6 +156,11 @@ working tree:
   set, isolated source namespaces, immutable token-free NotReady probe pods,
   allowed-before-blocked same-target controls, exact cleanup, target-redacted
   candidate-bound evidence, and optional-component coverage;
+- a dependency-free read-only External Secrets Operator v1 provenance verifier
+  that rejects broad imports and stale syncs, hashes the exact per-key remote
+  bindings and store configuration, verifies a Ready store plus stable
+  digest-pinned admitted controller pods, never fetches Secret data, and emits
+  the same hashed Secret reference used by the workload verifier;
 - an environment-bound production capacity harness with mandatory dataset,
   replica, concurrency, count, p95, and worker-retry limits; it measures grid,
   FTS, optimistic-write, workflow-enqueue, and durable-completion paths through
@@ -226,10 +231,12 @@ dated evidence linked from a release issue or runbook record:
   logs, metrics, alert routing, and an operator-owned rollback decision path;
   retain `BYOK_GRID_KUBERNETES_RUNTIME_VERIFIED` from the read-only live-object
   check in [`VERIFY_KUBERNETES_RUNTIME.md`](VERIFY_KUBERNETES_RUNTIME.md),
+  `BYOK_GRID_KUBERNETES_EXTERNAL_SECRET_PROVENANCE_VERIFIED` from
+  [`VERIFY_KUBERNETES_SECRET_PROVENANCE.md`](VERIFY_KUBERNETES_SECRET_PROVENANCE.md),
   `BYOK_GRID_KUBERNETES_NETWORK_POLICY_ENFORCEMENT_VERIFIED` from the isolated
   CNI drill in
   [`KUBERNETES_NETWORK_POLICY_DRILL.md`](KUBERNETES_NETWORK_POLICY_DRILL.md),
-  external-secret provenance evidence, plus a passing
+  plus a passing
   `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` record from the canonical ingress;
 - capture the production ingress `X-Forwarded-For` chain, prove the proxy
   overwrites or predictably appends it, deny direct web access, configure only

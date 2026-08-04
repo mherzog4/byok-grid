@@ -63,6 +63,7 @@
       "artifactSha256": "<64-character-lowercase-SHA-256>",
       "id": "reference-deployment",
       "markers": [
+        "BYOK_GRID_KUBERNETES_EXTERNAL_SECRET_PROVENANCE_VERIFIED",
         "BYOK_GRID_KUBERNETES_NETWORK_POLICY_ENFORCEMENT_VERIFIED",
         "BYOK_GRID_KUBERNETES_RUNTIME_VERIFIED"
       ],
