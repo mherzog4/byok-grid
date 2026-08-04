@@ -1,0 +1,52 @@
+scripts/publish-release-image-tags.mjs
+  s_28ae7db8033464::t_077eb6d80cae5b 1-95
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_721c37736141f4 201-203
+  s_28ae7db8033464::t_1dc31299320052 197-200
+docs/adr/0058-conflict-safe-release-image-tags.md
+  s_28ae7db8033464::t_4d49c82184ea39 37-42
+  s_28ae7db8033464::t_1dc31299320052 1-31,36,43-49,52-55
+  s_28ae7db8033464::t_721c37736141f4 32-35,50-51
+scripts/verify-release-version.mjs
+  s_28ae7db8033464::t_0f24fdbdbfc060 167-197
+scripts/publish-release-image-tags-lib.mjs
+  s_28ae7db8033464::t_077eb6d80cae5b 1-115,118-119,131-175,186-192,194-308,311-330,363-418,425-432,436-494
+  s_28ae7db8033464::t_721c37736141f4 124-126,176-185
+  s_28ae7db8033464::t_1dc31299320052 116-117,120-123,127-128,193,419-424,433-435
+  s_28ae7db8033464::t_5cf0a8dae819a2 129-130,309-310,331-362
+.github/workflows/release.yml
+  s_28ae7db8033464::t_0f24fdbdbfc060 252-261,281-288
+package.json
+  s_28ae7db8033464::t_0f24fdbdbfc060 55
+docs/VERIFY_RELEASE.md
+  s_28ae7db8033464::t_1dc31299320052 42-43,50
+  s_28ae7db8033464::t_721c37736141f4 44-49
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_1dc31299320052 39-40
+scripts/publish-release-image-tags.test.mjs
+  s_28ae7db8033464::t_387de050035e04 1,10-79,85-113,115,118-122,124-125,127-146,151-201,233-276,299-322,327-345,393
+  s_28ae7db8033464::t_5cf0a8dae819a2 222,232
+  s_28ae7db8033464::t_954da95b381655 2-9,346-392,394-433
+  s_28ae7db8033464::t_1dc31299320052 80-84,147-150,202-221,223-231,323-326
+  s_28ae7db8033464::t_721c37736141f4 277-298
+  s_28ae7db8033464::t_0f24fdbdbfc060 114,116-117,123,126
+docs/RELEASING.md
+  s_28ae7db8033464::t_1dc31299320052 131-134,138-143,146-148
+  s_28ae7db8033464::t_721c37736141f4 135-137,149-153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "8479d1b996994958d43e8be1d64cc5d44e1d35e4",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
