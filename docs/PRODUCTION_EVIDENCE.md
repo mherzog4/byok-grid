@@ -79,6 +79,7 @@ These marker arrays are exact:
 - `authenticated-worker-drain`:
   `BYOK_GRID_KUBERNETES_WORKER_DRAIN_VERIFIED`;
 - `multi-architecture-smoke`:
+  `BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED` and
   `BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED`;
 - `remote-libsql-recovery`:
   `BYOK_GRID_REMOTE_LIBSQL_DRILL_PREPARED` and

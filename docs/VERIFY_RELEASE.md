@@ -75,7 +75,9 @@ gh attestation verify \
 Cross-check `IMAGE_SMOKE.jsonl` against the seven `release-smoke-<target>`
 workflow artifacts while they remain available. Then follow
 [`MULTI_ARCH_IMAGE_SMOKE.md`](MULTI_ARCH_IMAGE_SMOKE.md) to repeat the isolated
-smoke on native hosts for both architectures before stable promotion.
+smoke on native hosts for both architectures and produce the exact
+`BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED` combined record before
+stable promotion.
 
 After cryptographic verification, render the chart with image tags replaced by
 the verified digests. The release includes `values.digests.yaml`, generated

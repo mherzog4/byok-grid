@@ -73,10 +73,32 @@ workflow artifacts expire.
 ## Independent release verification
 
 The CI run is emulated architecture evidence, not native-hardware evidence.
-Before stable promotion, boot the published manifest-list digest once on a
-native `amd64` host and once on a native `arm64` host using the same isolation
-flags. Pipe the exact image output into the verifier from the matching release
-source:
+Before stable promotion, use one native Linux `amd64` Docker server and one
+native Linux `arm64` Docker server. Download the release's `IMAGE_DIGESTS.txt`
+and `IMAGE_SMOKE.jsonl`, then check out the exact candidate source with no
+tracked or untracked changes. Keep downloaded inputs and outputs outside the
+checkout so clean-source verification remains meaningful. On each host, run
+the collector with a different output path:
+
+```text
+npm run release:collect-native-smoke -- \
+  --version 0.1.0-rc.1 \
+  --candidate <40-character-candidate-commit> \
+  --digest-manifest /path/to/IMAGE_DIGESTS.txt \
+  --output native-amd64.json
+```
+
+The collector first requires the clean Git `HEAD` to equal the claimed
+candidate. It refuses non-Linux hosts, unsupported CPU architectures, and a
+Docker server whose reported OS/architecture differs from the Node.js host.
+It then runs all seven exact digest references with the release workflow's
+fixed network, filesystem, privilege, process, pull, platform, and timeout
+boundary. Docker's server version, OS, and architecture come from structured
+`docker version --format` fields. The output is a canonical, exclusively
+created mode-`0600` record with no hostname, credentials, raw provider output,
+or image stderr.
+
+The equivalent single-image operation performed by the collector is:
 
 ```text
 docker run --rm --pull=always \
@@ -90,18 +112,42 @@ docker run --rm --pull=always \
   --image-smoke
 ```
 
-Verify the output without placing it in a command argument. In a shell with
-pipeline failure propagation enabled, run the image command above directly into:
+The collector verifies this output in memory without placing it in a command
+argument. For isolated diagnosis, a shell with pipeline failure propagation may
+run the image command above directly into:
 
 ```text
 node scripts/verify-release-image-smoke.mjs \
   web linux/arm64 sha256:<digest>
 ```
 
-Retain the two native-host verifier records, host architecture/runtime details,
+After both hosts finish within one 24-hour collection window, combine and
+verify their canonical records against the attested release manifest:
+
+```text
+npm run release:verify-native-smoke -- \
+  --version 0.1.0-rc.1 \
+  --candidate <40-character-candidate-commit> \
+  --digest-manifest /path/to/IMAGE_DIGESTS.txt \
+  --release-smoke /path/to/IMAGE_SMOKE.jsonl \
+  --amd64-evidence /path/to/native-amd64.json \
+  --arm64-evidence /path/to/native-arm64.json \
+  --output native-multi-architecture.json
+```
+
+The offline verifier requires exactly one matching native record per platform,
+all seven digest-bound targets on both hosts, canonical target order, matching
+candidate/version/manifest identity, matching Docker architecture, no future
+timestamps, and the exact same fourteen records as the checksummed release
+asset. It emits `BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED` only after
+the closed set passes.
+
+Retain both native-host records, the combined record, Docker server versions,
 the attested `IMAGE_SMOKE.jsonl` asset, the release digest manifest, and the
-workflow URL. The stable `multi-architecture-smoke` evidence record must carry
-the `BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED` marker and hash the retained bundle.
+workflow URL. The stable `multi-architecture-smoke` evidence record hashes the
+combined artifact and must carry both
+`BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED` and
+`BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED`.
 
 ## Boundary
 

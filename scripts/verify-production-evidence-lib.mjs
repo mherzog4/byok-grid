@@ -30,7 +30,10 @@ const OPTIONAL_ADAPTER_EVIDENCE = Object.freeze({
 
 const EXPECTED_MARKERS = Object.freeze({
   'authenticated-worker-drain': ['BYOK_GRID_KUBERNETES_WORKER_DRAIN_VERIFIED'],
-  'multi-architecture-smoke': ['BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED'],
+  'multi-architecture-smoke': [
+    'BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED',
+    'BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED',
+  ],
   'production-capacity': ['BYOK_GRID_PRODUCTION_CAPACITY_VERIFIED'],
   'public-ingress-and-proxy': [
     'BYOK_GRID_INGRESS_BOUNDARY_VERIFIED',
