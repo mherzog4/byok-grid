@@ -198,3 +198,9 @@ authenticated and unauthenticated request-rate, concurrent-request, and
 connection limits at the edge. Application-level tenant quotas remain a
 separate product policy and should not reuse Better Auth's internal rate-limit
 table.
+
+Before production promotion, use the
+[`production ingress boundary drill`](INGRESS_BOUNDARY_DRILL.md) from two real
+client networks. It distinguishes application and edge `429` responses, binds
+the observed forwarding chain to the trusted-proxy configuration, and requires
+direct-origin denial rather than inferring those properties from public health.

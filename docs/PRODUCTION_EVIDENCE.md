@@ -73,6 +73,8 @@ its contents.
 
 These marker arrays are exact:
 
+- `release-assets`: `BYOK_GRID_PUBLISHED_RELEASE_VERIFIED` and
+  `BYOK_GRID_RELEASE_BUNDLE_VERIFIED`;
 - `authenticated-worker-drain`:
   `BYOK_GRID_KUBERNETES_WORKER_DRAIN_VERIFIED`;
 - `multi-architecture-smoke`:
@@ -83,6 +85,7 @@ These marker arrays are exact:
 - `smtp-delivery`:
   `BYOK_GRID_SMTP_DELIVERY_AUTHENTICATION_VERIFIED`;
 - `public-ingress-and-proxy`:
+  `BYOK_GRID_INGRESS_BOUNDARY_VERIFIED` and
   `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED`;
 - `reference-deployment`:
   `BYOK_GRID_KUBERNETES_EXTERNAL_SECRET_PROVENANCE_VERIFIED`,
@@ -95,7 +98,10 @@ The top-level `rollback` object separately requires
 artifact hash and reference bind the marker-bearing output to the in-window
 `testedAt` timestamp.
 
-All other required records use an empty `markers` array. A generic “passed”
+All other required records use an empty `markers` array. The release-assets
+record requires both existing producers: bundle verification alone cannot prove
+that GitHub published the same immutable files, while publication readback alone
+does not replace the independent semantic bundle check. A generic “passed”
 string is rejected because it has no repository-defined producer contract.
 
 ## Optional production surface

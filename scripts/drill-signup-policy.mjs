@@ -149,6 +149,14 @@ async function verifyDisabledSignup() {
         index < 3 ? 401 : 429,
         `spoof-rotated authentication attempt ${index + 1}`
       );
+      if (
+        index === 3 &&
+        response.headers.get('x-byok-grid-rate-limit-layer') !== 'application'
+      ) {
+        throw new Error(
+          'The application rate-limit response lacked exact layer provenance.'
+        );
+      }
     }
     console.log(
       JSON.stringify({ marker: 'BYOK_GRID_AUTH_RATE_LIMIT_DRILL_PASSED' })
