@@ -1,0 +1,21 @@
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_77c3a84ee019e8 158-166,215-217
+docs/evidence/2026-08-03-github-hosted-state.md
+  s_28ae7db8033464::t_77c3a84ee019e8 49-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "b3eceb9ab15ab92f6718d0d19ee27dd0db9039f3",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
