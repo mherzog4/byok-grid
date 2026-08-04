@@ -130,7 +130,8 @@ Then install atomically:
 helm upgrade --install byok-grid deploy/helm/byok-grid \
   --namespace byok-grid \
   --create-namespace \
-  --atomic \
+  --rollback-on-failure \
+  --wait=watcher \
   --timeout 15m \
   --values values.production.yaml \
   --values values.digests.yaml
@@ -149,6 +150,12 @@ provenance verifier in
 [`VERIFY_KUBERNETES_SECRET_PROVENANCE.md`](VERIFY_KUBERNETES_SECRET_PROVENANCE.md),
 telemetry and alert records, and a tested rollback path; the live-object check
 does not make those provider-specific claims.
+
+During the candidate observation window, use the controlled live drill in
+[`KUBERNETES_ROLLBACK_DRILL.md`](KUBERNETES_ROLLBACK_DRILL.md). It verifies the
+named prior revision and restored candidate against their independent digest
+manifests and the canonical public endpoint. A command-level Helm success alone
+does not satisfy the rollback gate.
 
 The migration Job runs at hook weight `-10`. A failed Job stops the release
 before either runtime changes. Its pod does not mount a Kubernetes API token. If

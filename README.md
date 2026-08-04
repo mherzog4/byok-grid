@@ -308,6 +308,9 @@ restore-drill evidence.
 See [the authenticated Kubernetes worker drain drill](docs/KUBERNETES_WORKER_DRAIN_DRILL.md)
 for isolated Hatchet registration, in-flight `SIGTERM`, clean restart, and
 durable workflow-completion evidence.
+See [the Kubernetes rollback drill](docs/KUBERNETES_ROLLBACK_DRILL.md) for a
+controlled rollback to a named digest-pinned Helm revision and restoration of
+the exact candidate with live workload and public-ingress verification.
 See [the production capacity drill](docs/PRODUCTION_CAPACITY_DRILL.md) for a
 declared HTTPS, remote-libSQL, and workflow concurrency envelope with
 operator-owned latency and contention thresholds.

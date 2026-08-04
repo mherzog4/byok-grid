@@ -25,7 +25,8 @@ properties:
    HTTPS evidence reference;
 5. drill-backed gates carry their exact structured success markers;
 6. observation lasts at least 24 hours and has zero unresolved blockers;
-7. rollback is tested during the observation window;
+7. rollback and exact candidate restoration produce the repository-defined
+   marker during the observation window;
 8. named operator acceptance follows rollback and observation; and
 9. candidate-to-stable changes touch only release metadata and evidence files.
 
@@ -89,6 +90,11 @@ These marker arrays are exact:
   `BYOK_GRID_KUBERNETES_RUNTIME_VERIFIED`; and
 - `production-capacity`: `BYOK_GRID_PRODUCTION_CAPACITY_VERIFIED`.
 
+The top-level `rollback` object separately requires
+`BYOK_GRID_KUBERNETES_ROLLBACK_VERIFIED` from the controlled live drill. Its
+artifact hash and reference bind the marker-bearing output to the in-window
+`testedAt` timestamp.
+
 All other required records use an empty `markers` array. A generic “passed”
 string is rejected because it has no repository-defined producer contract.
 
@@ -107,7 +113,8 @@ stable support promises.
 2. Deploy its immutable digests and complete every environment gate.
 3. Start the observation window only after the intended production topology is
    healthy. Retain at least 24 hours with zero unresolved blockers.
-4. Test the documented rollback during that window.
+4. Run the documented Kubernetes rollback-and-restoration drill during that
+   window and retain its exact marker-bearing record.
 5. Hash each retained artifact and create the stable version's manifest from the
    template. Use canonical millisecond UTC timestamps such as
    `2026-08-03T12:34:56.789Z` and credential-free HTTPS URLs without query

@@ -135,11 +135,19 @@ export function verifyProductionEvidence(value, options = {}) {
 
   const rollback = exactObject(root.rollback, 'rollback', [
     'artifactSha256',
+    'markers',
     'reference',
     'testedAt',
   ]);
   const rollbackTestedAt = timestamp(rollback.testedAt, 'rollback.testedAt');
   sha256(rollback.artifactSha256, 'rollback.artifactSha256');
+  if (
+    !sameArray(stringArray(rollback.markers, 'rollback.markers'), [
+      'BYOK_GRID_KUBERNETES_ROLLBACK_VERIFIED',
+    ])
+  ) {
+    fail('Rollback evidence must carry the exact Kubernetes rollback marker.');
+  }
   httpsReference(rollback.reference, 'rollback.reference');
   if (
     rollbackTestedAt < observationStartedAt ||
