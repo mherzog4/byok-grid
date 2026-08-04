@@ -94,6 +94,8 @@ jobs:
         run: npm run typecheck
 
       - name: Run unit tests
+        env:
+          BYOK_GRID_RELEASE_INTEGRATION: '1'
         run: npm test
 
       - name: Run connector runner tests

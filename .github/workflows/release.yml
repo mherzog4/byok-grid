@@ -88,6 +88,8 @@ jobs:
           npm run db:postgres:migrate
 
       - name: Run repository verification
+        env:
+          BYOK_GRID_RELEASE_INTEGRATION: '1'
         run: |
           npm run format:check
           npm run lint
@@ -353,27 +355,17 @@ jobs:
         with:
           subject-path: dist/release/*
 
-      - name: Publish GitHub Release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [[ "$VERSION" == *-* ]]; then
-            gh release create "v$VERSION" dist/release/* --verify-tag --notes-file "docs/releases/v$VERSION.md" --title "BYOK Grid $VERSION" --prerelease --latest=false
-          else
-            gh release create "v$VERSION" dist/release/* --verify-tag --notes-file "docs/releases/v$VERSION.md" --title "BYOK Grid $VERSION" --latest
-          fi
-
-      - name: Read back published GitHub Release
+      - name: Publish or verify immutable GitHub Release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >-
-          gh api
-          "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION"
-          --header "Accept: application/vnd.github+json"
-          --header "X-GitHub-Api-Version: 2026-03-10"
-          > dist/github-release.json
+          npm run release:publish-github --
+          --version "$VERSION"
+          --directory dist/release
+          --notes-file "docs/releases/v$VERSION.md"
+          --release-json dist/github-release.json
+          --repository '${{ github.repository }}'
 
       - name: Verify immutable published release
         shell: bash

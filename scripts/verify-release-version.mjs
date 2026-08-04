@@ -35,7 +35,16 @@ const values = readFileSync('deploy/helm/byok-grid/values.yaml', 'utf8');
 const dockerfile = readFileSync('Dockerfile', 'utf8');
 const ciWorkflow = readFileSync('.github/workflows/ci.yml', 'utf8');
 const compose = readFileSync('docker-compose.yml', 'utf8');
+const releasePackager = readFileSync('scripts/package-release.mjs', 'utf8');
 const releaseWorkflow = readFileSync('.github/workflows/release.yml', 'utf8');
+const githubReleasePublisher = readFileSync(
+  'scripts/publish-github-release.mjs',
+  'utf8'
+);
+const githubReleasePublisherLibrary = readFileSync(
+  'scripts/publish-github-release-lib.mjs',
+  'utf8'
+);
 const releaseNotesPath = `docs/releases/v${requestedVersion}.md`;
 let releaseNotes;
 try {
@@ -200,9 +209,8 @@ if (!releaseWorkflow.includes('needs: [verify, images, publish_images]')) {
 }
 
 if (
-  !releaseWorkflow.includes(
-    '--notes-file "docs/releases/v$VERSION.md" --title "BYOK Grid $VERSION"'
-  ) ||
+  !releaseWorkflow.includes('--notes-file "docs/releases/v$VERSION.md"') ||
+  !githubReleasePublisher.includes('`BYOK Grid ${version}`') ||
   releaseWorkflow.includes('--generate-notes')
 ) {
   fail('The release must publish its reviewed, version-bound notes file.');
@@ -212,6 +220,29 @@ if (!releaseWorkflow.includes('npm run release:package --')) {
   fail('The release must use the tested atomic artifact packager.');
 }
 
+for (const workflow of [ciWorkflow, releaseWorkflow]) {
+  if (!workflow.includes("BYOK_GRID_RELEASE_INTEGRATION: '1'")) {
+    fail('Hosted verification must prove reproducible real release packaging.');
+  }
+}
+
+for (const reproduciblePackagingContract of [
+  'copyReproducibleChart',
+  "new Date('1985-10-26T08:15:00.000Z')",
+  'utimesSync',
+  'must not contain symbolic links',
+]) {
+  if (!releasePackager.includes(reproduciblePackagingContract)) {
+    fail('Release packaging must retain deterministic chart metadata.');
+  }
+}
+
+if (
+  rootPackage.scripts?.['release:publish-github'] !==
+  'node scripts/publish-github-release.mjs'
+) {
+  fail('The GitHub Release publisher must remain a public repository command.');
+}
 if (
   rootPackage.scripts?.['release:verify-bundle'] !==
   'node scripts/verify-release-bundle.mjs'
@@ -235,7 +266,7 @@ const releaseAttestationIndex = releaseWorkflow.indexOf(
   '- name: Attest release files'
 );
 const releasePublicationIndex = releaseWorkflow.indexOf(
-  '- name: Publish GitHub Release'
+  'npm run release:publish-github --'
 );
 const publishedVerificationIndex = releaseWorkflow.indexOf(
   'npm run release:verify-published --'
@@ -253,13 +284,42 @@ if (
 }
 
 for (const publishedReleaseContract of [
-  'repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION',
-  'X-GitHub-Api-Version: 2026-03-10',
+  'npm run release:publish-github --',
+  "--repository '${{ github.repository }}'",
   '--release-json dist/github-release.json',
   '--notes-file "docs/releases/v$VERSION.md"',
 ]) {
   if (!releaseWorkflow.includes(publishedReleaseContract)) {
     fail('The release workflow must read back the immutable GitHub Release.');
+  }
+}
+
+if (releaseWorkflow.includes('gh release create')) {
+  fail('GitHub Release publication must not drift into inline workflow logic.');
+}
+
+for (const publisherContract of [
+  "spawnSync('gh', args",
+  "'release'",
+  "'create'",
+  "'--verify-tag'",
+  "'--notes-file'",
+  "'--title'",
+]) {
+  if (!githubReleasePublisher.includes(publisherContract)) {
+    fail('The GitHub Release publisher must retain its reviewed CLI contract.');
+  }
+}
+
+for (const publisherApiContract of [
+  'https://api.github.com/repos/${repository}/releases/tags/v${version}',
+  "'x-github-api-version': '2026-03-10'",
+  'verifyPublishedRelease',
+  'verifyReleaseBundle',
+  'response.status === 404',
+]) {
+  if (!githubReleasePublisherLibrary.includes(publisherApiContract)) {
+    fail('The GitHub Release publisher must retain fail-closed API readback.');
   }
 }
 
