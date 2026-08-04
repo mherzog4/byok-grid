@@ -1,0 +1,53 @@
+scripts/verify-smtp-delivery.mjs
+  s_28ae7db8033464::t_b41b85bcd97406 1-33
+  s_28ae7db8033464::t_76f3880dd9a7f1 34-38
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_2c2d0827af8ac1 41
+  s_28ae7db8033464::t_10eef04f0544bb 37-40,42-45,232-234
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_5aea2484034b31 40
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_10eef04f0544bb 66,82-83
+scripts/verify-smtp-delivery-lib.mjs
+  s_28ae7db8033464::t_b41b85bcd97406 1-25,27-106,110-133,140-147,149-161,166-174,176-251,256-263,265-273,295-367,370-438,452-453,459-499,503-511
+  s_28ae7db8033464::t_2c2d0827af8ac1 26,107-109,134-139,148,162-165,175,252-255,264,274-294,368-369,439-451,454-458,500-502
+scripts/verify-smtp-delivery.test.mjs
+  s_28ae7db8033464::t_b41b85bcd97406 1,10-19,23-96,116-125,127,129-185,213-214,225-246,250-265,267-276
+  s_28ae7db8033464::t_a3b28d47345bb3 3-9,128
+  s_28ae7db8033464::t_7d77c44938ae54 20-22,126,266
+  s_28ae7db8033464::t_2c2d0827af8ac1 2,97-115,186-212,247-249
+  s_28ae7db8033464::t_1111be551174d9 215-224
+docs/SMTP_PRODUCTION_DRILL.md
+  s_28ae7db8033464::t_170ca9f66dd0d1 1-51,54-91
+  s_28ae7db8033464::t_2c2d0827af8ac1 52-53
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_10eef04f0544bb 200-203
+package.json
+  s_28ae7db8033464::t_5aea2484034b31 56
+README.md
+  s_28ae7db8033464::t_10eef04f0544bb 305-307
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_5aea2484034b31 33
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_5aea2484034b31 96
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_10eef04f0544bb 46-49
+docs/RELEASING.md
+  s_28ae7db8033464::t_170ca9f66dd0d1 99-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "6292d4dfd86306ae3d9a8da30c53701bde2b8f4d",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
