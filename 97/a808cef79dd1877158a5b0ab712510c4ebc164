@@ -1,0 +1,30 @@
+docs/RELEASING.md
+  s_28ae7db8033464::t_2a838ad78fabc8 150-151
+docs/adr/0057-stable-release-notes-promotion-contract.md
+  s_28ae7db8033464::t_8006cfc2fedd9e 1-42
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_b20b36d0d9a83e 367-371,383
+  s_28ae7db8033464::t_2a838ad78fabc8 357,384-394,401
+  s_28ae7db8033464::t_4062311abdda5b 380-382
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_2a838ad78fabc8 281,287,294-295
+  s_28ae7db8033464::t_804bba0a8e0548 296
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_2a838ad78fabc8 39-40,43-49,131-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "97a808cef79dd1877158a5b0ab712510c4ebc164",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
