@@ -55,20 +55,20 @@ verification so the release gate remains deterministic and credential-free;
 reviewers must independently retrieve the object, verify its digest, and assess
 its contents.
 
-| Gate ID                        | Evidence that must be retained                                                                                                  |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| `release-assets`               | Passing RC tag workflow, seven image digests, chart, SDK, checksums, SBOM/provenance, and attestations                          |
-| `code-security`                | CodeQL JavaScript/TypeScript and Rust results, dependency review, enabled repository security features, and required checks     |
-| `authenticated-worker-drain`   | Authenticated Hatchet in-flight Kubernetes drain record                                                                         |
-| `remote-libsql-recovery`       | Provider backup/loss/restore operation and both remote-drill markers                                                            |
-| `reference-deployment`         | Digest-pinned Helm release, TLS, external secrets, network policy, centralized telemetry, alerts, and rollback ownership        |
-| `public-ingress-and-proxy`     | Canonical deployment marker plus real proxy-chain, direct-access denial, and multi-network edge/application rate-limit evidence |
-| `smtp-delivery`                | TLS verification/recovery delivery, SPF/DKIM/DMARC alignment, exact SMTP verification marker, and provider failure monitoring   |
-| `multi-architecture-smoke`     | Attested fourteen-record release asset plus native-host boot records for published `linux/amd64` and `linux/arm64` digests      |
-| `release-tag-protection`       | Protected release tags/ruleset and strongest available GHCR immutability evidence                                               |
-| `production-capacity`          | Passing declared-envelope marker, provider/ingress metrics, supported limit, alert threshold, and saturation response           |
-| `observation-window`           | Start/end record and zero unresolved security, correctness, restore, or data-loss blockers                                      |
-| `candidate-source-equivalence` | Reviewed diff from observed candidate to the proposed stable commit                                                             |
+| Gate ID                        | Evidence that must be retained                                                                                                          |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `release-assets`               | Passing RC tag workflow, seven image digests, chart, SDK, checksums, SBOM/provenance, and attestations                                  |
+| `code-security`                | CodeQL JavaScript/TypeScript and Rust results, dependency review, enabled repository security features, and required checks             |
+| `authenticated-worker-drain`   | Authenticated Hatchet in-flight Kubernetes drain record                                                                                 |
+| `remote-libsql-recovery`       | Provider backup/loss/restore operation and both remote-drill markers                                                                    |
+| `reference-deployment`         | Exact Kubernetes runtime marker plus external-secret provenance, CNI enforcement, centralized telemetry, alerts, and rollback ownership |
+| `public-ingress-and-proxy`     | Canonical deployment marker plus real proxy-chain, direct-access denial, and multi-network edge/application rate-limit evidence         |
+| `smtp-delivery`                | TLS verification/recovery delivery, SPF/DKIM/DMARC alignment, exact SMTP verification marker, and provider failure monitoring           |
+| `multi-architecture-smoke`     | Attested fourteen-record release asset plus native-host boot records for published `linux/amd64` and `linux/arm64` digests              |
+| `release-tag-protection`       | Protected release tags/ruleset and strongest available GHCR immutability evidence                                                       |
+| `production-capacity`          | Passing declared-envelope marker, provider/ingress metrics, supported limit, alert threshold, and saturation response                   |
+| `observation-window`           | Start/end record and zero unresolved security, correctness, restore, or data-loss blockers                                              |
+| `candidate-source-equivalence` | Reviewed diff from observed candidate to the proposed stable commit                                                                     |
 
 These marker arrays are exact:
 
@@ -82,7 +82,9 @@ These marker arrays are exact:
 - `smtp-delivery`:
   `BYOK_GRID_SMTP_DELIVERY_AUTHENTICATION_VERIFIED`;
 - `public-ingress-and-proxy`:
-  `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED`; and
+  `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED`;
+- `reference-deployment`:
+  `BYOK_GRID_KUBERNETES_RUNTIME_VERIFIED`; and
 - `production-capacity`: `BYOK_GRID_PRODUCTION_CAPACITY_VERIFIED`.
 
 All other required records use an empty `markers` array. A generic “passed”
