@@ -1,0 +1,63 @@
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_c3e6e22e5f11a2 64-71,87
+  s_28ae7db8033464::t_b5cc592cda8e74 58-63
+docs/kubernetes-network-policy-plan.template.json
+  s_28ae7db8033464::t_033aae162a065e 1-163
+docs/RELEASING.md
+  s_28ae7db8033464::t_f5af1c4db1ac08 117-120
+scripts/drill-kubernetes-network-policy-lib.mjs
+  s_28ae7db8033464::t_7be93847ec6049 176-184,205
+  s_28ae7db8033464::t_1efd715342c6cc 622
+  s_28ae7db8033464::t_48120db95a8f6c 1-18,20-175,185-204,206-283,285-415,418-480,483-484,488,510-517,522-530,534-574,578-621,623-649,653-656,658-662,664-686,690-707,711-715,718-743,745-746,748-751,756-804,807-888,891,905-913
+  s_28ae7db8033464::t_d1dc5230d5b8bc 19,284,416-417,481,495-496,499-500,506,508,518-521,531-533,575-577,650-652,657,663,687-689,708-710,716-717,744,747,752-755,805-806,889-890
+  s_28ae7db8033464::t_9d173e536d15f5 482,485-487,489-494,497-498,501-505,507,509,892-904
+  s_28ae7db8033464::t_c1d78d44b88b9f 914-918
+package.json
+  s_28ae7db8033464::t_c3e6e22e5f11a2 34
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_c3e6e22e5f11a2 65-68
+docs/KUBERNETES.md
+  s_28ae7db8033464::t_f5af1c4db1ac08 240-244
+docs/releases/v0.1.0-rc.1.md
+  s_28ae7db8033464::t_f5af1c4db1ac08 54-56
+scripts/drill-kubernetes-network-policy.mjs
+  s_28ae7db8033464::t_1efd715342c6cc 1-43,45-83,85-98,100-128,130-139,141-203,205-208,210-228,233-267
+  s_28ae7db8033464::t_a460ae230fb206 99,129
+  s_28ae7db8033464::t_72528a1ddbcebb 44,204,209,229-232
+  s_28ae7db8033464::t_9d173e536d15f5 84,140
+docs/KUBERNETES_NETWORK_POLICY_DRILL.md
+  s_28ae7db8033464::t_033aae162a065e 1-55,70-130
+  s_28ae7db8033464::t_ad0a415555ce74 56-69
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_c3e6e22e5f11a2 29-32
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_43e0c295b00725 155-158,228-232
+scripts/drill-kubernetes-network-policy.test.mjs
+  s_28ae7db8033464::t_7be93847ec6049 5,592
+  s_28ae7db8033464::t_5b0319adcf3549 1-4,6-110,114-156,159-160,163-164,170-187,195-223,225-238,251-260,265-300,302-303,308,313-385,387-413,415-420,422-424,426-441,443-449,452-466,468-473,482-501,503,508-591,593-596
+  s_28ae7db8033464::t_9d173e536d15f5 111-113,157-158,161-162,165-169,188-194,224,239-250,261-264,301,304-307,309-312,386,414,421,425,442,450-451,467,474-481,502,504-507
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_c3e6e22e5f11a2 36-39
+README.md
+  s_28ae7db8033464::t_f5af1c4db1ac08 293-295
+docs/NETWORK_SECURITY.md
+  s_28ae7db8033464::t_f5af1c4db1ac08 127-133
+docs/VERIFY_KUBERNETES_RUNTIME.md
+  s_28ae7db8033464::t_f5af1c4db1ac08 70-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "b2c0609f4a4d0d550e6b5a84b3b542db618d8e46",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
