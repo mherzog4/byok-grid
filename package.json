@@ -31,6 +31,7 @@
     "dev:workflows": "turbo run dev --filter=@byok-grid/web --filter=@byok-grid/workflow-worker",
     "drill:remote-libsql": "npm run drill:remote-libsql --workspace=@byok-grid/db --",
     "drill:kubernetes-workflow-drain": "node scripts/drill-kubernetes-workflow-drain.mjs",
+    "drill:kubernetes-network-policy": "node scripts/drill-kubernetes-network-policy.mjs",
     "drill:production-capacity": "npm run drill:production-capacity --workspace=@byok-grid/db",
     "drill:signup-policy": "node scripts/drill-signup-policy.mjs",
     "drill:web-drain": "node scripts/drill-web-drain.mjs",

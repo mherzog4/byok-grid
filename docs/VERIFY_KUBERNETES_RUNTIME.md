@@ -67,3 +67,6 @@ services work. Retain controller-provenance evidence, negative connectivity
 tests, public-deployment evidence, telemetry and alert-delivery records, and a
 tested rollback decision path alongside this marker. Do not put credentials,
 raw Secret objects, kubeconfig files, or bearer tokens in an evidence bundle.
+Use the isolated behavioral procedure in
+[`KUBERNETES_NETWORK_POLICY_DRILL.md`](KUBERNETES_NETWORK_POLICY_DRILL.md) for
+the complementary CNI enforcement marker.

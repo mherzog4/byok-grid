@@ -114,8 +114,10 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    the release's generated `values.digests.yaml` after operator values.
 7. Run the read-only live Kubernetes verifier from
    `docs/VERIFY_KUBERNETES_RUNTIME.md` while the migration Job is retained, and
-   keep its exact digest-bound structured marker with the reference-deployment
-   evidence. Run the read-only public deployment verifier from
+   run the isolated CNI enforcement drill from
+   `docs/KUBERNETES_NETWORK_POLICY_DRILL.md`. Keep both exact digest-bound
+   structured markers with the reference-deployment evidence. Run the
+   read-only public deployment verifier from
    `docs/VERIFY_DEPLOYMENT.md` against the canonical TLS origin and retain its
    structured success record with the deployment evidence.
    Before stable promotion, repeat the isolated image smoke from

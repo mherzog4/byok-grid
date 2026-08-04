@@ -1,0 +1,163 @@
+{
+  "namespaces": {
+    "ingress": {
+      "name": "replace-probe-ingress",
+      "namespaceLabels": {
+        "byok-grid.dev/network-drill": "isolated",
+        "network-role": "ingress"
+      },
+      "podLabels": {
+        "network-role": "ingress"
+      }
+    },
+    "monitor": {
+      "name": "replace-probe-monitor",
+      "namespaceLabels": {
+        "byok-grid.dev/network-drill": "isolated",
+        "network-role": "monitor"
+      },
+      "podLabels": {
+        "network-role": "monitor"
+      }
+    },
+    "untrusted": {
+      "name": "replace-probe-untrusted",
+      "namespaceLabels": {
+        "byok-grid.dev/network-drill": "isolated",
+        "network-role": "untrusted"
+      },
+      "podLabels": {}
+    }
+  },
+  "probes": [
+    {
+      "claim": "control-unapproved-egress-allowed",
+      "expectation": "allowed",
+      "source": "control",
+      "target": "unapproved"
+    },
+    {
+      "claim": "ingress-web-allowed",
+      "expectation": "allowed",
+      "source": "ingress",
+      "target": "web"
+    },
+    {
+      "claim": "ingress-worker-health-blocked",
+      "expectation": "blocked",
+      "source": "ingress",
+      "target": "worker-health"
+    },
+    {
+      "claim": "migration-libsql-egress-allowed",
+      "expectation": "allowed",
+      "source": "migration",
+      "target": "libsql"
+    },
+    {
+      "claim": "migration-unapproved-egress-blocked",
+      "expectation": "blocked",
+      "source": "migration",
+      "target": "unapproved"
+    },
+    {
+      "claim": "monitor-web-blocked",
+      "expectation": "blocked",
+      "source": "monitor",
+      "target": "web"
+    },
+    {
+      "claim": "monitor-worker-health-allowed",
+      "expectation": "allowed",
+      "source": "monitor",
+      "target": "worker-health"
+    },
+    {
+      "claim": "monitor-worker-metrics-allowed",
+      "expectation": "allowed",
+      "source": "monitor",
+      "target": "worker-metrics"
+    },
+    {
+      "claim": "untrusted-web-blocked",
+      "expectation": "blocked",
+      "source": "untrusted",
+      "target": "web"
+    },
+    {
+      "claim": "untrusted-worker-health-blocked",
+      "expectation": "blocked",
+      "source": "untrusted",
+      "target": "worker-health"
+    },
+    {
+      "claim": "untrusted-worker-metrics-blocked",
+      "expectation": "blocked",
+      "source": "untrusted",
+      "target": "worker-metrics"
+    },
+    {
+      "claim": "web-libsql-egress-allowed",
+      "expectation": "allowed",
+      "source": "web",
+      "target": "libsql"
+    },
+    {
+      "claim": "web-unapproved-egress-blocked",
+      "expectation": "blocked",
+      "source": "web",
+      "target": "unapproved"
+    },
+    {
+      "claim": "worker-hatchet-egress-allowed",
+      "expectation": "allowed",
+      "source": "worker",
+      "target": "hatchet"
+    },
+    {
+      "claim": "worker-libsql-egress-allowed",
+      "expectation": "allowed",
+      "source": "worker",
+      "target": "libsql"
+    },
+    {
+      "claim": "worker-unapproved-egress-blocked",
+      "expectation": "blocked",
+      "source": "worker",
+      "target": "unapproved"
+    }
+  ],
+  "schemaVersion": 1,
+  "targets": [
+    {
+      "host": "replace-hatchet.invalid",
+      "id": "hatchet",
+      "port": 443
+    },
+    {
+      "host": "replace-libsql.invalid",
+      "id": "libsql",
+      "port": 443
+    },
+    {
+      "host": "replace-available-sentinel.invalid",
+      "id": "unapproved",
+      "port": 443
+    },
+    {
+      "host": "replace-web-service.invalid",
+      "id": "web",
+      "port": 80
+    },
+    {
+      "host": "replace-worker-pod-ip.invalid",
+      "id": "worker-health",
+      "port": 8001
+    },
+    {
+      "host": "replace-worker-pod-ip.invalid",
+      "id": "worker-metrics",
+      "port": 8002
+    }
+  ]
+}

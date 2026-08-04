@@ -237,6 +237,11 @@ Job. Keep the application's DNS-pinned guarded HTTP dispatcher enabled as a
 second layer. The [network security guide](NETWORK_SECURITY.md) defines the
 values contract, selector semantics, migration boundary, and required negative
 tests.
+Run the isolated behavioral verifier in
+[`KUBERNETES_NETWORK_POLICY_DRILL.md`](KUBERNETES_NETWORK_POLICY_DRILL.md) to
+retain candidate-bound CNI enforcement evidence. Its probe pods remain NotReady
+and use immutable release images, but they intentionally assume application
+identities; never run it in a namespace serving production traffic.
 
 ## Optional components
 
