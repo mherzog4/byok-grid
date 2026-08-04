@@ -41,6 +41,7 @@ const EXPECTED_MARKERS = {
     'BYOK_GRID_PUBLISHED_RELEASE_VERIFIED',
     'BYOK_GRID_RELEASE_BUNDLE_VERIFIED',
   ],
+  'release-tag-protection': ['BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED'],
   'remote-libsql-recovery': [
     'BYOK_GRID_REMOTE_LIBSQL_DRILL_PREPARED',
     'BYOK_GRID_REMOTE_LIBSQL_RESTORE_VERIFIED',
@@ -158,6 +159,14 @@ describe('production evidence verifier', () => {
     assert.throws(
       () =>
         verifyProductionEvidence(incompleteReleaseVerification, { now: NOW }),
+      /incorrect structured markers/u
+    );
+
+    const missingReleaseProtection = manifest();
+    findEvidence(missingReleaseProtection, 'release-tag-protection').markers =
+      [];
+    assert.throws(
+      () => verifyProductionEvidence(missingReleaseProtection, { now: NOW }),
       /incorrect structured markers/u
     );
 
