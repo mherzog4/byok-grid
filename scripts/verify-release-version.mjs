@@ -49,6 +49,14 @@ const nativeSmokeLibrary = readFileSync(
   'scripts/native-image-smoke-lib.mjs',
   'utf8'
 );
+const releaseProtectionVerifier = readFileSync(
+  'scripts/verify-release-protection.mjs',
+  'utf8'
+);
+const releaseProtectionLibrary = readFileSync(
+  'scripts/verify-release-protection-lib.mjs',
+  'utf8'
+);
 const productionEvidenceLibrary = readFileSync(
   'scripts/verify-production-evidence-lib.mjs',
   'utf8'
@@ -317,6 +325,47 @@ if (
   )
 ) {
   fail('Stable promotion must require native multi-architecture evidence.');
+}
+if (
+  rootPackage.scripts?.['release:verify-protection'] !==
+  'node scripts/verify-release-protection.mjs'
+) {
+  fail('The release protection verifier must remain a public command.');
+}
+for (const releaseProtectionContract of [
+  'BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED',
+  'digestManifestSha256',
+  "'2026-03-10'",
+  '/immutable-releases',
+  'rulesets?includes_parents=true&per_page=100',
+  "tagReference?.object?.type !== 'tag'",
+  "annotatedTag.verification.reason !== 'valid'",
+  "'non_fast_forward'",
+  "['creation']",
+  "flag: 'wx'",
+  'mode: 0o600',
+]) {
+  if (!releaseProtectionLibrary.includes(releaseProtectionContract)) {
+    fail('Release protection evidence must retain its closed read-only set.');
+  }
+}
+for (const releaseProtectionCliContract of [
+  'BYOK_GRID_GITHUB_TOKEN',
+  'BYOK_GRID_GHCR_ACTOR',
+  'BYOK_GRID_GHCR_TOKEN',
+  "['--digest-manifest', 'digestManifest']",
+  'writeReleaseProtectionEvidence',
+]) {
+  if (!releaseProtectionVerifier.includes(releaseProtectionCliContract)) {
+    fail('Release protection collection must retain its private boundary.');
+  }
+}
+if (
+  !productionEvidenceLibrary.includes(
+    'BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED'
+  )
+) {
+  fail('Stable promotion must require release protection evidence.');
 }
 if (
   rootPackage.scripts?.['release:verify-bundle'] !==

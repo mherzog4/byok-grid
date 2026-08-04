@@ -63,6 +63,7 @@
     "release:verify-kubernetes-secret-provenance": "node scripts/verify-kubernetes-secret-provenance.mjs",
     "release:verify-native-smoke": "node scripts/verify-native-image-smoke.mjs",
     "release:verify-published": "node scripts/verify-published-release.mjs",
+    "release:verify-protection": "node scripts/verify-release-protection.mjs",
     "release:verify-smtp-delivery": "node scripts/verify-smtp-delivery.mjs",
     "release:verify-version": "node scripts/verify-release-version.mjs",
     "test": "npm run ci:verify-community && npm run test:release-tools && turbo run test",

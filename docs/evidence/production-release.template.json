@@ -89,7 +89,7 @@
     {
       "artifactSha256": "<64-character-lowercase-SHA-256>",
       "id": "release-tag-protection",
-      "markers": [],
+      "markers": ["BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED"],
       "reference": "https://evidence.example.com/releases/<version>/release-tag-protection",
       "verifiedAt": "<canonical-millisecond-UTC-timestamp>"
     },

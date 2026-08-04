@@ -167,7 +167,12 @@ release. Review and update `docs/PRODUCTION_READINESS.md` with the resulting run
 and deployment evidence.
 
 Protect release tags with a repository ruleset and enable GHCR tag immutability
-when the registry supports it. Repository workflow concurrency plus immediate
+when the registry supports it. After publication, follow
+[`VERIFY_RELEASE_PROTECTION.md`](VERIFY_RELEASE_PROTECTION.md) and retain the
+`BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED` record. It requires the exact
+no-bypass mutation rule, owner-only creation rule, GitHub-verified signed tag,
+immutable release state, and all seven version tags at the release digests.
+Repository workflow concurrency plus immediate
 pre-write and post-write registry checks narrow the non-atomic registry update
 window, but registry tags remain pointers unless the registry itself enforces
 immutability. A final closed-set readback detects changes during the job but

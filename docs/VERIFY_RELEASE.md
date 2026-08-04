@@ -55,6 +55,16 @@ publication without moving the tag. This marker protects the publication
 process, while `IMAGE_DIGESTS.txt` remains the authoritative identity operators
 must verify and deploy.
 
+After the immutable release exists, run the read-only protection verifier in
+[`VERIFY_RELEASE_PROTECTION.md`](VERIFY_RELEASE_PROTECTION.md). Its
+`BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED` evidence proves that the active
+repository rules prevent release-tag mutation without bypass, restrict creation
+to the repository owner, and that the GitHub-verified signed annotated tag
+peels to the candidate commit. It also confirms immutable GitHub Release state
+and reads every GHCR version tag back at the exact digest in
+`IMAGE_DIGESTS.txt`. This is a point-in-time protection and identity proof;
+digest references remain the deployment authority.
+
 Verify a downloaded chart or SDK package against the repository identity:
 
 ```text

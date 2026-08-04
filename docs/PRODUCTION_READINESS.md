@@ -211,7 +211,13 @@ working tree:
   as idempotent rerun state, rejects conflicting digests, rechecks immediately
   before creation, verifies every created tag plus the final complete tag set by
   OCI digest readback, and keeps registry credentials and provider errors out of
-  logs.
+  logs;
+- a dependency-free read-only release-protection verifier that discovers the
+  active tag ruleset inventory, requires exact no-bypass mutation and
+  owner-only creation rules, peels a GitHub-verified signed annotated tag to the
+  candidate commit, confirms repository and published-release immutability,
+  reads all seven GHCR version tags back at the checksummed release digests, and
+  writes one exclusive private marker-bound evidence record;
 - a fail-closed public community contract with a recognized Contributor
   Covenant and private enforcement channel, explicit best-effort support
   boundaries, structured bug/feature/support intake, private vulnerability
@@ -289,9 +295,13 @@ dated evidence linked from a release issue or runbook record:
   native `linux/arm64` hosts, retaining the two host records and the combined
   `BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED` record with the release
   workflow's attested fourteen-record `IMAGE_SMOKE.jsonl` asset;
-- verify the strongest available GHCR tag immutability controls against the
-  first candidate publication; the active no-bypass `v*` repository tag
-  ruleset already prevents release-tag update and deletion;
+- run the read-only release-protection verifier in
+  [`VERIFY_RELEASE_PROTECTION.md`](VERIFY_RELEASE_PROTECTION.md) against the
+  first candidate publication and retain
+  `BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED`; the active no-bypass `v*`
+  mutation rules, owner-only creation rule, signed tag, immutable GitHub
+  Release, and seven GHCR digest identities are all required while the digest
+  manifest remains authoritative;
 - measure web/API latency and SQLite/libSQL contention at the intended tenant,
   row, mutation, and workflow concurrency envelope; record a capacity limit and
   alert threshold using
