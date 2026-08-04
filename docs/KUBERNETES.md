@@ -140,6 +140,14 @@ Pass the verified digest file last. Before installation, inspect the render and
 confirm every enabled workload image uses `repository@sha256:...`; do not
 convert those references back to tags for convenience.
 
+After the rollout succeeds, run the read-only live-cluster check in
+[`VERIFY_KUBERNETES_RUNTIME.md`](VERIFY_KUBERNETES_RUNTIME.md) before the
+retained migration Job expires. Its structured marker binds Deployment images
+and actual Pod `imageID` values to the release digest manifest. Pair it with the
+network guide's CNI enforcement tests, external-secret controller evidence,
+telemetry and alert records, and a tested rollback path; the live-object check
+does not make those provider-specific claims.
+
 The migration Job runs at hook weight `-10`. A failed Job stops the release
 before either runtime changes. Its pod does not mount a Kubernetes API token. If
 the migration needs an operator-managed ServiceAccount, set

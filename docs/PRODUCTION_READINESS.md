@@ -220,8 +220,10 @@ dated evidence linked from a release issue or runbook record:
 - deploy the reference Helm release behind real TLS with an external secret
   manager, default-deny network policy, provider-specific egress, centralized
   logs, metrics, alert routing, and an operator-owned rollback decision path;
-  retain a passing `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` record from the
-  canonical ingress;
+  retain `BYOK_GRID_KUBERNETES_RUNTIME_VERIFIED` from the read-only live-object
+  check in [`VERIFY_KUBERNETES_RUNTIME.md`](VERIFY_KUBERNETES_RUNTIME.md), CNI
+  negative-test and external-secret provenance evidence, plus a passing
+  `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` record from the canonical ingress;
 - capture the production ingress `X-Forwarded-For` chain, prove the proxy
   overwrites or predictably appends it, deny direct web access, configure only
   the observed proxy IP/CIDR boundary, and exercise both application and edge

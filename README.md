@@ -290,6 +290,9 @@ ownership, workload isolation, and optional component boundaries.
 See [the Kubernetes network security guide](docs/NETWORK_SECURITY.md) for
 trusted ingress peers, explicit runtime egress, CNI/FQDN limitations, and
 negative connectivity tests.
+See [the live Kubernetes verifier](docs/VERIFY_KUBERNETES_RUNTIME.md) for a
+read-only digest, rollout, pod-security, ingress, and policy-shape evidence
+record bound to a release candidate.
 See [the workspace-purge ADR](docs/adr/0033-previewed-workspace-purge-and-cross-system-erasure.md)
 and [retention guide](docs/DATA_RETENTION.md) for confirmation, legal holds,
 receipts, analytics erasure, backups, and external-system boundaries.
