@@ -1,0 +1,37 @@
+docker-compose.yml
+  s_28ae7db8033464::t_41f8fb9ea5d071 82
+README.md
+  s_28ae7db8033464::t_b340a152ab07dc 340-341
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_a0be1cfa8b0d97 84-87
+apps/web/src/proxy.test.ts
+  s_28ae7db8033464::t_64cbc6644250ab 108-111
+  s_28ae7db8033464::t_7354b1c21ec80b 105-107
+  s_28ae7db8033464::t_347af80b80f452 99-104
+apps/web/src/workflow-sqlite.e2e.test.ts
+  s_28ae7db8033464::t_b340a152ab07dc 66,77
+docs/releases/v0.1.0-rc.3.md
+  s_28ae7db8033464::t_3249d91043b81c 30-31
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_b340a152ab07dc 77-78,110-113
+apps/web/src/lib/request-origin.test.ts
+  s_28ae7db8033464::t_b340a152ab07dc 28,53
+apps/web/src/proxy.ts
+  s_28ae7db8033464::t_64cbc6644250ab 31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "1863b1b668e8c97b42a6ca616b16aebc031eb62d",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
