@@ -63,7 +63,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
         error: 'Cross-origin API mutations are not allowed.',
       });
 
-      const retiredAccountEndpoint = await fetch(
+      const absentAccountEndpoint = await fetch(
         `${appUrl}/api/auth/sign-up/email`,
         {
           body: '{}',
@@ -74,10 +74,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
           method: 'POST',
         }
       );
-      expect(retiredAccountEndpoint.status).toBe(404);
-      await expect(retiredAccountEndpoint.json()).resolves.toEqual({
-        error: 'Not found.',
-      });
+      expect(absentAccountEndpoint.status).toBe(404);
 
       const app = await fetch(`${appUrl}/app`);
       expect(app.status).toBe(200);

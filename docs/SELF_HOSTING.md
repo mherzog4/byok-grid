@@ -74,8 +74,8 @@ docker build --target maintenance -t byok-grid-maintenance .
 docker build --target connector-runner -t byok-grid-connector-runner .
 ```
 
-The Dockerfile uses a digest-pinned Node 24.14 image, the repository-declared
-npm 11.17 installer, and `npm ci` against the committed lockfile. The web
+The Dockerfile uses a digest-pinned Node 24.19 image, the repository-declared
+npm 12.0.2 installer, and `npm ci` against the committed lockfile. The web
 runtime consumes Next.js standalone output instead of a complete monorepo
 dependency tree. The worker deliberately retains the TypeScript workspace
 sources and production `tsx` loader because those package exports currently
@@ -107,9 +107,10 @@ when that adapter is enabled.
 The web UI uses same-origin requests, so the image contains no operator URL.
 Set the optional canonical runtime origin through `BYOK_GRID_PUBLIC_URL` when a
 reverse proxy changes the origin visible to Next.js. It must contain only
-scheme, host, and optional port. Local clones can leave it empty. Database URLs,
-provider keys, encryption keys, optional Hatchet tokens, and operator origins
-must never be passed as image build arguments.
+scheme, host, and optional port. Compose defaults it to
+`http://localhost:3000`; direct local development can leave it empty. Database
+URLs, provider keys, encryption keys, optional Hatchet tokens, and operator
+origins must never be passed as image build arguments.
 
 ## Access boundary
 

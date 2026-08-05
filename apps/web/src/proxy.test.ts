@@ -105,6 +105,19 @@ describe('Next.js application proxy', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('x-middleware-next')).toBe('1');
   });
+
+  it('uses the request origin when Compose supplies an empty public URL', () => {
+    vi.stubEnv('BYOK_GRID_PUBLIC_URL', '');
+    const response = proxy(
+      new NextRequest('http://localhost:3000/api/workspaces/example', {
+        headers: { origin: 'http://localhost:3000' },
+        method: 'POST',
+      })
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-middleware-next')).toBe('1');
+  });
 });
 
 function expectScriptNoncePolicy(headers: Headers): string {

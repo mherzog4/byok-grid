@@ -25,7 +25,7 @@ describe('API mutation origin boundary', () => {
     expect(
       enforceApiMutationOrigin(
         apiRequest('PATCH', {
-          cookie: 'better-auth.session_token=opaque',
+          cookie: 'byok-grid.preference=opaque',
           referer: `${publicUrl}/app`,
         }),
         publicUrl
@@ -50,7 +50,7 @@ describe('API mutation origin boundary', () => {
 
   it('fails closed when a cookie-bearing mutation has no provenance', async () => {
     await expectForbidden(
-      apiRequest('PUT', { cookie: 'better-auth.session_token=opaque' })
+      apiRequest('PUT', { cookie: 'byok-grid.preference=opaque' })
     );
   });
 

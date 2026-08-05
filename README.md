@@ -337,8 +337,8 @@ authoritative-store-versus-ClickHouse boundary.
 
 ## Local development
 
-Prerequisites: Node.js 24 or newer and npm 11 or newer. Docker is needed only
-for Hatchet, container evaluation, and optional services.
+Prerequisites: Node.js 24.19 and npm 12.0.2, matching `package.json`. Docker is
+needed only for container evaluation and optional services such as Hatchet.
 
 1. Copy `.env.example` to `.env`. Generate `BYOK_GRID_MASTER_KEY` with
    `openssl rand -base64 32`.
