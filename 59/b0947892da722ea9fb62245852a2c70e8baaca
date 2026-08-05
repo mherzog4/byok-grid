@@ -1,0 +1,101 @@
+apps/workflow-worker/src/local-worker.ts
+  s_28ae7db8033464::t_6372623d61596c 33-35
+  s_28ae7db8033464::t_28cad7a8475180 1-32,36-38,43,46-47
+  s_28ae7db8033464::t_4b361367a60f63 39-42,44-45
+package.json
+  s_28ae7db8033464::t_caeaba715c5bd5 44-45
+docs/SELF_HOSTING.md
+  s_28ae7db8033464::t_c873a4203dc36b 28-39,53,97,104-105,111-112,233,240-241,246-247
+  s_28ae7db8033464::t_bd33f5a5ef0229 54-56,98-101,234-237,242-245
+  s_28ae7db8033464::t_e882a4f24c2e10 4-7,15-16,22,27,132-134,187-190
+apps/workflow-worker/src/worker-lifecycle.ts
+  s_28ae7db8033464::t_cdd73d264417cf 43
+apps/workflow-worker/src/expand-bulk-run.ts
+  s_28ae7db8033464::t_5301277bcb74ab 2,6-17
+apps/workflow-worker/src/execute-writeback-delivery.ts
+  s_28ae7db8033464::t_aa37d1d6beaae4 33,79-80
+apps/workflow-worker/src/hatchet-tasks.ts
+  s_28ae7db8033464::t_28cad7a8475180 1-182
+apps/workflow-worker/src/index.ts
+  s_28ae7db8033464::t_28cad7a8475180 3-9
+scripts/drill-workflow-drain.mjs
+  s_28ae7db8033464::t_6372623d61596c 143-145,148-150,221-222,229
+apps/workflow-worker/src/execute-workflow-run.ts
+  s_28ae7db8033464::t_20cb57f10e3288 7,12
+apps/workflow-worker/src/operational-metrics.ts
+  s_28ae7db8033464::t_50bb0178a55a1f 167-183,251-265
+apps/workflow-worker/src/apply-ingestion-batch.ts
+  s_28ae7db8033464::t_5301277bcb74ab 9,14,16,38-39
+apps/workflow-worker/src/local-dispatcher.ts
+  s_28ae7db8033464::t_b34e2fb20edcda 12-15,54-61
+  s_28ae7db8033464::t_c9f980aec00818 1-11,16-53,62-76
+apps/workflow-worker/src/hatchet.ts
+  s_28ae7db8033464::t_dabde858c3aa30 4-12
+apps/workflow-worker/src/local-worker.integration.test.ts
+  s_28ae7db8033464::t_5fb89d70ce93db 243-244
+  s_28ae7db8033464::t_70422569170c0d 1-151,162-175,179-181,183-190,192,194-201,205-208,211-226,230-233,248-250,256-265,269-304,308
+  s_28ae7db8033464::t_6372623d61596c 176-178,209
+  s_28ae7db8033464::t_6c810f7fd6d723 152-161,193,210,234-242,245-247
+  s_28ae7db8033464::t_f3ebba830d2e9e 182
+  s_28ae7db8033464::t_061c070dc49c84 191,202-204,227-229,251-255,266-268,305-307
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_cdd73d264417cf 69-79,85-87,236-239,241
+  s_28ae7db8033464::t_6090f85ddba204 215-217
+apps/workflow-worker/src/apply-csv-import.ts
+  s_28ae7db8033464::t_5301277bcb74ab 8,12,14-17,33
+docker-compose.yml
+  s_28ae7db8033464::t_caeaba715c5bd5 5,23,129
+.env.example
+  s_28ae7db8033464::t_caeaba715c5bd5 37-44
+apps/workflow-worker/src/execute-source-run.ts
+  s_28ae7db8033464::t_aa37d1d6beaae4 40,123-124
+README.md
+  s_28ae7db8033464::t_e882a4f24c2e10 102-103,136-138,360-362,367-368,370-372,380-382,418
+  s_28ae7db8033464::t_bd33f5a5ef0229 168-169,180-181,183-184
+docs/OBSERVABILITY.md
+  s_28ae7db8033464::t_cdd73d264417cf 3-7,50,70-72,87-92,136-140
+docs/evidence/2026-08-04-sqlite-native-worker.md
+  s_28ae7db8033464::t_6090f85ddba204 1-64
+apps/workflow-worker/src/dispatcher.ts
+  s_28ae7db8033464::t_16f031df112a67 13,43,45
+apps/workflow-worker/src/config.ts
+  s_28ae7db8033464::t_dabde858c3aa30 59-63,65,88,97-112
+deploy/helm/byok-grid/templates/configmap.yaml
+  s_28ae7db8033464::t_caeaba715c5bd5 8
+apps/workflow-worker/src/task-handlers.ts
+  s_28ae7db8033464::t_b34e2fb20edcda 1-4,17-52,70-87
+  s_28ae7db8033464::t_decf576c70484a 5,56
+  s_28ae7db8033464::t_c9f980aec00818 6-16,53-55,57-69,88-168
+docs/adr/0036-portable-visual-workflow-execution.md
+  s_28ae7db8033464::t_bd33f5a5ef0229 8
+  s_28ae7db8033464::t_c873a4203dc36b 9-12,53-57
+apps/workflow-worker/src/operational-metrics.test.ts
+  s_28ae7db8033464::t_50bb0178a55a1f 72-80
+apps/workflow-worker/src/process-row-settlement.ts
+  s_28ae7db8033464::t_5301277bcb74ab 5,11,13,26-27
+turbo.json
+  s_28ae7db8033464::t_caeaba715c5bd5 19
+apps/workflow-worker/src/hatchet-worker.ts
+  s_28ae7db8033464::t_28cad7a8475180 1-39
+scripts/container/worker-health-probe.mjs
+  s_28ae7db8033464::t_50bb0178a55a1f 14,37-40
+  s_28ae7db8033464::t_3b04d0c4034442 41-42
+scripts/container/workflow-worker-entrypoint.sh
+  s_28ae7db8033464::t_50bb0178a55a1f 13-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "59b0947892da722ea9fb62245852a2c70e8baaca",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
