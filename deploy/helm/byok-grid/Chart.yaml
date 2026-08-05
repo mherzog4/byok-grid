@@ -2,8 +2,8 @@ apiVersion: v2
 name: byok-grid
 description: Vendor-neutral Kubernetes deployment for the open-source BYOK Grid control plane and workers
 type: application
-version: 0.1.0-rc.2
-appVersion: 0.1.0-rc.2
+version: 0.1.0-rc.3
+appVersion: 0.1.0-rc.3
 home: https://github.com/mherzog4/byok-grid
 sources:
   - https://github.com/mherzog4/byok-grid

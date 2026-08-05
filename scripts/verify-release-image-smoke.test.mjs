@@ -260,6 +260,9 @@ describe('multi-architecture release image smoke', () => {
     ]);
     const workflow = readFileSync('.github/workflows/release.yml', 'utf8');
     for (const fragment of [
+      'docker/setup-docker-action@77e84dbf09b47d1e29270283c22f16145aa85ca1',
+      'version: v29.6.2',
+      '"containerd-snapshotter": true',
       'set -euo pipefail',
       'for platform in linux/amd64 linux/arm64',
       '--pull=always',
