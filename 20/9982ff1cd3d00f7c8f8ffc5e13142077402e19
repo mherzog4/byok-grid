@@ -1,0 +1,66 @@
+scripts/drill-kubernetes-workflow-drain.test.mjs
+  s_28ae7db8033464::t_b9e9f4c1eede68 185
+.github/workflows/ci.yml
+  s_28ae7db8033464::t_6a644d939884dd 18
+  s_28ae7db8033464::t_50e94881f5264e 127-156
+  s_28ae7db8033464::t_0d6e4afa752091 175
+  s_28ae7db8033464::t_578ee1ba9e585d 157,162-172
+package.json
+  s_28ae7db8033464::t_837919a63657a4 3,76,78
+Dockerfile
+  s_28ae7db8033464::t_ac44a7aeac9c0d 3,29,47-52,68,97,128
+  s_28ae7db8033464::t_578ee1ba9e585d 119-124
+  s_28ae7db8033464::t_0d6e4afa752091 125-126
+  s_28ae7db8033464::t_16e0f83c85ca53 127
+scripts/package-release.test.mjs
+  s_28ae7db8033464::t_859718eae757ab 40-42,315,332,347-350,367
+deploy/helm/byok-grid/Chart.yaml
+  s_28ae7db8033464::t_837919a63657a4 5-6
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_837919a63657a4 7,259
+  s_28ae7db8033464::t_50e94881f5264e 125-127
+docs/VERIFY_RELEASE.md
+  s_28ae7db8033464::t_837919a63657a4 26,79,107
+packages/db/src/sqlite/credentials.integration.test.ts
+  s_28ae7db8033464::t_23dfea96f9fa68 390-395,415-420,433-438,447
+docs/MULTI_ARCH_IMAGE_SMOKE.md
+  s_28ae7db8033464::t_837919a63657a4 85,129
+packages/db/src/sqlite/migrate-cli.test.ts
+  s_28ae7db8033464::t_23dfea96f9fa68 41
+scripts/verify-release-version.mjs
+  s_28ae7db8033464::t_0d6e4afa752091 233-234
+  s_28ae7db8033464::t_578ee1ba9e585d 197,204-209,223-232,235-237,239
+  s_28ae7db8033464::t_ac44a7aeac9c0d 210-222,238
+  s_28ae7db8033464::t_f592abcbba3f32 240
+scripts/verify-release-image-smoke.test.mjs
+  s_28ae7db8033464::t_8297ffab984c5d 284
+docs/RELEASING.md
+  s_28ae7db8033464::t_837919a63657a4 20,34,52,125
+docs/releases/v0.1.0-rc.2.md
+  s_28ae7db8033464::t_837919a63657a4 1-24,30-78
+  s_28ae7db8033464::t_b63a5acf86ca8a 25-29
+docs/VERIFY_RELEASE_PROTECTION.md
+  s_28ae7db8033464::t_837919a63657a4 32,37
+docs/KUBERNETES_ROLLBACK_DRILL.md
+  s_28ae7db8033464::t_837919a63657a4 57
+scripts/verify-release-bundle.test.mjs
+  s_28ae7db8033464::t_859718eae757ab 13,32-34,150,162,266,269-270
+package-lock.json
+  s_28ae7db8033464::t_2231e7ee7036a9 3,9,29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "209982ff1cd3d00f7c8f8ffc5e13142077402e19",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
