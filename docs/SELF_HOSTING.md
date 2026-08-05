@@ -11,8 +11,8 @@ authentication disabled.
 
 Prerequisites are Docker Compose and a copied `.env.example` at `.env`.
 
-1. Generate unique local values for `BYOK_GRID_MASTER_KEY` and
-   `BETTER_AUTH_SECRET` as described in `.env.example`.
+1. Generate a unique local `BYOK_GRID_MASTER_KEY` as described in
+   `.env.example`.
 2. Run `npm run infra:up` to start local Hatchet and its private PostgreSQL
    dependency.
 3. Open <http://localhost:8888>, create or copy the development worker token
@@ -99,133 +99,21 @@ HubSpot sources. `SOURCE_SCHEDULER_POLL_SECONDS` controls the due-source scan
 interval; source credentials and encrypted page cursors never enter Hatchet.
 
 The web UI uses same-origin requests, so the image contains no operator URL.
-Set the canonical runtime origin through `BETTER_AUTH_URL`; it must contain only
-scheme, host, and optional port. The web runtime uses that exact origin for
-browser mutation enforcement and does not trust forwarded proxy headers to
-derive Better Auth's base URL. Database URLs, auth secrets, provider keys,
-encryption keys, Hatchet tokens, and operator origins must never be passed as
-image build arguments.
+Set the optional canonical runtime origin through `BYOK_GRID_PUBLIC_URL` when a
+reverse proxy changes the origin visible to Next.js. It must contain only
+scheme, host, and optional port. Local clones can leave it empty. Database URLs,
+provider keys, encryption keys, Hatchet tokens, and operator origins must never
+be passed as image build arguments.
 
-## Authentication rate limits and proxy trust
+## Access boundary
 
-Authentication rate limiting is database-backed. With
-`BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS` empty, the web process ignores every
-client-IP header and uses one shared fail-closed bucket per authentication
-route. This is safe for evaluation and small controlled installations, but a
-multi-user deployment should configure real client identity before traffic is
-admitted.
-
-After proving that the reverse proxy overwrites or predictably appends
-`X-Forwarded-For` and that the web service cannot be reached directly, set the
-exact proxy addresses or narrow CIDRs:
-
-```dotenv
-BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS=10.20.0.0/16,192.0.2.10
-```
-
-The rightmost trusted hops are skipped and the first untrusted address becomes
-the rate-limit identity. Do not copy an entire client-facing network or use a
-`/0` range; startup rejects trust-all ranges. Re-test the observed header chain
-after changing load balancers, CDN settings, ingress controllers, or network
-topology. This setting does not enable forwarded host/protocol trust and does
-not replace edge connection and distributed rate limits.
-
-## Account provisioning
-
-Loopback evaluation defaults to `BYOK_GRID_SIGNUP_MODE=open`. A public origin
-defaults to `disabled`, and explicitly setting `open` on a non-loopback origin
-causes web startup and readiness to fail. This prevents an omitted deployment
-setting from exposing registration.
-
-For controlled production provisioning, set
-`BYOK_GRID_SIGNUP_MODE=allowlist` and supply a comma-separated
-`BYOK_GRID_SIGNUP_ALLOWED_EMAILS` through the secret manager. Comparisons are
-case-insensitive. Remove an address after its account is created, then switch to
-`disabled` when provisioning is complete. The Helm chart exposes
-`app.signupMode` and reads the allowlist from the `signup-allowed-emails` Secret
-key by default. The chart schema intentionally permits only `disabled` and
-`allowlist` for public Kubernetes releases.
-
-Without SMTP, this mechanism limits account creation but does not verify control
-of an inbox. Public open signup remains rejected even after SMTP is enabled;
-delivery reputation, abuse controls, and public-registration policy require a
-separate promotion decision.
-
-## Authentication email and recovery
-
-Email delivery is disabled by default. Set `BYOK_GRID_EMAIL_MODE=smtp` to
-enable verified-email enforcement and password recovery for controlled
-accounts. SMTP mode requires `SMTP_HOST` and `SMTP_FROM_EMAIL`; credentials are
-optional, but `SMTP_USER` and `SMTP_PASSWORD` must be supplied together.
-
-```text
-BYOK_GRID_EMAIL_MODE=smtp
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_REQUIRE_TLS=true
-SMTP_FROM_EMAIL=security@example.com
-SMTP_FROM_NAME=BYOK Grid
-SMTP_USER=mailer
-SMTP_PASSWORD=from-your-secret-manager
-```
-
-Use `SMTP_SECURE=true` with port 465 for implicit TLS, or require STARTTLS with
-`SMTP_REQUIRE_TLS=true` on port 587. Cleartext SMTP is rejected unless the host
-is loopback, which exists only for disposable local delivery drills. The
-transport uses certificate validation, a TLS 1.2 minimum, bounded connection
-and socket timeouts, a two-connection pool, and no debug logging.
-
-SMTP mode sends a one-hour verification link after signup and again after a
-correct sign-in attempt by an unverified account. Signup does not create a
-session until inbox control is proven. Password-reset requests return the same
-message for known and unknown addresses, use a one-hour single-use token, and
-revoke every session after a successful reset. Recovery and reset pages return
-`404` while delivery is disabled; token-bearing reset pages are private,
-non-cacheable, non-indexable, and covered by the global no-referrer policy.
-
-Before relying on recovery, verify the SMTP connection and a complete delivery
-to a controlled inbox, configure SPF, DKIM, and DMARC for the sending domain,
-and monitor rejection, deferral, bounce, complaint, and authentication-failure
-signals. BYOK Grid does not ingest bounces or complaints in this release.
-With deployment environment variables available, verify connection and SMTP
-authentication without sending a message:
-
-```text
-npm run email:verify
-```
-
-Success emits only `BYOK_GRID_SMTP_CONNECTION_VERIFIED`. This proves SMTP
-connection and authentication, not inbox placement; follow it with a real
-verification and password-reset delivery to a controlled account. Before a
-stable production promotion, analyze the two received messages and live sender
-DNS with the bounded procedure in
-[`SMTP_PRODUCTION_DRILL.md`](SMTP_PRODUCTION_DRILL.md).
-
-## Session lifecycle
-
-Public origins default to a hard seven-day session. Loopback evaluation uses
-sliding refresh for contributor convenience. Configure the policy explicitly
-in a managed deployment:
-
-```text
-BYOK_GRID_SESSION_EXPIRES_IN_SECONDS=604800
-BYOK_GRID_SESSION_REFRESH_ENABLED=false
-BYOK_GRID_SESSION_UPDATE_AGE_SECONDS=86400
-```
-
-Expiry must be between 900 and 2,592,000 seconds. Update age must be between 60
-seconds and the configured expiry. Enabling refresh extends an active session
-after the update age; leaving it disabled preserves the original hard expiry.
-Invalid values fail runtime validation and readiness. The account UI lets a
-user sign out every other active session while preserving the current one, and
-database revocation is checked without a cookie cache.
-
-The Helm equivalents are `app.session.expiresInSeconds`,
-`app.session.refreshEnabled`, and `app.session.updateAgeSeconds`. Treat longer
-lifetimes and public sliding refresh as explicit risk acceptance for a stolen
-cookie. Password recovery and verified email are available only when the SMTP
-mode above is configured.
+BYOK Grid is a single-user, fork-first application. It does not ship signup,
+sign-in, sessions, invitations, or password recovery. Keep local development on
+loopback. Before exposing an installation beyond a trusted device or private
+network, place it behind an operator-controlled boundary such as a VPN,
+identity-aware proxy, or equivalent ingress policy. The application does not
+interpret upstream identity headers and must not be treated as a multi-tenant
+SaaS authentication boundary.
 
 ## Production boundary
 
@@ -237,16 +125,12 @@ defaults:
   multi-host topology;
 - an authenticated, release-pinned Hatchet deployment or compatible managed
   Hatchet endpoint with TLS;
-- unique `BETTER_AUTH_SECRET`, `BYOK_GRID_MASTER_KEY`, and
-  `BYOK_GRID_MASTER_KEY_ID` values from a secret manager, plus an optional
+- unique `BYOK_GRID_MASTER_KEY` and `BYOK_GRID_MASTER_KEY_ID` values from a
+  secret manager, plus an optional
   secret-managed `BYOK_GRID_ADDITIONAL_MASTER_KEYS` overlap set used only
   during documented rotation;
 - HTTPS termination with the canonical public URL configured consistently;
-- disabled or secret-backed allowlisted account provisioning, with approved
-  addresses removed after use;
-- a TLS-authenticated SMTP service, secret-managed credentials, aligned sending
-  domain, and tested inbox delivery when account recovery is enabled;
-- an explicitly reviewed bounded session lifetime and refresh policy;
+- an operator-controlled access boundary before any non-loopback exposure;
 - preservation of the application's request-scoped nonce CSP, HSTS,
   no-referrer, anti-framing, MIME-sniffing, browser-capability, and cache-control
   response headers plus the browser's `Origin`, `Referer`, and `Sec-Fetch-*`
@@ -267,8 +151,8 @@ defaults:
   procedures tested before accepting
   customer data.
 
-The [API transport security guide](API_SECURITY.md) defines the 64-KiB Better
-Auth boundary, five-MiB JSON and ingestion boundaries, 50-MiB CSV boundary,
+The [API transport security guide](API_SECURITY.md) defines the five-MiB JSON
+and ingestion boundaries, 50-MiB CSV boundary,
 compressed-body policy, and edge tests. Do not rely exclusively on proxy limits:
 the application bounds observed bytes so chunked requests and alternate internal
 paths cannot bypass the memory boundary.
@@ -290,8 +174,9 @@ source.
 
 Run SQLite migrations as a one-shot release job with `SQLITE_DATABASE_URL` and,
 for remote libSQL, `SQLITE_AUTH_TOKEN`. The web container needs those values,
-`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BYOK_GRID_MASTER_KEY`,
-`BYOK_GRID_MASTER_KEY_ID`, and optional `BYOK_GRID_ADDITIONAL_MASTER_KEYS`.
+`BYOK_GRID_MASTER_KEY`, `BYOK_GRID_MASTER_KEY_ID`, optional
+`BYOK_GRID_ADDITIONAL_MASTER_KEYS`, and an optional `BYOK_GRID_PUBLIC_URL`
+behind a reverse proxy.
 The workflow worker needs the same SQLite and BYOK
 encryption-key settings plus Hatchet client settings. No BYOK Grid runtime needs
 PostgreSQL credentials.

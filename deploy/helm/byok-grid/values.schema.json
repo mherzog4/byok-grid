@@ -13,104 +13,13 @@
   "properties": {
     "app": {
       "type": "object",
-      "required": ["publicUrl", "auth", "signupMode", "email", "session"],
+      "required": ["publicUrl"],
+      "additionalProperties": false,
       "properties": {
         "publicUrl": {
           "type": "string",
           "format": "uri",
           "pattern": "^https://"
-        },
-        "auth": {
-          "type": "object",
-          "required": ["trustedProxyCidrs"],
-          "additionalProperties": false,
-          "properties": {
-            "trustedProxyCidrs": {
-              "type": "array",
-              "maxItems": 64,
-              "uniqueItems": true,
-              "items": {
-                "type": "string",
-                "minLength": 2,
-                "maxLength": 64,
-                "not": { "pattern": "/0$" }
-              }
-            }
-          }
-        },
-        "signupMode": { "enum": ["disabled", "allowlist"] },
-        "email": {
-          "type": "object",
-          "required": ["mode", "smtp"],
-          "additionalProperties": false,
-          "properties": {
-            "mode": { "enum": ["disabled", "smtp"] },
-            "smtp": {
-              "type": "object",
-              "required": [
-                "fromEmail",
-                "fromName",
-                "host",
-                "port",
-                "requireTls",
-                "secure"
-              ],
-              "additionalProperties": false,
-              "properties": {
-                "fromEmail": { "type": "string" },
-                "fromName": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 128
-                },
-                "host": { "type": "string" },
-                "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
-                "requireTls": { "type": "boolean" },
-                "secure": { "type": "boolean" }
-              }
-            }
-          },
-          "allOf": [
-            {
-              "if": { "properties": { "mode": { "const": "smtp" } } },
-              "then": {
-                "properties": {
-                  "smtp": {
-                    "properties": {
-                      "fromEmail": { "format": "email", "minLength": 3 },
-                      "host": { "minLength": 1 }
-                    },
-                    "anyOf": [
-                      { "properties": { "secure": { "const": true } } },
-                      { "properties": { "requireTls": { "const": true } } }
-                    ]
-                  }
-                }
-              }
-            }
-          ]
-        },
-        "session": {
-          "type": "object",
-          "required": [
-            "expiresInSeconds",
-            "refreshEnabled",
-            "updateAgeSeconds"
-          ],
-          "additionalProperties": false,
-          "properties": {
-            "expiresInSeconds": {
-              "type": "integer",
-              "minimum": 900,
-              "maximum": 2592000
-            },
-            "refreshEnabled": { "type": "boolean" },
-            "updateAgeSeconds": {
-              "type": "integer",
-              "minimum": 60,
-              "maximum": 2591999
-            }
-          }
         }
       }
     },
@@ -125,10 +34,6 @@
           "properties": {
             "sqliteDatabaseUrl": { "type": "string" },
             "sqliteAuthToken": { "type": "string" },
-            "betterAuthSecret": { "type": "string" },
-            "signupAllowedEmails": { "type": "string" },
-            "smtpUser": { "type": "string" },
-            "smtpPassword": { "type": "string" },
             "masterKey": { "type": "string" },
             "additionalMasterKeys": { "type": "string" },
             "hatchetClientToken": { "type": "string" },
@@ -150,7 +55,6 @@
               "values": {
                 "required": [
                   "sqliteDatabaseUrl",
-                  "betterAuthSecret",
                   "masterKey",
                   "hatchetClientToken"
                 ],
@@ -159,7 +63,6 @@
                     "minLength": 1,
                     "pattern": "^libsql://"
                   },
-                  "betterAuthSecret": { "minLength": 32 },
                   "masterKey": { "minLength": 1 },
                   "hatchetClientToken": { "minLength": 1 }
                 }

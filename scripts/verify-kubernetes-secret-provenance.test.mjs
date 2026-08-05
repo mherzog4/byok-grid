@@ -29,7 +29,6 @@ const CONTROLLER_DIGEST = `sha256:${'b'.repeat(64)}`;
 const CONTROLLER_IMAGE = `ghcr.io/external-secrets/external-secrets@${CONTROLLER_DIGEST}`;
 const NOW = new Date('2026-08-04T18:00:00.000Z');
 const SECRET_KEYS = [
-  'better-auth-secret',
   'byok-grid-master-key',
   'hatchet-client-token',
   'sqlite-auth-token',
@@ -77,7 +76,7 @@ describe('Kubernetes external-secret provenance verifier', () => {
       },
       {
         BYOK_GRID_EXTERNAL_SECRET_EXPECTED_KEYS:
-          'sqlite-database-url,better-auth-secret',
+          'sqlite-database-url,unexpected-secret',
       },
       { BYOK_GRID_EXTERNAL_SECRET_MAX_REFRESH_AGE_SECONDS: '59' },
     ]) {
@@ -105,7 +104,7 @@ describe('Kubernetes external-secret provenance verifier', () => {
     assert.equal(result.externalSecretGeneration, 3);
     assert.equal(result.refreshIntervalSeconds, 3_600);
     assert.equal(result.refreshTime, '2026-08-04T17:30:00.000Z');
-    assert.equal(result.secretKeyCount, 5);
+    assert.equal(result.secretKeyCount, 4);
     assert.equal(result.secretReferenceSha256, sha256('byok-grid-secrets'));
     for (const value of Object.values(result)) {
       assert.doesNotMatch(String(value), /production\/byok-grid/u);
@@ -315,7 +314,7 @@ describe('Kubernetes external-secret provenance verifier', () => {
     assert.equal(evidence.candidateCommit, CANDIDATE_COMMIT);
     assert.equal(evidence.controllerDigest, CONTROLLER_DIGEST);
     assert.equal(evidence.controllerPods, 2);
-    assert.equal(evidence.secretKeyCount, 5);
+    assert.equal(evidence.secretKeyCount, 4);
     assert.equal(evidence.verifiedAt, NOW.toISOString());
     const serialized = JSON.stringify(evidence);
     for (const secret of [

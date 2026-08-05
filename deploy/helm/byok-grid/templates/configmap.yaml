@@ -5,19 +5,7 @@ metadata:
   labels:
     {{- include "byok-grid.labels" . | nindent 4 }}
 data:
-  BETTER_AUTH_URL: {{ .Values.app.publicUrl | quote }}
-  BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS: {{ join "," .Values.app.auth.trustedProxyCidrs | quote }}
-  BYOK_GRID_SIGNUP_MODE: {{ .Values.app.signupMode | quote }}
-  BYOK_GRID_EMAIL_MODE: {{ .Values.app.email.mode | quote }}
-  SMTP_FROM_EMAIL: {{ .Values.app.email.smtp.fromEmail | quote }}
-  SMTP_FROM_NAME: {{ .Values.app.email.smtp.fromName | quote }}
-  SMTP_HOST: {{ .Values.app.email.smtp.host | quote }}
-  SMTP_PORT: {{ .Values.app.email.smtp.port | quote }}
-  SMTP_REQUIRE_TLS: {{ .Values.app.email.smtp.requireTls | quote }}
-  SMTP_SECURE: {{ .Values.app.email.smtp.secure | quote }}
-  BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: {{ .Values.app.session.expiresInSeconds | quote }}
-  BYOK_GRID_SESSION_REFRESH_ENABLED: {{ .Values.app.session.refreshEnabled | quote }}
-  BYOK_GRID_SESSION_UPDATE_AGE_SECONDS: {{ .Values.app.session.updateAgeSeconds | quote }}
+  BYOK_GRID_PUBLIC_URL: {{ .Values.app.publicUrl | quote }}
   BYOK_GRID_MASTER_KEY_ID: {{ .Values.worker.masterKeyId | default "v1" | quote }}
   HATCHET_CLIENT_API_URL: {{ .Values.worker.hatchet.apiUrl | quote }}
   HATCHET_CLIENT_HOST_PORT: {{ .Values.worker.hatchet.hostPort | quote }}

@@ -38,6 +38,18 @@ const UUID_PATTERN =
 const SHA_PATTERN = /^[0-9a-f]{40}$/u;
 const PROFILE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/u;
 const DNS_LABEL_PATTERN = /^[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?$/u;
+const CAPACITY_LOCAL_OWNER = Object.freeze({
+  email: 'local-owner@byok-grid.invalid',
+  id: 'local-owner',
+  name: 'Local owner',
+});
+const FTS5_SHADOW_SUFFIXES = [
+  'config',
+  'content',
+  'data',
+  'docsize',
+  'idx',
+] as const;
 
 export interface ProductionCapacityProfile {
   expectedWebReplicas: number;
@@ -63,7 +75,6 @@ export interface ProductionCapacityConfig {
   candidateSha: string;
   databaseAuthToken: string;
   databaseUrl: string;
-  drillEmail: string;
   kubectlContext: string;
   namespace: string;
   profile: ProductionCapacityProfile;
@@ -83,10 +94,8 @@ export interface CapacityPhaseSummary {
 
 export interface CapacityFixture {
   columnId: string;
-  cookie: string;
   rowIds: string[];
   tableId: string;
-  userId: string;
   workspaceId: string;
 }
 
@@ -191,7 +200,6 @@ export function parseProductionCapacityConfig(
     databaseUrl: canonicalLibsqlUrl(
       required(environment, 'BYOK_GRID_CAPACITY_DATABASE_URL')
     ),
-    drillEmail: email(environment, 'BYOK_GRID_CAPACITY_EMAIL'),
     kubectlContext: boundedText(
       environment,
       'BYOK_GRID_CAPACITY_KUBECTL_CONTEXT',
@@ -290,39 +298,22 @@ export async function createCapacityFixture(input: {
 }): Promise<CapacityFixture> {
   return safely('fixture creation', async () => {
     const fetchImpl = input.fetchImpl ?? fetch;
-    const password = `capacity-${randomUUID()}-${randomUUID()}`;
     const response = await safeFetch(
       fetchImpl,
-      `${input.config.appOrigin}/api/auth/sign-up/email`,
+      `${input.config.appOrigin}/app`,
       {
-        body: JSON.stringify({
-          email: input.config.drillEmail,
-          name: `Capacity Drill ${input.runId}`,
-          password,
-        }),
-        headers: {
-          'content-type': 'application/json',
-          origin: input.config.appOrigin,
-        },
-        method: 'POST',
+        headers: { origin: input.config.appOrigin },
       }
     );
-    requireStatus(response, 200, 'The capacity fixture signup was rejected.');
-    const cookie = response.headers
-      .getSetCookie()
-      .map((value) => value.split(';', 1)[0])
-      .join('; ');
-    if (!cookie) {
-      throw new ProductionCapacityDrillError(
-        'The capacity fixture signup did not create an authenticated session.'
-      );
-    }
-
-    const user = await one(
-      input.client,
-      'select id from users where email = ?',
-      [input.config.drillEmail]
+    requireStatus(
+      response,
+      200,
+      'The capacity fixture could not open the local workspace.'
     );
+
+    const user = await one(input.client, 'select id from users where id = ?', [
+      CAPACITY_LOCAL_OWNER.id,
+    ]);
     const workspace = await one(
       input.client,
       'select workspace_id from workspace_members where user_id = ?',
@@ -348,10 +339,8 @@ export async function createCapacityFixture(input: {
 
     return {
       columnId: String(column.id),
-      cookie,
       rowIds,
       tableId: String(table.id),
-      userId: String(user.id),
       workspaceId: String(workspace.workspace_id),
     };
   });
@@ -370,7 +359,6 @@ export async function createCapacityWorkflow(input: {
       firstColumnValueType: 'text',
       name: 'Capacity workflow output',
     }),
-    cookie: input.fixture.cookie,
     expectedStatus: 201,
     method: 'POST',
     origin: input.config.appOrigin,
@@ -443,7 +431,6 @@ export async function createCapacityWorkflow(input: {
         },
         name: 'Production capacity workflow',
       }),
-      cookie: input.fixture.cookie,
       expectedStatus: 201,
       method: 'POST',
       origin: input.config.appOrigin,
@@ -461,7 +448,6 @@ export async function createCapacityWorkflow(input: {
     `${workflowCollectionUrl}/${workflowId}/publish`,
     {
       body: JSON.stringify({ expectedRevision: draftRevision }),
-      cookie: input.fixture.cookie,
       expectedStatus: 200,
       method: 'POST',
       origin: input.config.appOrigin,
@@ -479,7 +465,7 @@ export async function runCapacityWorkload(input: {
 }): Promise<CapacityWorkloadEvidence> {
   const fetchImpl = input.fetchImpl ?? fetch;
   const tableUrl = `${input.config.appOrigin}/api/workspaces/${input.fixture.workspaceId}/tables/${input.fixture.tableId}`;
-  const requestHeaders = { cookie: input.fixture.cookie };
+  const requestHeaders = {};
 
   for (let index = 0; index < 5; index += 1) {
     await performGridRead(fetchImpl, `${tableUrl}?limit=100`, requestHeaders);
@@ -521,7 +507,6 @@ export async function runCapacityWorkload(input: {
           }),
           headers: {
             'content-type': 'application/json',
-            cookie: input.fixture.cookie,
             origin: input.config.appOrigin,
           },
           method: 'PUT',
@@ -560,7 +545,6 @@ export async function runCapacityWorkload(input: {
           body: JSON.stringify({ input: { capacityOperation: index } }),
           headers: {
             'content-type': 'application/json',
-            cookie: input.fixture.cookie,
             origin: input.config.appOrigin,
           },
           method: 'POST',
@@ -578,7 +562,6 @@ export async function runCapacityWorkload(input: {
     operations: input.config.profile.workflowRuns,
   });
   const workflowCompletion = await waitForWorkflowRuns({
-    cookie: input.fixture.cookie,
     fetchImpl,
     runCollectionUrl: input.workflow.runCollectionUrl,
     runStartedAt,
@@ -597,7 +580,7 @@ export async function runCapacityWorkload(input: {
 
 export async function cleanupCapacityFixture(
   client: Client,
-  fixture: Pick<CapacityFixture, 'userId' | 'workspaceId'>
+  fixture: Pick<CapacityFixture, 'workspaceId'>
 ): Promise<void> {
   await safely('fixture cleanup', async () => {
     await client.batch(
@@ -606,11 +589,73 @@ export async function cleanupCapacityFixture(
           args: [fixture.workspaceId],
           sql: 'delete from workspaces where id = ?',
         },
-        { args: [fixture.userId], sql: 'delete from users where id = ?' },
         { sql: 'delete from rate_limits' },
       ],
       'write'
     );
+  });
+}
+
+export async function assertCapacityCleanupState(
+  client: Client
+): Promise<void> {
+  await safely('cleanup verification', async () => {
+    const owners = await client.execute(
+      'select id, email, name from users order by id'
+    );
+    if (
+      owners.rows.length !== 1 ||
+      owners.rows[0]?.[0] !== CAPACITY_LOCAL_OWNER.id ||
+      owners.rows[0]?.[1] !== CAPACITY_LOCAL_OWNER.email ||
+      owners.rows[0]?.[2] !== CAPACITY_LOCAL_OWNER.name
+    ) {
+      throw new ProductionCapacityDrillError(
+        'Capacity cleanup did not preserve exactly the deterministic local owner.'
+      );
+    }
+
+    const tables = await client.execute(
+      `select name, coalesce(sql, '') from sqlite_schema
+        where type = 'table' and name not like 'sqlite_%'
+        order by name asc`
+    );
+    const fullTextTables = tables.rows
+      .filter(
+        (row) =>
+          typeof row[0] === 'string' &&
+          typeof row[1] === 'string' &&
+          /\busing\s+fts5\b/iu.test(row[1])
+      )
+      .map((row) => row[0] as string);
+    const fullTextShadowTables = new Set(
+      fullTextTables.flatMap((name) =>
+        FTS5_SHADOW_SUFFIXES.map((suffix) => `${name}_${suffix}`)
+      )
+    );
+
+    for (const row of tables.rows) {
+      const name = row[0];
+      if (typeof name !== 'string') {
+        throw new ProductionCapacityDrillError(
+          'Capacity cleanup found an invalid table name.'
+        );
+      }
+      if (
+        name === '__drizzle_migrations' ||
+        name === 'users' ||
+        fullTextShadowTables.has(name)
+      ) {
+        continue;
+      }
+      const count = await client.execute(
+        `select count(*) from ${quoteIdentifier(name)}`
+      );
+      if (Number(count.rows[0]?.[0] ?? 0) !== 0) {
+        throw new ProductionCapacityDrillError(
+          'Capacity cleanup left application rows behind.'
+        );
+      }
+    }
   });
 }
 
@@ -961,7 +1006,6 @@ export function safeProductionCapacityMessage(error: unknown): string {
 }
 
 async function waitForWorkflowRuns(input: {
-  cookie: string;
   fetchImpl: typeof fetch;
   runCollectionUrl: string;
   runStartedAt: ReadonlyMap<string, number>;
@@ -969,9 +1013,7 @@ async function waitForWorkflowRuns(input: {
   const deadline = Date.now() + 120_000;
   const completionSamples = new Map<string, number>();
   while (Date.now() < deadline) {
-    const response = await safeFetch(input.fetchImpl, input.runCollectionUrl, {
-      headers: { cookie: input.cookie },
-    });
+    const response = await safeFetch(input.fetchImpl, input.runCollectionUrl);
     requireStatus(response, 200, 'Workflow capacity polling failed.');
     const body = await safeJson(
       response,
@@ -1091,7 +1133,6 @@ async function capacityJson(
   url: string,
   input: {
     body: string;
-    cookie: string;
     expectedStatus: number;
     method: string;
     origin: string;
@@ -1102,7 +1143,6 @@ async function capacityJson(
     body: input.body,
     headers: {
       'content-type': 'application/json',
-      cookie: input.cookie,
       origin: input.origin,
     },
     method: input.method,
@@ -1238,14 +1278,6 @@ function pattern(
   return value;
 }
 
-function email(environment: NodeJS.ProcessEnv, name: string): string {
-  const value = boundedText(environment, name, 254);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(value)) {
-    throw new ProductionCapacityDrillError(`${name} must be a valid email.`);
-  }
-  return value;
-}
-
 function dnsLabel(environment: NodeJS.ProcessEnv, name: string): string {
   const value = boundedText(environment, name, 63);
   if (!DNS_LABEL_PATTERN.test(value)) {
@@ -1254,6 +1286,10 @@ function dnsLabel(environment: NodeJS.ProcessEnv, name: string): string {
     );
   }
   return value;
+}
+
+function quoteIdentifier(value: string): string {
+  return `"${value.replaceAll('"', '""')}"`;
 }
 
 function dnsSubdomain(environment: NodeJS.ProcessEnv, name: string): string {

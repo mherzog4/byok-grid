@@ -93,14 +93,11 @@ async function startRuntime() {
 
   const port = await availablePort();
   const localUrl = `http://127.0.0.1:${port}`;
-  const publicUrl = 'https://web-drain.example.test';
   const environment = {
     ...process.env,
-    BETTER_AUTH_SECRET: 'drill-only-auth-secret-with-32-characters',
-    BETTER_AUTH_URL: publicUrl,
     BYOK_GRID_MASTER_KEY: Buffer.alloc(32, 11).toString('base64'),
     BYOK_GRID_MASTER_KEY_ID: 'drill-v1',
-    BYOK_GRID_SIGNUP_MODE: 'disabled',
+    BYOK_GRID_PUBLIC_URL: 'https://web-drain.example.test',
     HOSTNAME: '127.0.0.1',
     NODE_ENV: 'production',
     PORT: String(port),

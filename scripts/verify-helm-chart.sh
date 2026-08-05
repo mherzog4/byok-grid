@@ -49,13 +49,11 @@ grep -q 'helm.sh/hook: pre-install,pre-upgrade' "$default_render"
 grep -q 'key: sqlite-database-url' "$default_render"
 test "$(grep -c 'name: BYOK_GRID_DATABASE_MODE' "$default_render")" -eq 3
 test "$(grep -A1 'name: BYOK_GRID_DATABASE_MODE' "$default_render" | grep -c 'value: remote')" -eq 3
-grep -q 'BYOK_GRID_SIGNUP_MODE: "disabled"' "$default_render"
-grep -q 'BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS: ""' "$default_render"
-grep -q 'BYOK_GRID_EMAIL_MODE: "disabled"' "$default_render"
-grep -q 'BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: "604800"' "$default_render"
-grep -q 'BYOK_GRID_SESSION_REFRESH_ENABLED: "false"' "$default_render"
-grep -q 'BYOK_GRID_SESSION_UPDATE_AGE_SECONDS: "86400"' "$default_render"
-grep -q 'key: signup-allowed-emails' "$default_render"
+grep -q 'BYOK_GRID_PUBLIC_URL: "https://byok-grid.example.com"' "$default_render"
+if grep -Eq 'BETTER_AUTH|BYOK_GRID_SIGNUP|BYOK_GRID_EMAIL|SMTP_|BYOK_GRID_SESSION' "$default_render"; then
+  echo 'expected the local-owner chart to omit account and SMTP configuration' >&2
+  exit 1
+fi
 test "$(grep -c 'name: BYOK_GRID_MASTER_KEY' "$default_render")" -eq 2
 test "$(grep -c 'name: BYOK_GRID_ADDITIONAL_MASTER_KEYS' "$default_render")" -eq 2
 grep -q 'key: byok-grid-additional-master-keys' "$default_render"
@@ -88,17 +86,7 @@ grep -q 'cidr: 192.0.2.0/24' "$egress_render"
 grep -q 'cidr: 198.51.100.0/24' "$egress_render"
 grep -q 'cidr: 203.0.113.0/24' "$egress_render"
 grep -q 'value: "10000000"' "$full_render"
-grep -q 'BYOK_GRID_SIGNUP_MODE: "allowlist"' "$full_render"
-grep -q 'BYOK_GRID_AUTH_TRUSTED_PROXY_CIDRS: "10.20.0.0/16"' "$full_render"
-grep -q 'BYOK_GRID_EMAIL_MODE: "smtp"' "$full_render"
-grep -q 'SMTP_HOST: "smtp.test.example"' "$full_render"
-grep -q 'SMTP_REQUIRE_TLS: "true"' "$full_render"
-grep -q 'smtp-user: "ci-only-smtp-user"' "$full_render"
-grep -q 'smtp-password: "ci-only-smtp-password"' "$full_render"
-grep -q 'name: SMTP_PASSWORD' "$full_render"
-grep -q 'BYOK_GRID_SESSION_EXPIRES_IN_SECONDS: "43200"' "$full_render"
-grep -q 'BYOK_GRID_SESSION_UPDATE_AGE_SECONDS: "3600"' "$full_render"
-grep -q 'signup-allowed-emails: "release-owner@example.test"' "$full_render"
+grep -q 'BYOK_GRID_PUBLIC_URL: "https://grid.test.example"' "$full_render"
 grep -q 'byok-grid-additional-master-keys:' "$full_render"
 grep -q 'name: SQLITE_DATABASE_URL' "$full_render"
 test "$(grep -c 'name: BYOK_GRID_DATABASE_MODE' "$full_render")" -eq 4
@@ -134,38 +122,9 @@ if helm template invalid-hatchet-api "$chart_dir" \
   exit 1
 fi
 
-if helm template invalid-public-signup "$chart_dir" \
-  --set app.signupMode=open >/dev/null 2>&1; then
-  echo 'expected public open signup to fail chart validation' >&2
-  exit 1
-fi
-
-if helm template trust-all-auth-proxy "$chart_dir" \
-  --set 'app.auth.trustedProxyCidrs[0]=0.0.0.0/0' >/dev/null 2>&1; then
-  echo 'expected a trust-all authentication proxy range to fail chart validation' >&2
-  exit 1
-fi
-
-if helm template missing-smtp-host "$chart_dir" \
-  --set app.email.mode=smtp \
-  --set app.email.smtp.fromEmail=security@example.com >/dev/null 2>&1; then
-  echo 'expected SMTP mode without a host to fail chart validation' >&2
-  exit 1
-fi
-
-if helm template plaintext-smtp "$chart_dir" \
-  --set app.email.mode=smtp \
-  --set app.email.smtp.fromEmail=security@example.com \
-  --set app.email.smtp.host=smtp.example.com \
-  --set app.email.smtp.requireTls=false \
-  --set app.email.smtp.secure=false >/dev/null 2>&1; then
-  echo 'expected plaintext production SMTP to fail chart validation' >&2
-  exit 1
-fi
-
-if helm template invalid-session-expiry "$chart_dir" \
-  --set app.session.expiresInSeconds=2592001 >/dev/null 2>&1; then
-  echo 'expected an excessive session lifetime to fail chart validation' >&2
+if helm template removed-account-settings "$chart_dir" \
+  --set app.authentication.enabled=true >/dev/null 2>&1; then
+  echo 'expected account configuration to fail chart validation' >&2
   exit 1
 fi
 

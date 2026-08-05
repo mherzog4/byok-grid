@@ -134,7 +134,6 @@ async function startWorkflowFixture(config) {
         TEST_SQLITE_DATABASE_URL: config.databaseUrl,
         VERIFY_WORKFLOW_EXECUTION: '1',
         WORKFLOW_DRAIN_DRILL_ROWS: '500',
-        WORKFLOW_DRILL_EMAIL: config.email,
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     }

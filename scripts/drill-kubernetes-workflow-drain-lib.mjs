@@ -15,15 +15,6 @@ export function parseDrainEnvironment(environment) {
   const databaseUrl = canonicalLibsqlUrl(
     required(environment, 'BYOK_GRID_DRILL_DATABASE_URL')
   );
-  const email = required(environment, 'BYOK_GRID_DRILL_EMAIL');
-  if (
-    email.length > 254 ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email) ||
-    /[\r\n]/u.test(email)
-  ) {
-    throw new Error('BYOK_GRID_DRILL_EMAIL must be a valid email address.');
-  }
-
   return {
     appOrigin,
     context: boundedText(environment, 'BYOK_GRID_DRILL_KUBECTL_CONTEXT'),
@@ -36,7 +27,6 @@ export function parseDrainEnvironment(environment) {
       environment,
       'BYOK_GRID_DRILL_WORKER_DEPLOYMENT'
     ),
-    email,
     namespace: kubernetesLabel(environment, 'BYOK_GRID_DRILL_NAMESPACE'),
     timeoutMs: 120_000,
   };

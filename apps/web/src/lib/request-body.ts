@@ -1,5 +1,4 @@
 export const MAXIMUM_API_JSON_BODY_BYTES = 5 * 1_048_576;
-export const MAXIMUM_AUTH_REQUEST_BODY_BYTES = 64 * 1_024;
 
 /**
  * Reads JSON incrementally so App Router handlers never buffer an unbounded
@@ -22,25 +21,6 @@ export async function readApiJsonBody(
   } catch {
     return null;
   }
-}
-
-/** Replays accepted bytes into a dependency-owned Fetch handler. */
-export async function cloneRequestWithBoundedBody(
-  request: Request,
-  maximumBytes: number
-): Promise<Request | Response> {
-  const result = await readBoundedBodyBytes(request, maximumBytes);
-  if (result instanceof Response) return result;
-  const init: RequestInit & { duplex?: 'half' } = {
-    headers: request.headers,
-    method: request.method,
-    signal: request.signal,
-  };
-  if (result.byteLength > 0) {
-    init.body = Uint8Array.from(result).buffer;
-    init.duplex = 'half';
-  }
-  return new Request(request.url, init);
 }
 
 async function readBoundedBodyBytes(

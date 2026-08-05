@@ -16,11 +16,8 @@ import {
   loadSandboxConnectorRegistry,
   summarizeInstalledSandboxConnectors,
 } from '@byok-grid/connectors';
-import { auth } from '@/lib/auth';
+import { getLocalOwner } from '@/lib/local-owner';
 import { sqliteDb } from '@/lib/sqlite-database';
-import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { SignOutButton } from './sign-out-button';
 import { SourcePanel } from './source-panel';
 import { CredentialPanel } from './credential-panel';
 import { ConnectorColumnForm } from './connector-column-form';
@@ -38,28 +35,20 @@ export default async function AppPage({
 }: {
   searchParams: Promise<{ table?: string; workspace?: string }>;
 }) {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-  if (!session) redirect('/sign-in');
-  const activeSessions = await auth.api.listSessions({
-    headers: requestHeaders,
-  });
-  const otherSessionCount = activeSessions.filter(
-    (active) => active.token !== session.session.token
-  ).length;
+  const user = await getLocalOwner();
 
   const ensured = await ensureSqlitePersonalWorkspace(sqliteDb, {
-    id: session.user.id,
-    name: session.user.name,
+    id: user.id,
+    name: user.name,
   });
-  const workspaces = await listSqliteUserWorkspaces(sqliteDb, session.user.id);
+  const workspaces = await listSqliteUserWorkspaces(sqliteDb, user.id);
   const requested = await searchParams;
   const workspace =
     workspaces.find((item) => item.id === requested.workspace) ??
     workspaces.find((item) => item.id === ensured.id) ??
     ensured;
   const tables = await listSqliteWorkspaceTables(sqliteDb, {
-    userId: session.user.id,
+    userId: user.id,
     workspaceId: workspace.id,
   });
   const table = tables.find((item) => item.id === requested.table) ?? tables[0];
@@ -75,40 +64,40 @@ export default async function AppPage({
     workflows,
   ] = await Promise.all([
     listSqliteCredentialMetadata(sqliteDb, {
-      userId: session.user.id,
+      userId: user.id,
       workspaceId: workspace.id,
     }),
     getSqliteGridSnapshot(sqliteDb, {
       tableId: table.id,
-      userId: session.user.id,
+      userId: user.id,
       workspaceId: workspace.id,
     }),
     listSqliteIngestionEndpoints(sqliteDb, {
       tableId: table.id,
-      userId: session.user.id,
+      userId: user.id,
       workspaceId: workspace.id,
     }),
     listSqliteWorkspaceConnectorRevocations(sqliteDb, {
-      userId: session.user.id,
+      userId: user.id,
       workspaceId: workspace.id,
     }),
     listSqliteSources(sqliteDb, {
       tableId: table.id,
-      userId: session.user.id,
+      userId: user.id,
       workspaceId: workspace.id,
     }),
     listSqliteWebhookDestinations(sqliteDb, {
       tableId: table.id,
-      userId: session.user.id,
+      userId: user.id,
       workspaceId: workspace.id,
     }),
     listSqliteWritebackDestinations(sqliteDb, {
       tableId: table.id,
-      userId: session.user.id,
+      userId: user.id,
       workspaceId: workspace.id,
     }),
     listSqliteWorkflows(sqliteDb, {
-      userId: session.user.id,
+      userId: user.id,
       workspaceId: workspace.id,
     }),
   ]);
@@ -145,8 +134,7 @@ export default async function AppPage({
           />
         </div>
         <div className="account-actions">
-          <span>{session.user.email}</span>
-          <SignOutButton otherSessionCount={otherSessionCount} />
+          <span>Local workspace</span>
         </div>
       </header>
 

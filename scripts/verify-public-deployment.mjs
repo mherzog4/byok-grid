@@ -48,8 +48,8 @@ export async function verifyPublicDeployment(options) {
   const [live, ready, firstPage, secondPage] = await Promise.all([
     request(origin, '/api/live', fetchImplementation, timeoutMilliseconds),
     request(origin, '/api/health', fetchImplementation, timeoutMilliseconds),
-    request(origin, '/sign-in', fetchImplementation, timeoutMilliseconds),
-    request(origin, '/sign-in', fetchImplementation, timeoutMilliseconds),
+    request(origin, '/app', fetchImplementation, timeoutMilliseconds),
+    request(origin, '/app', fetchImplementation, timeoutMilliseconds),
   ]);
 
   const liveBody = await verifyJsonResponse(live, '/api/live', {
@@ -60,11 +60,11 @@ export async function verifyPublicDeployment(options) {
     database: 'sqlite',
     status: 'ok',
   });
-  const firstPageEvidence = await verifyHtmlResponse(firstPage, '/sign-in');
-  const secondPageEvidence = await verifyHtmlResponse(secondPage, '/sign-in');
+  const firstPageEvidence = await verifyHtmlResponse(firstPage, '/app');
+  const secondPageEvidence = await verifyHtmlResponse(secondPage, '/app');
 
   if (firstPageEvidence.nonce === secondPageEvidence.nonce) {
-    throw new Error('/sign-in reused its Content Security Policy nonce.');
+    throw new Error('/app reused its Content Security Policy nonce.');
   }
 
   const requestIds = [

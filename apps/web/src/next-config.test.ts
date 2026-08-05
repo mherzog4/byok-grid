@@ -23,28 +23,4 @@ describe('Next.js public response headers', () => {
       'camera=(), microphone=(), geolocation=(), browsing-topics=()'
     );
   });
-
-  it('keeps invitation pages private and non-cacheable', async () => {
-    const rules = await nextConfig.headers!();
-    const inviteRule = rules.find((rule) => rule.source === '/invite/:path*');
-    expect(inviteRule?.headers).toContainEqual({
-      key: 'Cache-Control',
-      value: 'private, no-store, max-age=0',
-    });
-  });
-
-  it('keeps token-bearing recovery pages private and non-indexable', async () => {
-    const rules = await nextConfig.headers!();
-    const recoveryRule = rules.find(
-      (rule) => rule.source === '/reset-password/:path*'
-    );
-    expect(recoveryRule?.headers).toContainEqual({
-      key: 'Cache-Control',
-      value: 'private, no-store, max-age=0',
-    });
-    expect(recoveryRule?.headers).toContainEqual({
-      key: 'X-Robots-Tag',
-      value: 'noindex, nofollow',
-    });
-  });
 });

@@ -536,7 +536,7 @@ function podSpec(componentName, target, image, probes) {
 function environmentFor(componentName) {
   const names =
     componentName === 'web'
-      ? ['SQLITE_DATABASE_URL', 'BETTER_AUTH_SECRET', 'BYOK_GRID_MASTER_KEY']
+      ? ['SQLITE_DATABASE_URL', 'BYOK_GRID_MASTER_KEY']
       : componentName === 'worker'
         ? [
             'SQLITE_DATABASE_URL',

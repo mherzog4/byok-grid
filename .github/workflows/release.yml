@@ -30,8 +30,6 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      BETTER_AUTH_SECRET: release-verification-secret-not-for-production
-      BETTER_AUTH_URL: http://localhost:3000
       BYOK_GRID_MASTER_KEY: Y2ktb25seS1ub3QtYS1wcm9kLWtleS0xMjM0NTY3ODk=
       BYOK_GRID_MASTER_KEY_ID: release-ci-v1
       HATCHET_CLIENT_TOKEN: release-verification-only
@@ -212,6 +210,7 @@ jobs:
                 "$platform" \
                 '${{ steps.build.outputs.digest }}' \
                 >> "release-smoke/${{ matrix.target }}.jsonl"
+            docker image rm --force "$IMAGE@${{ steps.build.outputs.digest }}"
           done
 
       - name: Upload multi-architecture smoke evidence

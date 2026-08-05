@@ -1,8 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
-    "BETTER_AUTH_SECRET",
-    "BETTER_AUTH_URL",
+    "BYOK_GRID_PUBLIC_URL",
     "SQLITE_AUTH_TOKEN",
     "SQLITE_DATABASE_URL"
   ],

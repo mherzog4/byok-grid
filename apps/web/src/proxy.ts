@@ -26,22 +26,9 @@ export function proxy(request: NextRequest): Response {
     request.nextUrl.pathname === '/api' ||
     request.nextUrl.pathname.startsWith('/api/')
   ) {
-    if (
-      request.nextUrl.pathname === '/api/auth/list-sessions' ||
-      request.nextUrl.pathname.startsWith('/api/auth/list-sessions/')
-    ) {
-      const rejection = Response.json(
-        { error: 'Not found.' },
-        { headers: { 'cache-control': 'no-store' }, status: 404 }
-      );
-      rejection.headers.set('content-security-policy', contentSecurityPolicy);
-      rejection.headers.set(PUBLIC_REQUEST_ID_HEADER, requestId);
-      return rejection;
-    }
-
     const rejection = enforceApiMutationOrigin(
       request,
-      process.env.BETTER_AUTH_URL
+      process.env.BYOK_GRID_PUBLIC_URL ?? request.nextUrl.origin
     );
     if (rejection) {
       rejection.headers.set('content-security-policy', contentSecurityPolicy);

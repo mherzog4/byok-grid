@@ -75,29 +75,6 @@ spec:
                   name: {{ include "byok-grid.secretName" . }}
                   key: {{ .Values.secrets.keys.sqliteAuthToken }}
                   optional: true
-            - name: BETTER_AUTH_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "byok-grid.secretName" . }}
-                  key: {{ .Values.secrets.keys.betterAuthSecret }}
-            - name: BYOK_GRID_SIGNUP_ALLOWED_EMAILS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "byok-grid.secretName" . }}
-                  key: {{ .Values.secrets.keys.signupAllowedEmails }}
-                  optional: true
-            - name: SMTP_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "byok-grid.secretName" . }}
-                  key: {{ .Values.secrets.keys.smtpUser }}
-                  optional: true
-            - name: SMTP_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "byok-grid.secretName" . }}
-                  key: {{ .Values.secrets.keys.smtpPassword }}
-                  optional: true
             - name: BYOK_GRID_MASTER_KEY
               valueFrom:
                 secretKeyRef:

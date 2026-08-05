@@ -7,13 +7,16 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { migrateSqliteDatabase } from './migrate';
 import { openSqliteDatabase } from './client';
-import { users } from './schema';
-import { ensureSqlitePersonalWorkspace } from './workspaces';
+import {
+  ensureSqliteLocalUser,
+  ensureSqlitePersonalWorkspace,
+} from './workspaces';
 import { assertRemoteDrillPreconditions } from './remote-production-drill';
 import {
   CAPACITY_DRILL_CONFIRMATION,
   CAPACITY_WORKER_OBSERVATION_SCRIPT,
   ProductionCapacityDrillError,
+  assertCapacityCleanupState,
   assertCapacityThresholds,
   assertSameKubectlContext,
   cleanupCapacityFixture,
@@ -253,26 +256,20 @@ globalThis.fetch = async url => String(url).endsWith('/health')
     await migrateSqliteDatabase(handle.db);
     const config = {
       ...capacityConfig(),
-      drillEmail: 'fixture@example.test',
       profile: { ...capacityConfig().profile, rowCount: 3 },
     };
     const runId = randomUUID();
     try {
       await assertRemoteDrillPreconditions(handle.client);
       const fetchImpl = (async () => {
-        const [user] = await handle.db
-          .insert(users)
-          .values({
-            email: config.drillEmail,
-            id: randomUUID(),
-            name: 'Capacity Fixture',
-          })
-          .returning({ id: users.id, name: users.name });
-        await ensureSqlitePersonalWorkspace(handle.db, user!);
-        return Response.json(
-          { user: { id: user!.id } },
-          { headers: { 'set-cookie': 'capacity_session=fake; Path=/' } }
-        );
+        const user = {
+          email: 'local-owner@byok-grid.invalid',
+          id: 'local-owner',
+          name: 'Local owner',
+        };
+        await ensureSqliteLocalUser(handle.db, user);
+        await ensureSqlitePersonalWorkspace(handle.db, user);
+        return new Response('<main>Local workspace</main>');
       }) as typeof fetch;
       const fixture = await createCapacityFixture({
         client: handle.client,
@@ -287,7 +284,7 @@ globalThis.fetch = async url => String(url).endsWith('/health')
         "insert into rate_limits (id, key, count, last_request) values ('capacity-rate', 'capacity', 1, 1)"
       );
       await cleanupCapacityFixture(handle.client, fixture);
-      await assertRemoteDrillPreconditions(handle.client);
+      await assertCapacityCleanupState(handle.client);
     } finally {
       handle.close();
       rmSync(directory, { force: true, recursive: true });
@@ -309,10 +306,8 @@ globalThis.fetch = async url => String(url).endsWith('/health')
     };
     const fixture = {
       columnId: randomUUID(),
-      cookie: 'capacity_session=fake',
       rowIds: Array.from({ length: 4 }, () => randomUUID()),
       tableId: randomUUID(),
-      userId: randomUUID(),
       workspaceId: randomUUID(),
     };
     const runIds: string[] = [];
@@ -410,7 +405,6 @@ function capacityEnvironment(): NodeJS.ProcessEnv {
     BYOK_GRID_CAPACITY_DATABASE_AUTH_TOKEN: 'capacity-test-token',
     BYOK_GRID_CAPACITY_DATABASE_URL: 'libsql://capacity-db.example.com',
     BYOK_GRID_CAPACITY_DRILL_CONFIRM: CAPACITY_DRILL_CONFIRMATION,
-    BYOK_GRID_CAPACITY_EMAIL: 'capacity@example.com',
     BYOK_GRID_CAPACITY_KUBECTL_CONTEXT: 'capacity-cluster',
     BYOK_GRID_CAPACITY_MAX_READ_P95_MS: '500',
     BYOK_GRID_CAPACITY_MAX_SEARCH_P95_MS: '750',

@@ -25,19 +25,18 @@ requested and safe.
 The default Hatchet image in `docker-compose.yml` disables authentication and
 is for local development only. Do not expose it to a network or deploy it in
 production. Production deployments must use authenticated, pinned workflow
-infrastructure and unique database, auth, and encryption secrets.
+infrastructure and unique database and encryption secrets.
 
 The Dockerfile runs both application targets as the unprivileged `node` user.
 Official images contain no deployment-specific build arguments. Never place
-database URLs, auth secrets, Hatchet tokens, workspace encryption keys, provider
+database URLs, Hatchet tokens, workspace encryption keys, provider
 credentials, or operator origins in build arguments or image layers. The
 Compose `app` profile still depends on the auth-disabled local
 Hatchet image and fixed local database passwords, so it is an evaluation path,
 not a production manifest. Follow `docs/SELF_HOSTING.md` before exposing a
 deployment.
 
-Better Auth POST requests are incrementally bounded at 64 KiB, and every product
-JSON mutation uses an incremental five-MiB reader rather than unbounded App
+Every product JSON mutation uses an incremental five-MiB reader rather than unbounded App
 Router `request.json()` buffering. Push ingestion independently enforces five
 MiB and CSV import streams at most 50 MiB. Keep route-aware limits at the public
 proxy as a first layer; a single five-MiB global setting would break supported
@@ -45,11 +44,10 @@ CSV imports. Reject compressed request bodies and configure edge request-rate,
 concurrent-request, slow-body, header, and connection limits. See
 `docs/API_SECURITY.md` for the exact transport contract and negative tests.
 
-Every unsafe `/api/*` request with browser provenance must match the canonical
-`BETTER_AUTH_URL` origin. Cookie-bearing mutations without `Origin` or `Referer`
-fail closed, while headless Bearer-capability clients remain supported when they
-send no browser metadata. Better Auth independently retains its own CSRF checks
-and is configured not to infer its base URL from forwarded proxy headers. The
+Every unsafe `/api/*` request with browser provenance must match the configured
+`BYOK_GRID_PUBLIC_URL` origin, or the request origin when that setting is empty.
+Mismatched browser mutations fail closed, while headless Bearer-capability
+clients remain supported when they send no browser metadata. The
 web server generates a fresh CSP nonce for every application response, requires
 that nonce on scripts, and enables `strict-dynamic` without production
 `unsafe-inline` or `unsafe-eval` script permission. Inline styles remain allowed
@@ -70,15 +68,10 @@ tenant identifiers to these events. Preserve the response ID through ingress
 and centralized logging, but never use it for authentication, authorization,
 tenancy, or idempotency.
 
-Public account provisioning fails closed. A non-loopback deployment defaults to
-`BYOK_GRID_SIGNUP_MODE=disabled`; it may use `allowlist` with a comma-separated
-`BYOK_GRID_SIGNUP_ALLOWED_EMAILS` secret. Fully open signup is accepted only on
-loopback until verified-email delivery exists. The server enforces this policy
-inside Better Auth's user-creation hook, while the sign-in page merely reflects
-it. Allowlisted addresses are normalized case-insensitively, configuration
-errors do not echo addresses, and approved entries should be removed after the
-intended account is provisioned. Allowlisting is not proof of email ownership,
-password recovery, or a substitute for verified public signup.
+BYOK Grid ships no account or session boundary. Keep local use on loopback and
+place any broader deployment behind an operator-controlled VPN,
+identity-aware proxy, or equivalent ingress policy. Do not trust forwarded
+identity headers inside the application.
 
 npm installs run with strict lifecycle-script review. The root `allowScripts`
 policy permits only esbuild's platform-binary validation and unrs-resolver's
