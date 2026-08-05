@@ -1,0 +1,41 @@
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_575f134176d9ce 7-9
+docs/RELEASING.md
+  s_28ae7db8033464::t_575f134176d9ce 20,34,52,122
+scripts/verify-release-version.mjs
+  s_28ae7db8033464::t_a8ebb38da6dc2b 175
+  s_28ae7db8033464::t_316839897a0fd7 173-174,176-184
+deploy/helm/byok-grid/Chart.yaml
+  s_28ae7db8033464::t_575f134176d9ce 5-6
+docs/releases/v0.1.0-rc.3.md
+  s_28ae7db8033464::t_dea0961956b59c 13-14
+  s_28ae7db8033464::t_1dad974b290bde 1-12,15-87
+package.json
+  s_28ae7db8033464::t_575f134176d9ce 3
+SECURITY.md
+  s_28ae7db8033464::t_6a04d41fe9d447 25-30,36-38
+.github/workflows/release.yml
+  s_28ae7db8033464::t_316839897a0fd7 141-143,145-151
+  s_28ae7db8033464::t_a8ebb38da6dc2b 144
+scripts/verify-release-image-smoke.test.mjs
+  s_28ae7db8033464::t_316839897a0fd7 263,265
+  s_28ae7db8033464::t_a8ebb38da6dc2b 264
+package-lock.json
+  s_28ae7db8033464::t_1e7c6e43c3a1e8 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "7638513316f7dec412b982c1018695020e741e70",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
