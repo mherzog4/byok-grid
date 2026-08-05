@@ -1,0 +1,24 @@
+scripts/drill-web-drain.mjs
+  s_28ae7db8033464::t_2083a1d37ea8c5 52,101,160-163,174,187
+apps/web/src/app/api/health/route.ts
+  s_28ae7db8033464::t_2083a1d37ea8c5 8-10,14,34-45
+  s_28ae7db8033464::t_b9388f008151da 46
+apps/web/src/app/api/health/route.test.ts
+  s_28ae7db8033464::t_2083a1d37ea8c5 3,22-26,54-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "4e3a2c53a31e6ab001cc7bc04e1bc2c18056ae6c",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
