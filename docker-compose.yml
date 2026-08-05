@@ -2,6 +2,7 @@ name: byok-grid
 
 services:
   hatchet-postgres:
+    profiles: ['hatchet']
     image: postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
     restart: unless-stopped
     environment:
@@ -19,6 +20,7 @@ services:
       retries: 10
 
   hatchet:
+    profiles: ['hatchet']
     # Auth is compiled out of this image for local development only. Production
     # deployments must use Hatchet's authenticated image and a pinned release.
     image: ghcr.io/hatchet-dev/hatchet/hatchet-lite-dev:latest@sha256:f635468ff0dfa35bfca55cdd777b9be6ec516a15d9f589a5a0c2ba8a655e639f
@@ -99,8 +101,6 @@ services:
       context: .
       target: workflow-worker
     depends_on:
-      hatchet:
-        condition: service_started
       sqlite-migrate:
         condition: service_completed_successfully
     environment:
@@ -126,6 +126,7 @@ services:
       HATCHET_CLIENT_WORKER_HEALTHCHECK_PORT: '8001'
       SQLITE_DATABASE_URL: file:/data/byok-grid.sqlite
       WORKFLOW_DISPATCH_POLL_MS: ${WORKFLOW_DISPATCH_POLL_MS:-1000}
+      WORKFLOW_EXECUTION_DRIVER: ${WORKFLOW_EXECUTION_DRIVER:-local}
       SOURCE_SCHEDULER_POLL_SECONDS: ${SOURCE_SCHEDULER_POLL_SECONDS:-30}
     restart: unless-stopped
     healthcheck:

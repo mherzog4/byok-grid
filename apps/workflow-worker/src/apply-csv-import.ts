@@ -5,32 +5,16 @@ import {
   SqliteCsvImportAccessError,
   SqliteCsvImportValidationError,
 } from '@byok-grid/db';
-import { csvImportInputSchema, type CsvImportInput } from '@byok-grid/domain';
+import type { CsvImportInput } from '@byok-grid/domain';
 import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { workflowDb } from './database';
-import { workflowHatchet } from './hatchet';
 
-const maximumImportRetries = 2;
+export const MAXIMUM_CSV_IMPORT_RETRIES = 2;
 
-export const applySqliteCsvImportTask = workflowHatchet.task({
-  name: 'apply-sqlite-csv-import',
-  retries: maximumImportRetries,
-  backoff: { factor: 2, maxSeconds: 30 },
-  executionTimeout: '30m',
-  idempotency: {
-    expression: 'input.importJobId',
-    fallbackTtlMs: 86_400_000,
-    strategy: 'status',
-  },
-  inputValidator: csvImportInputSchema,
-  fn: (input, context) =>
-    applySqliteCsvImport(
-      csvImportInputSchema.parse(input),
-      context.retryCount()
-    ),
-});
-
-async function applySqliteCsvImport(input: CsvImportInput, retryCount: number) {
+export async function applySqliteCsvImport(
+  input: CsvImportInput,
+  retryCount: number
+) {
   try {
     const state = await prepareSqliteCsvImport(workflowDb, input);
     if (state === 'succeeded' || state === 'cancelled') {
@@ -46,7 +30,7 @@ async function applySqliteCsvImport(input: CsvImportInput, retryCount: number) {
     const nonRetryable =
       error instanceof SqliteCsvImportAccessError ||
       error instanceof SqliteCsvImportValidationError;
-    const retrying = !nonRetryable && retryCount < maximumImportRetries;
+    const retrying = !nonRetryable && retryCount < MAXIMUM_CSV_IMPORT_RETRIES;
     await setSqliteCsvImportWorkerFailure(workflowDb, {
       errorMessage:
         error instanceof Error ? error.message : 'The CSV import failed.',

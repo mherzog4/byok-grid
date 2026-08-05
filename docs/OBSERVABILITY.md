@@ -1,9 +1,10 @@
 # Observability
 
-BYOK Grid exposes two cluster-internal worker telemetry endpoints. Hatchet's
-health port defaults to `8001` and serves worker health, slot/action gauges, and
-Node.js process metrics. The application metrics port defaults to `8002` and
-serves database-backed workflow and dispatch state at `/metrics`.
+The default SQLite-native worker exposes one private telemetry endpoint on port
+`8002`. It serves DB-backed readiness at `/health` and workflow, dispatch, and
+SQLite-contention state at `/metrics`. The optional Hatchet driver also exposes
+Hatchet's lifecycle and process metrics on port `8001`; its application metrics
+remain on port `8002`.
 
 Neither endpoint implements application authorization. Do not route either
 through public ingress. Restrict access to readiness probes and the monitoring
@@ -46,7 +47,7 @@ messages.
 | `byok_grid_workflow_terminal_runs{status,window_seconds}`   | Terminal outcomes updated during the fixed five-minute window |
 | `byok_grid_workflow_active_steps{status}`                   | Current ready and running workflow steps                      |
 | `byok_grid_workflow_active_step_oldest_age_seconds{status}` | Age of the oldest ready or running step                       |
-| `byok_grid_outbox_unpublished_events`                       | Dispatchable events not yet handed to Hatchet                 |
+| `byok_grid_outbox_unpublished_events`                       | Dispatchable events not yet claimed by the execution driver   |
 | `byok_grid_outbox_unpublished_oldest_age_seconds`           | Age of the oldest dispatchable unpublished event              |
 | `byok_grid_metrics_collection_timestamp_seconds`            | Timestamp of the last successful database collection          |
 | `byok_grid_sqlite_write_acquisition_events{outcome}`        | Process-local retry or exhausted write-acquisition events     |
@@ -66,8 +67,9 @@ its generated `up == 0` signal.
 
 ## Kubernetes discovery
 
-The Helm worker pod declares named `health` and `app-metrics` ports. A
-Prometheus Operator `PodMonitor` can scrape both:
+The Helm worker pod currently selects the optional Hatchet driver and declares
+named `health` and `app-metrics` ports. A Prometheus Operator `PodMonitor` can
+scrape both:
 
 ```yaml
 podMetricsEndpoints:
@@ -82,12 +84,12 @@ selectors. Add the endpoints to the operator-owned PodMonitor and restrict
 network ingress to its namespace. Set `worker.metrics.enabled=false` only when
 an external collector provides equivalent application-level signals.
 
-Kubernetes startup and readiness use the packaged worker probe in `ready` mode
-and require the Hatchet body status `HEALTHY`. Liveness uses `live` mode and
-accepts every recognized lifecycle status; it is testing whether the local
-health server and event loop can produce a valid response, not whether the
-remote Hatchet control plane is available. Alert on sustained non-healthy
-Hatchet status separately from container restarts.
+The packaged worker probe selects the correct endpoint from
+`WORKFLOW_EXECUTION_DRIVER`. In local mode, startup and readiness require a
+successful DB-backed `/health` response from port `8002`; liveness accepts the
+same bounded health schema. In Hatchet mode, readiness requires Hatchet status
+`HEALTHY`, while liveness accepts every recognized lifecycle status. This keeps
+dependency outages visible without disguising them as a crashed process.
 
 ## Alert starting points
 
@@ -131,7 +133,8 @@ the deployment is approaching its write-contention envelope even when requests
 eventually succeed; use it with database latency and provider-side signals when
 setting the measured capacity limit.
 
-Alert separately on database latency, libSQL/provider availability, Hatchet
-queue age, provider rate limits, connector failures, backup freshness, and
-optional analytics erasure backlog; the application gauges do not claim to
-replace those service-specific signals.
+Alert separately on database latency, remote libSQL/provider availability,
+provider rate limits, connector failures, backup freshness, and optional
+analytics erasure backlog. Hatchet deployments must additionally alert on
+Hatchet health and queue age. The application gauges do not claim to replace
+those service-specific signals.

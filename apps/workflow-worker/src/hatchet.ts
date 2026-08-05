@@ -1,6 +1,15 @@
 import { HatchetClient } from '@hatchet-dev/typescript-sdk/v1';
 import { workflowWorkerConfig } from './config';
 
+if (
+  workflowWorkerConfig.WORKFLOW_EXECUTION_DRIVER !== 'hatchet' ||
+  !workflowWorkerConfig.HATCHET_CLIENT_API_URL ||
+  !workflowWorkerConfig.HATCHET_CLIENT_HOST_PORT ||
+  !workflowWorkerConfig.HATCHET_CLIENT_TOKEN
+) {
+  throw new Error('The Hatchet execution driver is not fully configured.');
+}
+
 export const workflowHatchet = HatchetClient.init({
   api_url: workflowWorkerConfig.HATCHET_CLIENT_API_URL,
   healthcheck: {

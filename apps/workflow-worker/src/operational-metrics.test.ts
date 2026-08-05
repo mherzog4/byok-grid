@@ -69,7 +69,15 @@ describe('workflow operational metrics server', () => {
       );
       expect(body).not.toContain('workspace-');
 
-      const missing = await fetch(`http://127.0.0.1:${port}/health`);
+      const health = await fetch(`http://127.0.0.1:${port}/health`);
+      expect(health.status).toBe(200);
+      await expect(health.json()).resolves.toEqual({
+        driver: 'local',
+        name: 'byok-grid-workflow-worker',
+        status: 'HEALTHY',
+      });
+
+      const missing = await fetch(`http://127.0.0.1:${port}/missing`);
       expect(missing.status).toBe(404);
       expect(await missing.text()).toBe('Not Found');
     } finally {

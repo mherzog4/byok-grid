@@ -4,30 +4,12 @@ import {
   failSqliteWorkflowStep,
   getClaimedSqliteWorkflowStepExecution,
 } from '@byok-grid/db';
-import {
-  workflowRunDispatchInputSchema,
-  type WorkflowRunDispatchInput,
-} from '@byok-grid/domain';
+import type { WorkflowRunDispatchInput } from '@byok-grid/domain';
 import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { randomUUID } from 'node:crypto';
 import { workflowDb } from './database';
 import { executeClaimedWorkflowStep } from './execute-step';
-import { workflowHatchet } from './hatchet';
-
-export const executeWorkflowRunTask = workflowHatchet.task({
-  name: 'execute-workflow-run',
-  retries: 2,
-  backoff: { factor: 2, maxSeconds: 30 },
-  executionTimeout: '30m',
-  idempotency: {
-    expression: 'input.runId',
-    fallbackTtlMs: 86_400_000,
-    strategy: 'status',
-  },
-  inputValidator: workflowRunDispatchInputSchema,
-  fn: (input) =>
-    executeWorkflowRun(workflowRunDispatchInputSchema.parse(input)),
-});
+export const MAXIMUM_WORKFLOW_RUN_RETRIES = 2;
 
 export async function executeWorkflowRun(input: WorkflowRunDispatchInput) {
   let completedSteps = 0;

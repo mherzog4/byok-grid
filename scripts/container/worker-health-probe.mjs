@@ -11,7 +11,7 @@ export async function checkWorkerHealth(
   mode,
   {
     fetchImpl = globalThis.fetch,
-    url = workerHealthUrl(process.env.HATCHET_CLIENT_WORKER_HEALTHCHECK_PORT),
+    url = workerHealthUrl(workerHealthPort(process.env)),
   } = {}
 ) {
   if (mode !== 'live' && mode !== 'ready') return false;
@@ -32,6 +32,12 @@ export async function checkWorkerHealth(
   } catch {
     return false;
   }
+}
+
+function workerHealthPort(environment) {
+  return environment.WORKFLOW_EXECUTION_DRIVER === 'hatchet'
+    ? environment.HATCHET_CLIENT_WORKER_HEALTHCHECK_PORT
+    : environment.BYOK_GRID_METRICS_PORT;
 }
 
 function workerHealthUrl(rawPort) {

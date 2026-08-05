@@ -40,7 +40,7 @@ export async function runWorkerLifecycle(input: {
       shutdown.promise.then(() => ({ kind: 'signal' as const })),
       workerRun.then(() => ({
         kind: 'component' as const,
-        name: 'hatchet worker',
+        name: 'execution worker',
       })),
       ...backgroundRuns.map(({ name, promise }) =>
         promise.then(() => ({ kind: 'component' as const, name }))

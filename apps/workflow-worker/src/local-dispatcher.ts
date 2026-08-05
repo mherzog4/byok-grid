@@ -4,18 +4,19 @@ import {
   DISPATCHABLE_OUTBOX_EVENT_TYPES,
   retrySqliteOutboxEvent,
 } from '@byok-grid/db';
-import { IdempotencyCollisionError } from '@hatchet-dev/typescript-sdk/v1';
+import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { workflowWorkerConfig } from './config';
 import { workflowDb } from './database';
-import { workflowHatchet } from './hatchet';
-import { resolveWorkerTask } from './task-handlers';
+import { maximumWorkerTaskRetries, resolveWorkerTask } from './task-handlers';
 
-export async function dispatchWorkflowRuns(signal: AbortSignal): Promise<void> {
+export async function dispatchLocalWorkflowTasks(
+  signal: AbortSignal
+): Promise<void> {
   while (!signal.aborted) {
     try {
-      const count = await dispatchBatch();
+      const count = await executeLocalBatch();
       if (count === 0) {
         await delay(workflowWorkerConfig.WORKFLOW_DISPATCH_POLL_MS, undefined, {
           signal,
@@ -23,7 +24,7 @@ export async function dispatchWorkflowRuns(signal: AbortSignal): Promise<void> {
       }
     } catch (error) {
       if (signal.aborted) return;
-      console.error('Workflow outbox dispatch failed', {
+      console.error('Local workflow dispatch failed', {
         errorName: error instanceof Error ? error.name : 'UnknownError',
       });
       await delay(2_000, undefined, { signal }).catch(() => undefined);
@@ -31,26 +32,36 @@ export async function dispatchWorkflowRuns(signal: AbortSignal): Promise<void> {
   }
 }
 
-async function dispatchBatch(): Promise<number> {
+async function executeLocalBatch(): Promise<number> {
   const claimId = randomUUID();
   const events = await claimSqliteOutboxEvents(workflowDb, {
     claimId,
     eventTypes: DISPATCHABLE_OUTBOX_EVENT_TYPES,
     limit: 10,
   });
+
   for (const event of events) {
     try {
-      const dispatch = resolveWorkerTask(event);
-      try {
-        await workflowHatchet.runNoWait(dispatch.name, dispatch.input);
-      } catch (error) {
-        if (!(error instanceof IdempotencyCollisionError)) throw error;
-      }
+      await resolveWorkerTask(event).execute();
       await completeSqliteOutboxEvent(workflowDb, {
         claimId,
         eventId: event.id,
       });
     } catch (error) {
+      if (
+        error instanceof NonRetryableError ||
+        event.attempt - 1 >= maximumWorkerTaskRetries(event.eventType)
+      ) {
+        console.error('Local workflow task reached a terminal failure', {
+          errorName: error instanceof Error ? error.name : 'UnknownError',
+          eventType: event.eventType,
+        });
+        await completeSqliteOutboxEvent(workflowDb, {
+          claimId,
+          eventId: event.id,
+        });
+        continue;
+      }
       await retrySqliteOutboxEvent(workflowDb, {
         claimId,
         errorMessage:
@@ -60,5 +71,6 @@ async function dispatchBatch(): Promise<number> {
       });
     }
   }
+
   return events.length;
 }

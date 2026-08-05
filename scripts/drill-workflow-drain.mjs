@@ -140,10 +140,14 @@ try {
     ['logs', '--since', drillStartedAt, workerContainer],
     { includeStderr: true }
   );
-  if (!logs.includes('Successfully finished pending tasks.')) {
+  const localDriver = logs.includes('BYOK_GRID_LOCAL_WORKER_DRAIN_COMPLETE');
+  const hatchetDriver = logs.includes('Successfully finished pending tasks.');
+  if (!localDriver && !hatchetDriver) {
     test.kill('SIGTERM');
     await testExitPromise;
-    throw new Error('The worker log has no pending-task drain confirmation.');
+    throw new Error(
+      'The worker log has no local or Hatchet pending-task drain confirmation.'
+    );
   }
   if (logs.includes('Could not pause worker:')) {
     test.kill('SIGTERM');
@@ -214,15 +218,15 @@ async function waitForWorkerHealth() {
     '--no-TTY',
     'workflow-worker',
     'node',
-    '-e',
-    "fetch('http://127.0.0.1:8001/health').then(async response => { const body = await response.json(); process.exit(body.status === 'HEALTHY' ? 0 : 1) }).catch(() => process.exit(1))",
+    'scripts/container/worker-health-probe.mjs',
+    'ready',
   ];
   for (let attempt = 1; attempt <= 30; attempt += 1) {
     try {
       await run('docker', probe, { quiet: true });
       return;
     } catch {
-      // The health server starts after the worker registers with Hatchet.
+      // The local metrics server or Hatchet health server is still starting.
     }
     await new Promise((resolvePromise) => setTimeout(resolvePromise, 1_000));
   }

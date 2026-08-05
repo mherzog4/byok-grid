@@ -66,19 +66,25 @@ working tree:
   cross-platform socket-result coverage;
 - worker startup rejection before Hatchet connection when its master key is
   malformed;
-- a packaged workflow-worker probe with a bounded 120-second authenticated
-  startup window, strict Hatchet readiness, dependency-tolerant local
-  liveness, default/full Helm render checks, and production-image evidence as
-  the unprivileged runtime user;
-- deterministic lifecycle tests plus a real child-process `SIGTERM` proving
-  poller abort, Hatchet drain completion, and database-close ordering;
+- a SQLite-native execution driver that claims the durable SQLite outbox,
+  resolves the same typed handlers as the optional Hatchet adapter, executes a
+  real published workflow with every Hatchet setting absent, persists the
+  expected row mutation, and drains cleanly on `SIGTERM`;
+- a packaged workflow-worker probe that selects DB-backed local health on port
+  `8002` or authenticated Hatchet health on port `8001`, with bounded startup,
+  strict readiness, dependency-tolerant liveness, default/full Helm render
+  checks, and production-image evidence as the unprivileged runtime user;
+- deterministic lifecycle tests plus real child-process `SIGTERM` evidence
+  proving poller abort, execution-driver drain completion, and database-close
+  ordering;
 - a reproducible local Compose drain drill that signals a persisted in-flight
   500-row, 100-step workflow, proves every step succeeds, verifies worker exit
   0 and Hatchet drain logs, and restores worker health; the application Node
   process is container PID 1 and the Hatchet REST lifecycle endpoint is
   explicit rather than inherited from its token;
-- Hatchet `/metrics` runtime support through the installed `prom-client` peer,
-  with container verification that the production dependency is present;
+- optional Hatchet `/metrics` runtime support through the installed
+  `prom-client` peer, with container verification that the production
+  dependency is present;
 - a separate graceful-lifecycle application metrics endpoint covering
   deployment-wide workflow status, terminal outcomes, active-step age, and
   dispatch backlog plus process-local SQLite acquisition retries/exhaustions
@@ -206,6 +212,9 @@ working tree:
 The dated local runtime, drain, SQLite recovery, and ClickHouse projection
 record is in
 [`docs/evidence/2026-08-03-local-runtime.md`](evidence/2026-08-03-local-runtime.md).
+The default SQLite-native worker's source, Compose topology, production-image
+readiness, and clean `SIGTERM` evidence is in
+[`docs/evidence/2026-08-04-sqlite-native-worker.md`](evidence/2026-08-04-sqlite-native-worker.md).
 The public repository's pre-promotion CI, security-feature, ruleset, release,
 and license-detection state is recorded in
 [`docs/evidence/2026-08-03-github-hosted-state.md`](evidence/2026-08-03-github-hosted-state.md).
@@ -224,13 +233,12 @@ dated evidence linked from a release issue or runbook record:
 
 - run the tag workflow in this public repository and independently verify its
   seven digest-pinned images, chart, SDK package, checksums, and attestations;
-- run an authenticated Hatchet worker against the supported production Hatchet
-  version, prove health registration, then send `SIGTERM` during an in-flight
-  workflow and prove lease-safe completion or recovery inside the 90-second
-  grace period using
+- for a deployment that enables the optional Hatchet adapter, run an
+  authenticated worker against the declared Hatchet version, prove health
+  registration, then send `SIGTERM` during an in-flight workflow and prove
+  lease-safe completion or recovery inside the 90-second grace period using
   [`KUBERNETES_WORKER_DRAIN_DRILL.md`](KUBERNETES_WORKER_DRAIN_DRILL.md); the
-  passing auth-disabled local Compose drill does not satisfy this
-  environment-specific gate;
+  SQLite-native driver does not need or satisfy this adapter-specific gate;
 - test the chosen remote libSQL provider with at least two application replicas,
   a simulated replica/process loss, provider backup creation, and restore into
   an isolated database before cutover; retain the drill's prepared and
