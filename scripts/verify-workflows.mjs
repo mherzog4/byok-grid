@@ -63,6 +63,14 @@ export function verifyWorkflowSource(source, filename = '<workflow>') {
         `${filename}: job ${job.name} must scope GitHub tokens to the step that uses them.`
       );
     }
+    if (
+      jobRunsReleaseVerification(job.lines) &&
+      !jobHasFullHistoryCheckout(job.lines)
+    ) {
+      issues.push(
+        `${filename}: job ${job.name} runs release verification and requires actions/checkout with fetch-depth: 0.`
+      );
+    }
   }
 
   let actionCount = 0;
@@ -178,6 +186,42 @@ function checkoutDisablesCredentialPersistence(lines, usesIndex) {
         line
       )
     ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function jobRunsReleaseVerification(lines) {
+  return lines.some((line) =>
+    /\bnpm\s+run\s+release:verify-version\b/u.test(stripYamlComment(line))
+  );
+}
+
+function jobHasFullHistoryCheckout(lines) {
+  return lines.some((line, index) => {
+    const reference = actionReference(line);
+    return (
+      reference?.split('@', 1)[0] === 'actions/checkout' &&
+      checkoutFetchesFullHistory(lines, index)
+    );
+  });
+}
+
+function checkoutFetchesFullHistory(lines, usesIndex) {
+  const usesIndent = indentation(lines[usesIndex] ?? '');
+  const stepIndent = Math.max(0, usesIndent - 2);
+  for (let index = usesIndex + 1; index < lines.length; index += 1) {
+    const line = lines[index] ?? '';
+    if (!line.trim()) continue;
+    const currentIndent = indentation(line);
+    if (
+      currentIndent < stepIndent ||
+      (currentIndent === stepIndent && line.trimStart().startsWith('-'))
+    ) {
+      break;
+    }
+    if (/^\s*fetch-depth:\s*(?:0|'0'|"0")\s*(?:#.*)?$/u.test(line)) {
       return true;
     }
   }
