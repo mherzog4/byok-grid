@@ -4,7 +4,9 @@ This ledger separates repository evidence from environment-specific evidence.
 Passing the local and CI gates makes a release candidate reproducible; it does
 not by itself prove that a particular deployment is production-ready.
 
-Last repository evidence review: 2026-08-04. Target version: `0.1.0-rc.2`.
+Last repository evidence review: 2026-08-05. Published baseline:
+`0.1.0-rc.2`; the next candidate must include the SQLite-native default
+topology and schema-v2 stable evidence contract.
 
 ## Repository and local-runtime evidence
 
@@ -163,11 +165,11 @@ working tree:
   endpoint in all three phases, restores the candidate after any post-mutation
   failure when possible, and emits an exact marker only after the original
   candidate is restored and reverified;
-- a dependency-free stable-promotion evidence verifier with a closed external
-  gate set, exact drill markers, retained-artifact hashes, canonical timing,
-  blocker-free 24-hour observation, rollback and operator acceptance ordering,
-  optional-adapter support binding, candidate ancestry, and a release-only Git
-  path allowlist that forces a new RC after any runtime or verifier change;
+- a dependency-free schema-v2 stable-promotion verifier with a closed default
+  product gate set, exact runtime and release markers, retained-artifact hashes,
+  canonical timing, post-evidence operator acceptance, optional-adapter support
+  binding, candidate ancestry, and a release-only Git path allowlist that forces
+  a new RC after any runtime or verifier change;
 - full-digest pins for release bases, CI services, and Compose third-party
   images, with registry evidence that each referenced manifest supports both
   `linux/amd64` and `linux/arm64`;
@@ -226,69 +228,56 @@ attestation, checksums, and release-file attestation. Version tags are created
 from digests only after the complete image matrix passes, and the GitHub Release
 remains blocked until all seven tags and digests are anonymously readable.
 
-## Release-candidate gates still requiring external evidence
+## Stable-release evidence still required
 
-Do not describe `0.1.0-rc.2` as a stable production release until each item has
-dated evidence linked from a release issue or runbook record:
+Do not describe the current candidate as a stable production release until the
+next candidate has dated evidence for the shipped default product:
 
-- run the tag workflow in this public repository and independently verify its
-  seven digest-pinned images, chart, SDK package, checksums, and attestations;
-- for a deployment that enables the optional Hatchet adapter, run an
-  authenticated worker against the declared Hatchet version, prove health
-  registration, then send `SIGTERM` during an in-flight workflow and prove
-  lease-safe completion or recovery inside the 90-second grace period using
-  [`KUBERNETES_WORKER_DRAIN_DRILL.md`](KUBERNETES_WORKER_DRAIN_DRILL.md); the
-  SQLite-native driver does not need or satisfy this adapter-specific gate;
-- test the chosen remote libSQL provider with at least two application replicas,
-  a simulated replica/process loss, provider backup creation, and restore into
-  an isolated database before cutover; retain the drill's prepared and
-  restore-verified markers with the provider operation evidence;
-- deploy the reference Helm release behind real TLS with an external secret
-  manager, default-deny network policy, provider-specific egress, centralized
-  logs, metrics, alert routing, and an operator-owned rollback decision path;
-  retain `BYOK_GRID_KUBERNETES_RUNTIME_VERIFIED` from the read-only live-object
-  check in [`VERIFY_KUBERNETES_RUNTIME.md`](VERIFY_KUBERNETES_RUNTIME.md),
-  `BYOK_GRID_KUBERNETES_EXTERNAL_SECRET_PROVENANCE_VERIFIED` from
-  [`VERIFY_KUBERNETES_SECRET_PROVENANCE.md`](VERIFY_KUBERNETES_SECRET_PROVENANCE.md),
-  `BYOK_GRID_KUBERNETES_NETWORK_POLICY_ENFORCEMENT_VERIFIED` from the isolated
-  CNI drill in
-  [`KUBERNETES_NETWORK_POLICY_DRILL.md`](KUBERNETES_NETWORK_POLICY_DRILL.md),
-  plus a passing
-  `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` record from the canonical ingress and
-  an in-window `BYOK_GRID_KUBERNETES_ROLLBACK_VERIFIED` record from
-  [`KUBERNETES_ROLLBACK_DRILL.md`](KUBERNETES_ROLLBACK_DRILL.md);
-- place every non-loopback deployment behind an operator-controlled VPN,
-  identity-aware proxy, or equivalent ingress boundary; deny direct web access
-  and retain `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` from the canonical origin;
-- independently repeat the digest-bound image smoke on native `linux/amd64` and
-  native `linux/arm64` hosts, retaining the two host records and the combined
-  `BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED` record with the release
-  workflow's attested fourteen-record `IMAGE_SMOKE.jsonl` asset;
-- run the read-only release-protection verifier in
-  [`VERIFY_RELEASE_PROTECTION.md`](VERIFY_RELEASE_PROTECTION.md) against the
-  first candidate publication and retain
-  `BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED`; the active no-bypass `v*`
-  mutation rules, owner-only creation rule, signed tag, immutable GitHub
-  Release, seven GHCR digest identities, and anonymous public access to every
-  tag and digest are all required while the digest manifest remains
-  authoritative;
-- measure web/API latency and SQLite/libSQL contention at the intended tenant,
-  row, mutation, and workflow concurrency envelope; record a capacity limit and
-  alert threshold using
-  [`PRODUCTION_CAPACITY_DRILL.md`](PRODUCTION_CAPACITY_DRILL.md) rather than
-  treating a synthetic benchmark as a guarantee;
-- exercise optional Airbyte ingestion and ClickHouse projection end to end in
-  the supported environment before listing either adapter in that environment's
-  supported production matrix;
-- complete a candidate observation window with no unresolved security,
-  correctness, restore, or data-loss blocker, then update `SECURITY.md` with the
-  stable supported-version policy.
+- a passing public tag workflow and independent verification of all seven
+  digest-pinned images, chart, SDK package, checksums, SBOMs, provenance, and
+  attestations;
+- the release workflow's checksummed
+  `BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED` record for both published platforms;
+- the default SQLite-native workflow drain and compiled Next.js web drain,
+  retaining `BYOK_GRID_DRAIN_DRILL_PASSED`,
+  `BYOK_GRID_DRAIN_SIGNAL_COMPLETE`, and
+  `BYOK_GRID_WEB_DRAIN_DRILL_PASSED`;
+- online SQLite backup, integrity verification, isolated restore, and digest
+  equality for the candidate database;
+- current required CI, CodeQL, dependency-review, and repository security
+  results;
+- `BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED` for the signed tag, immutable
+  GitHub Release, protected version tags, exact GHCR digest identities, and
+  anonymous public image access; and
+- named owner acceptance after all evidence, plus the stable supported-version
+  policy in `SECURITY.md`.
+
+## Deployment-specific evidence
+
+The following gates apply only when a maintainer or downstream operator claims
+the corresponding topology. They do not block a stable release of the default
+open-source application:
+
+- authenticated Hatchet lifecycle and in-flight drain;
+- remote libSQL multi-replica loss, provider backup, and isolated restore;
+- Kubernetes runtime, External Secrets provenance, enforced NetworkPolicy, and
+  rollback/restoration;
+- canonical public ingress and an operator-controlled access boundary;
+- native-host image repetition beyond the release workflow's two-platform
+  execution;
+- a measured tenant, row, mutation, and workflow concurrency envelope; and
+- Airbyte ingestion or ClickHouse projection E2E evidence when either adapter is
+  listed in `supportedOptionalAdapters`.
+
+Capacity limits, backup retention, identity boundaries, alerts, and incident
+ownership remain the responsibility of each production operator because they
+depend on that operator's hardware, traffic, and deployment choices.
 
 ## Promotion decision
 
 An RC can be published after its commit is reviewed, ordinary CI is green, and
-the tag workflow passes. Stable promotion additionally requires every external
-gate above, a documented rollback point, named operator acceptance, and a
-passing versioned manifest under the contract in `PRODUCTION_EVIDENCE.md`.
-Never move or reuse a failed tag; fix the cause and issue a new prerelease
-version.
+the tag workflow passes. Stable promotion additionally requires the universal
+evidence above, named post-evidence operator acceptance, and a passing schema-v2
+manifest under `PRODUCTION_EVIDENCE.md`. Optional deployment claims require
+their applicable runbooks but do not expand the default product gate. Never
+move or reuse a failed tag; fix the cause and issue a new prerelease version.

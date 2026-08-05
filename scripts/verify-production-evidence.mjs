@@ -24,7 +24,6 @@ try {
     `${JSON.stringify({
       evidenceCount: verified.evidenceCount,
       marker: PRODUCTION_EVIDENCE_MARKER,
-      observationHours: verified.observationHours,
       candidateCommit: verified.candidateCommit,
       releaseVersion: verified.releaseVersion,
       supportedOptionalAdapters: verified.supportedOptionalAdapters,

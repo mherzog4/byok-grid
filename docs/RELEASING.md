@@ -103,22 +103,22 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    Draft the matching curated release note before review; the release workflow
    publishes that committed file verbatim rather than inferring product status
    from the pull-request history.
-3. Run all repository checks plus the backup/restore, migration, rollout,
-   rollback-compatibility, signal-drain, and external-service failure drills.
-   For the local Compose drain gate, start the app profile and run
-   `npm run drill:workflow-drain`; retain its three structured marker lines in
-   the dated release evidence. After the production web build, also run
-   `npm run drill:web-drain` and retain its
-   `BYOK_GRID_WEB_DRAIN_DRILL_PASSED` record; this separately proves the
-   standalone Next.js listener and in-flight request behavior used by the Helm
-   rollout contract.
-   Multi-host candidates must also retain both successful markers from
-   `docs/REMOTE_LIBSQL_DRILL.md` after a provider backup is restored into an
-   isolated database. Retain the authenticated Kubernetes worker marker from
-   `docs/KUBERNETES_WORKER_DRAIN_DRILL.md` after signalling an in-flight run in
-   the isolated reference deployment. For stable promotion, retain the passing
-   declared-envelope record and supporting provider/ingress metrics from
-   `docs/PRODUCTION_CAPACITY_DRILL.md`.
+3. Run all repository checks plus the default SQLite backup/restore, migration,
+   rollback-compatibility, and signal-drain drills. Start the default Compose
+   app and run `npm run drill:workflow-drain`; retain
+   `BYOK_GRID_DRAIN_DRILL_PASSED` and
+   `BYOK_GRID_DRAIN_SIGNAL_COMPLETE`. After the production web build, run
+   `npm run drill:web-drain` and retain
+   `BYOK_GRID_WEB_DRAIN_DRILL_PASSED`. Together these prove the shipped
+   SQLite-native worker and standalone Next.js listener complete in-flight work
+   during shutdown.
+
+   Run deployment-specific drills only for capabilities the release or an
+   operator actually claims: authenticated Hatchet drain, remote libSQL
+   recovery, Kubernetes runtime and rollback, public ingress, capacity,
+   Airbyte, or ClickHouse. Those runbooks remain available, but they are not
+   universal candidate blockers.
+
 4. Create and push a signed annotated tag such as `v0.1.0-rc.2`.
 5. Let `.github/workflows/release.yml` verify source, build images, publish
    attestations, smoke every immutable image on `linux/amd64` and `linux/arm64`,
@@ -135,24 +135,14 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    visibility to **Public**, confirm the irreversible change, and rerun the
    same workflow attempt. Never weaken or skip the anonymous gate; public GHCR
    visibility cannot later be changed back to private.
-6. Verify every released file and image using `docs/VERIFY_RELEASE.md`, then
-   install a digest-pinned candidate in the reference environment by applying
-   the release's generated `values.digests.yaml` after operator values.
-7. Run the read-only live Kubernetes verifier from
-   `docs/VERIFY_KUBERNETES_RUNTIME.md` while the migration Job is retained, and
-   run the read-only External Secrets Operator provenance verifier from
-   `docs/VERIFY_KUBERNETES_SECRET_PROVENANCE.md`. Then
-   run the isolated CNI enforcement drill from
-   `docs/KUBERNETES_NETWORK_POLICY_DRILL.md`. Keep all three exact
-   candidate-bound
-   structured markers with the reference-deployment evidence. Run the
-   read-only public deployment verifier from
-   `docs/VERIFY_DEPLOYMENT.md` against the canonical TLS origin and retain its
-   structured success record with the deployment evidence.
-   Before stable promotion, repeat the isolated image smoke from
-   `docs/MULTI_ARCH_IMAGE_SMOKE.md` on native hosts for both architectures,
-   then retain the closed fourteen-record
-   `BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED` artifact.
+6. Verify every released file and image using `docs/VERIFY_RELEASE.md`. The
+   release workflow's checksummed and attested fourteen-record image-smoke
+   asset is the universal multi-architecture proof.
+7. If a deployment uses Helm, Hatchet, remote libSQL, or a public ingress, run
+   the matching Kubernetes, worker-drain, recovery, network-policy, rollback,
+   and ingress runbooks before that deployment is called production-ready.
+   Native-host image-smoke repetition is also available as additional operator
+   assurance, but is not required to publish the default product.
 
 The image job initially publishes only commit-scoped staging tags. Each image
 is scanned at its immutable digest and attested only after the scan passes. A
@@ -194,18 +184,20 @@ commit.
 
 ## Stable release gate
 
-Remove the Artifact Hub prerelease annotation only when all production drills
-have current evidence, supported upgrade and rollback paths are documented, the
-security policy names supported versions, and the release candidate has run
-through its observation window without an unresolved release blocker.
+Remove the Artifact Hub prerelease annotation only when the default single-node
+runtime, SQLite backup/restore, release assets, image smoke, tag protection, and
+security checks have current evidence; the security policy names supported
+versions; and no known release blocker remains.
 
 Stable versions additionally require the closed, versioned manifest described
 in `docs/PRODUCTION_EVIDENCE.md`. Commit the manifest, the curated
 version-bound stable release notes, and only the allowed
-version/readiness/security metadata after the observed RC. Then run
+version/readiness/security metadata after the observed RC. Operator acceptance
+must follow all retained evidence; there is no fixed waiting period. Then run
 `npm run release:verify-production-evidence` and
 `npm run release:verify-version -- <stable-version>` from that committed state.
 The latter proves candidate ancestry and rejects any runtime, dependency,
-workflow, deployment, or verifier change after observation. Prerelease tags do
-not require this manifest; a code change discovered during promotion requires a
-new RC rather than an expanded allowlist.
+workflow, deployment, or verifier change after the candidate. Prerelease tags
+do not require this manifest; a code change discovered during promotion
+requires a new RC rather than an expanded allowlist. Deployment-specific
+topologies must separately satisfy their applicable runbooks.

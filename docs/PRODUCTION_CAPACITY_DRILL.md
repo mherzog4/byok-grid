@@ -153,5 +153,6 @@ and warm behavior, then record:
 
 Worker metrics expose process-local contention only. Web/API retries occur in
 separate processes, and a single load-generator network does not represent all
-clients. Provider metrics, ingress metrics, a second client location, and the
-candidate observation window remain required before stable promotion.
+clients. Provider metrics, ingress metrics, a second client location, and an
+operator-chosen observation period remain required before a deployment claims
+the measured capacity envelope in production.
