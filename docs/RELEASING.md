@@ -17,7 +17,7 @@ marker, required operator-facing sections, and final newline. Validate the
 contract locally with:
 
 ```text
-npm run release:verify-version -- 0.1.0-rc.2
+npm run release:verify-version -- 0.1.0-rc.3
 ```
 
 `release-images.json` is the single list of published image targets. The
@@ -31,7 +31,7 @@ every artifact succeeds:
 
 ```text
 npm run release:package -- \
-  --version 0.1.0-rc.2 \
+  --version 0.1.0-rc.3 \
   --digests-dir release-digests \
   --smoke-dir release-smoke \
   --output-dir dist/release
@@ -49,7 +49,7 @@ that runs before release-file attestation:
 
 ```text
 npm run release:verify-bundle -- \
-  --version 0.1.0-rc.2 \
+  --version 0.1.0-rc.3 \
   --directory dist/release
 ```
 
@@ -119,7 +119,7 @@ BYOK_GRID_RELEASE_INTEGRATION=1 npm run test:release-tools
    Airbyte, or ClickHouse. Those runbooks remain available, but they are not
    universal candidate blockers.
 
-4. Create and push a signed annotated tag such as `v0.1.0-rc.2`.
+4. Create and push a signed annotated tag such as `v0.1.0-rc.3`.
 5. Let `.github/workflows/release.yml` verify source, build images, publish
    attestations, smoke every immutable image on `linux/amd64` and `linux/arm64`,
    revalidate the seven two-record `release-smoke-<target>` artifacts into the

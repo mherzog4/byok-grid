@@ -170,6 +170,18 @@ if (
   fail('The release scanner must inspect the immutable build digest.');
 }
 
+for (const containerdImageStoreContract of [
+  'docker/setup-docker-action@77e84dbf09b47d1e29270283c22f16145aa85ca1',
+  'version: v29.6.2',
+  '"containerd-snapshotter": true',
+]) {
+  if (!releaseWorkflow.includes(containerdImageStoreContract)) {
+    fail(
+      'Release smoke must retain the multi-platform containerd image store.'
+    );
+  }
+}
+
 for (const smokeContract of [
   'set -euo pipefail',
   'for platform in linux/amd64 linux/arm64',

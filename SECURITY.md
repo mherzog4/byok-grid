@@ -22,19 +22,20 @@ requested and safe.
 
 ## Deployment warning
 
-The default Hatchet image in `docker-compose.yml` disables authentication and
-is for local development only. Do not expose it to a network or deploy it in
-production. Production deployments must use authenticated, pinned workflow
-infrastructure and unique database and encryption secrets.
+The default Compose application uses the SQLite-native workflow worker and does
+not start Hatchet. The optional `hatchet` profile uses an auth-disabled local
+Hatchet image for adapter development only. Do not expose that service to a
+network or deploy it in production. A deployment that selects the Hatchet
+adapter must use authenticated, pinned workflow infrastructure and unique
+database and encryption secrets.
 
 The Dockerfile runs both application targets as the unprivileged `node` user.
 Official images contain no deployment-specific build arguments. Never place
 database URLs, Hatchet tokens, workspace encryption keys, provider
 credentials, or operator origins in build arguments or image layers. The
-Compose `app` profile still depends on the auth-disabled local
-Hatchet image and fixed local database passwords, so it is an evaluation path,
-not a production manifest. Follow `docs/SELF_HOSTING.md` before exposing a
-deployment.
+Compose `app` profile is a single-node SQLite evaluation and self-hosting path,
+not a public production manifest. Follow `docs/SELF_HOSTING.md` before exposing
+a deployment.
 
 Every product JSON mutation uses an incremental five-MiB reader rather than unbounded App
 Router `request.json()` buffering. Push ingestion independently enforces five
