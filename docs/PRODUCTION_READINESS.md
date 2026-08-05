@@ -5,8 +5,9 @@ Passing the local and CI gates makes a release candidate reproducible; it does
 not by itself prove that a particular deployment is production-ready.
 
 Last repository evidence review: 2026-08-05. Target candidate:
-`0.1.0-rc.3`, containing the SQLite-native default topology and schema-v2
-stable evidence contract.
+`0.1.0-rc.4`, containing the SQLite-native default topology, schema-v2 stable
+evidence contract, and full-history CI checkout required to verify promotion
+ancestry.
 
 ## Repository and local-runtime evidence
 
@@ -16,7 +17,8 @@ working tree:
 - locked npm installation with the reviewed lifecycle-script allowlist;
 - dependency-free GitHub Actions policy verification before package install,
   covering full action SHA pins, checkout credential non-persistence, explicit
-  permissions, job timeouts, concurrency, and privileged-trigger rejection;
+  permissions, job timeouts, concurrency, privileged-trigger rejection, and
+  full checkout history for any job that verifies stable-release ancestry;
 - formatting, linting, TypeScript checks, unit and SQLite integration tests;
 - production Next.js build and compiled standalone application E2E covering
   deterministic local-owner and personal-workspace provisioning, grid

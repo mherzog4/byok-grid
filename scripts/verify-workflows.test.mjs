@@ -55,6 +55,23 @@ test('rejects checkout credential persistence', () => {
   assert.match(result.issues.join('\n'), /persist-credentials: false/u);
 });
 
+test('requires full checkout history for stable release verification', () => {
+  const shallow = validWorkflow.replace(
+    '      - uses: owner/action/subpath',
+    '      - run: npm run release:verify-version\n      - uses: owner/action/subpath'
+  );
+  assert.match(
+    verifyWorkflowSource(shallow).issues.join('\n'),
+    /release verification.*fetch-depth: 0/u
+  );
+
+  const fullHistory = shallow.replace(
+    '          persist-credentials: false',
+    '          fetch-depth: 0\n          persist-credentials: false'
+  );
+  assert.deepEqual(verifyWorkflowSource(fullHistory).issues, []);
+});
+
 test('rejects privileged trigger handoffs', () => {
   for (const trigger of ['pull_request_target', 'workflow_run']) {
     const result = verifyWorkflowSource(
