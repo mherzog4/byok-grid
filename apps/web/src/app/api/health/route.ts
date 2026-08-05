@@ -5,10 +5,13 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+const DRAIN_PROBE_DELAY_MILLISECONDS = 750;
+
+export async function GET(request?: Request) {
   try {
     assertWebRuntimeConfiguration();
     await assertSqliteMigrationsReady(sqliteDatabase.client);
+    await delayDrainProbe(request);
     return NextResponse.json(
       {
         configuration: 'valid',
@@ -27,4 +30,17 @@ export async function GET() {
       { headers: { 'Cache-Control': 'no-store' }, status: 503 }
     );
   }
+}
+
+async function delayDrainProbe(request?: Request): Promise<void> {
+  if (
+    process.env.BYOK_GRID_WEB_DRAIN_DRILL !== '1' ||
+    request?.headers.get('x-byok-grid-drain-probe') !== '1'
+  ) {
+    return;
+  }
+
+  await new Promise((resolve) =>
+    setTimeout(resolve, DRAIN_PROBE_DELAY_MILLISECONDS)
+  );
 }
