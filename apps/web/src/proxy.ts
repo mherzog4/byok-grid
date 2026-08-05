@@ -28,7 +28,7 @@ export function proxy(request: NextRequest): Response {
   ) {
     const rejection = enforceApiMutationOrigin(
       request,
-      process.env.BYOK_GRID_PUBLIC_URL ?? request.nextUrl.origin
+      process.env.BYOK_GRID_PUBLIC_URL || request.nextUrl.origin
     );
     if (rejection) {
       rejection.headers.set('content-security-policy', contentSecurityPolicy);

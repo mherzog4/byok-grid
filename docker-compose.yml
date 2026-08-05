@@ -79,7 +79,7 @@ services:
       sqlite-migrate:
         condition: service_completed_successfully
     environment:
-      BYOK_GRID_PUBLIC_URL: ${BYOK_GRID_PUBLIC_URL:-}
+      BYOK_GRID_PUBLIC_URL: ${BYOK_GRID_PUBLIC_URL:-http://localhost:3000}
       BYOK_GRID_MASTER_KEY: ${BYOK_GRID_MASTER_KEY:-}
       BYOK_GRID_MASTER_KEY_ID: ${BYOK_GRID_MASTER_KEY_ID:-local-v1}
       BYOK_GRID_ADDITIONAL_MASTER_KEYS: '${BYOK_GRID_ADDITIONAL_MASTER_KEYS:-}'

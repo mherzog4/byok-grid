@@ -81,9 +81,10 @@ working tree:
   ordering;
 - a reproducible local Compose drain drill that signals a persisted in-flight
   500-row, 100-step workflow, proves every step succeeds, verifies worker exit
-  0 and Hatchet drain logs, and restores worker health; the application Node
-  process is container PID 1 and the Hatchet REST lifecycle endpoint is
-  explicit rather than inherited from its token;
+  0 and driver-specific pending-task drain confirmation, and restores worker
+  health; the application Node process is container PID 1 and the optional
+  Hatchet REST lifecycle endpoint is explicit rather than inherited from its
+  token;
 - optional Hatchet `/metrics` runtime support through the installed
   `prom-client` peer, with container verification that the production
   dependency is present;
