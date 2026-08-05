@@ -1,7 +1,11 @@
 import type { NextConfig } from 'next';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-const monorepoRoot = path.join(__dirname, '../..');
+const repositoryRoot = path.join(__dirname, '../..');
+const buildRoot = existsSync(path.join(repositoryRoot, 'package.json'))
+  ? repositoryRoot
+  : __dirname;
 
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -17,10 +21,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ headers: securityHeaders, source: '/(.*)' }];
   },
-  outputFileTracingRoot: monorepoRoot,
+  outputFileTracingRoot: buildRoot,
   poweredByHeader: false,
   turbopack: {
-    root: monorepoRoot,
+    root: buildRoot,
   },
 };
 
