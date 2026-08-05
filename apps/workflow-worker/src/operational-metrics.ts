@@ -164,6 +164,23 @@ async function runMetricsServer(input: {
 }): Promise<void> {
   const server = createServer(async (request, response) => {
     response.setHeader('Cache-Control', 'no-store');
+    if (request.method === 'GET' && request.url === '/health') {
+      try {
+        await withTimeout(input.metrics.scrape(), SCRAPE_TIMEOUT_MILLISECONDS);
+        writeJson(response, 200, {
+          driver: workflowExecutionDriver(),
+          name: 'byok-grid-workflow-worker',
+          status: 'HEALTHY',
+        });
+      } catch {
+        writeJson(response, 503, {
+          driver: workflowExecutionDriver(),
+          name: 'byok-grid-workflow-worker',
+          status: 'UNHEALTHY',
+        });
+      }
+      return;
+    }
     if (request.method !== 'GET' || request.url !== '/metrics') {
       writeText(response, 404, 'Not Found');
       return;
@@ -229,6 +246,21 @@ function closeServer(server: Server): Promise<void> {
 function writeText(response: ServerResponse, status: number, body: string) {
   response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
   response.end(body);
+}
+
+function writeJson(
+  response: ServerResponse,
+  status: number,
+  body: Readonly<Record<string, string>>
+) {
+  response.writeHead(status, { 'Content-Type': 'application/json' });
+  response.end(JSON.stringify(body));
+}
+
+function workflowExecutionDriver(): 'hatchet' | 'local' {
+  return process.env.WORKFLOW_EXECUTION_DRIVER === 'hatchet'
+    ? 'hatchet'
+    : 'local';
 }
 
 function withTimeout<T>(promise: Promise<T>, milliseconds: number): Promise<T> {

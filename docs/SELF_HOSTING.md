@@ -1,11 +1,10 @@
 # Self-hosting BYOK Grid
 
 The repository ships production-shaped images for the Next.js control plane and
-Node.js workflow worker. The root Compose file is a **local evaluation
-environment**, not a production topology. SQLite is the application source of
-truth. PostgreSQL is present only as Hatchet's private scheduler store; its
-credentials are public development values and the Hatchet image has
-authentication disabled.
+Node.js workflow worker. The root Compose file is a **single-node evaluation
+environment**, not a managed production topology. SQLite is the application
+source of truth and the default execution driver; Hatchet and PostgreSQL are
+not part of the default profile.
 
 ## Local container evaluation
 
@@ -13,26 +12,31 @@ Prerequisites are Docker Compose and a copied `.env.example` at `.env`.
 
 1. Generate a unique local `BYOK_GRID_MASTER_KEY` as described in
    `.env.example`.
-2. Run `npm run infra:up` to start local Hatchet and its private PostgreSQL
-   dependency.
-3. Open <http://localhost:8888>, create or copy the development worker token
-   from **Settings → API Tokens**, and set `HATCHET_CLIENT_TOKEN` in `.env`.
-4. Run `npm run self-host:up`.
-5. Wait for `sqlite-migrate` to complete, then open
+2. Run `npm run self-host:up`.
+3. Wait for `sqlite-migrate` to complete, then open
    <http://localhost:3000>. The web container's `/api/health` endpoint reports
    database readiness and also drives the image health check.
 
 The `app` Compose profile builds a non-root standalone Next.js image and a
 SQLite-only visual-workflow worker. A one-shot SQLite migration job, web
-container, and workflow worker share only the `sqlite_data` volume. Hatchet's
-private PostgreSQL volume is isolated from all BYOK Grid processes. Image
+container, and workflow worker share only the `sqlite_data` volume. Image
 entrypoints validate required runtime variables and exit before startup when a
 value is missing; profile-independent interpolation does not block
 infrastructure-only bootstrapping.
 
-Use `npm run self-host:down` to stop the profile. Named SQLite, Hatchet
-PostgreSQL, and Hatchet configuration volumes are retained. Removing volumes is
-a separate destructive operation and is intentionally not part of that script.
+Use `npm run self-host:down` to stop the profile. The named SQLite volume is
+retained. Removing volumes is a separate destructive operation and is
+intentionally not part of that script.
+
+### Optional Hatchet adapter
+
+The local driver is the supported default. To evaluate the Hatchet adapter,
+set `WORKFLOW_EXECUTION_DRIVER=hatchet`, run `npm run infra:up`, copy the
+development token from Hatchet into `.env`, and then run
+`npm run self-host:up`. The `hatchet` Compose profile contains Hatchet and its
+private PostgreSQL database; BYOK Grid never reads or writes that database.
+The bundled Hatchet image has authentication disabled and is for local adapter
+testing only.
 
 ### Local graceful-drain drill
 
@@ -46,10 +50,10 @@ The command builds a disposable E2E image, creates a synthetic 500-row,
 100-node workflow in the shared local SQLite database, waits for a persisted
 running step, sends `SIGTERM` to the worker with its 90-second grace period,
 and requires the complete workflow to succeed. It verifies a clean container
-exit and Hatchet drain logs, cleans the synthetic workspace, restarts the
-worker, and waits for health. Do not run this disruptive drill against a
-production deployment; repeat its signal and recovery procedure through that
-environment's approved rollout tooling instead.
+exit and the selected driver's drain marker, cleans the synthetic workspace,
+restarts the worker, and waits for health. Do not run this disruptive drill
+against a production deployment; repeat its signal and recovery procedure
+through that environment's approved rollout tooling instead.
 
 For the authenticated Kubernetes release gate, use the isolated remote
 procedure in
@@ -90,20 +94,22 @@ bounded `BYOK_GRID_ADDITIONAL_MASTER_KEYS` Secret. Follow the complete overlap,
 plan, apply, verification, and backup-key retirement sequence in the
 [master-key rotation guide](MASTER_KEY_ROTATION.md); replacing the current key
 without that overlap can make existing workspace credentials unreadable.
-Hatchet receives delivery and run identifiers, never those
-secrets. When community connectors are enabled, the workflow worker also needs
-the signed registry mount plus the connector-runner URL and shared RPC secret.
-The runner remains isolated from SQLite and workspace encryption keys.
+When the optional adapter is enabled, Hatchet receives delivery and run
+identifiers, never those secrets. When community connectors are enabled, the
+workflow worker also needs the signed registry mount plus the connector-runner
+URL and shared RPC secret. The runner remains isolated from SQLite and
+workspace encryption keys.
 The same workflow-worker process schedules and executes SQLite-owned HTTP and
 HubSpot sources. `SOURCE_SCHEDULER_POLL_SECONDS` controls the due-source scan
-interval; source credentials and encrypted page cursors never enter Hatchet.
+interval; source credentials and encrypted page cursors never enter Hatchet
+when that adapter is enabled.
 
 The web UI uses same-origin requests, so the image contains no operator URL.
 Set the optional canonical runtime origin through `BYOK_GRID_PUBLIC_URL` when a
 reverse proxy changes the origin visible to Next.js. It must contain only
 scheme, host, and optional port. Local clones can leave it empty. Database URLs,
-provider keys, encryption keys, Hatchet tokens, and operator origins must never
-be passed as image build arguments.
+provider keys, encryption keys, optional Hatchet tokens, and operator origins
+must never be passed as image build arguments.
 
 ## Access boundary
 
@@ -123,8 +129,9 @@ defaults:
 - persistent local storage for the SQLite database and WAL on one active
   application/worker host, or a remote libSQL service for a supported
   multi-host topology;
-- an authenticated, release-pinned Hatchet deployment or compatible managed
-  Hatchet endpoint with TLS;
+- the default SQLite-native execution driver on the same active host as the
+  local database, or an authenticated release-pinned Hatchet endpoint when the
+  optional adapter is intentionally enabled;
 - unique `BYOK_GRID_MASTER_KEY` and `BYOK_GRID_MASTER_KEY_ID` values from a
   secret manager, plus an optional
   secret-managed `BYOK_GRID_ADDITIONAL_MASTER_KEYS` overlap set used only
@@ -177,9 +184,10 @@ for remote libSQL, `SQLITE_AUTH_TOKEN`. The web container needs those values,
 `BYOK_GRID_MASTER_KEY`, `BYOK_GRID_MASTER_KEY_ID`, optional
 `BYOK_GRID_ADDITIONAL_MASTER_KEYS`, and an optional `BYOK_GRID_PUBLIC_URL`
 behind a reverse proxy.
-The workflow worker needs the same SQLite and BYOK
-encryption-key settings plus Hatchet client settings. No BYOK Grid runtime needs
-PostgreSQL credentials.
+The workflow worker needs the same SQLite and BYOK encryption-key settings.
+Hatchet client settings are required only when
+`WORKFLOW_EXECUTION_DRIVER=hatchet`. No BYOK Grid runtime needs PostgreSQL
+credentials.
 
 Set `AUTOMATIC_RUN_MAX_PER_ROW_CHANGE` and
 `AUTOMATIC_WRITEBACK_MAX_PER_ROW_CHANGE` conservatively for the deployment.
@@ -222,20 +230,21 @@ web, worker, and runner. During planned dual-signature rotation, workspace
 publisher revocation blocks execution only after every verified co-signer is
 revoked; an artifact block is the immediate exact-code kill switch.
 
-Set both `HATCHET_CLIENT_HOST_PORT` for gRPC task dispatch and
-`HATCHET_CLIENT_API_URL` for REST lifecycle operations. Do not rely on the API
-URL embedded in a token: it may name `localhost` from the machine where the
-token was minted, which prevents a containerized worker from pausing itself
-during a graceful drain.
+When using the optional adapter, set both `HATCHET_CLIENT_HOST_PORT` for gRPC
+task dispatch and `HATCHET_CLIENT_API_URL` for REST lifecycle operations. Do not
+rely on the API URL embedded in a token: it may name `localhost` from the
+machine where the token was minted, which prevents a containerized worker from
+pausing itself during a graceful drain.
 
 The web image health check proves runtime configuration is valid and the Next.js
-server can open a fully migrated SQLite database. The worker profile parses
-Hatchet's native health status and performs a graceful drain on termination.
-Neither check proves provider reachability or that queue age is within its SLO.
-Production monitoring must cover queued-work age, workflow failure rate,
-database saturation, and provider error/limit rates separately.
-The worker health port serves Hatchet/process Prometheus metrics at `/metrics`.
-A separate application endpoint on port `8002` exposes low-cardinality
+server can open a fully migrated SQLite database. The worker probe reads the
+local database-backed health response or Hatchet's native health status,
+depending on the selected driver, and both modes perform a graceful drain on
+termination. Neither check proves provider reachability or that queue age is
+within its SLO. Production monitoring must cover queued-work age, workflow
+failure rate, database saturation, and provider error/limit rates separately.
+The optional Hatchet health port exposes its SDK lifecycle status. The
+application endpoint on port `8002` exposes low-cardinality
 workflow, step, and dispatch backlog gauges backed by one bounded SQLite read.
 Neither endpoint implements application authorization; both must remain on a
 trusted monitoring network rather than public ingress. See the

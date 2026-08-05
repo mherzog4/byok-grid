@@ -2,36 +2,15 @@ import {
   processSqliteRowSettlement,
   setSqliteRowSettlementWorkerFailure,
 } from '@byok-grid/db';
-import {
-  rowSettlementInputSchema,
-  type RowSettlementInput,
-} from '@byok-grid/domain';
+import type { RowSettlementInput } from '@byok-grid/domain';
 import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { z } from 'zod';
 import { workflowWorkerConfig } from './config';
 import { workflowDb } from './database';
-import { workflowHatchet } from './hatchet';
 
-const maximumRetries = 2;
+export const MAXIMUM_ROW_SETTLEMENT_RETRIES = 2;
 
-export const processSqliteRowSettlementTask = workflowHatchet.task({
-  name: 'process-sqlite-row-settlement',
-  retries: maximumRetries,
-  backoff: { factor: 2, maxSeconds: 30 },
-  idempotency: {
-    expression: 'input.settlementId',
-    fallbackTtlMs: 7 * 86_400_000,
-    strategy: 'status',
-  },
-  inputValidator: rowSettlementInputSchema,
-  fn: (input, context) =>
-    runSqliteRowSettlement(
-      rowSettlementInputSchema.parse(input),
-      context.retryCount()
-    ),
-});
-
-async function runSqliteRowSettlement(
+export async function runSqliteRowSettlement(
   input: RowSettlementInput,
   retryCount: number
 ) {
@@ -44,7 +23,8 @@ async function runSqliteRowSettlement(
     });
   } catch (error) {
     const retrying =
-      !(error instanceof z.ZodError) && retryCount < maximumRetries;
+      !(error instanceof z.ZodError) &&
+      retryCount < MAXIMUM_ROW_SETTLEMENT_RETRIES;
     const message =
       error instanceof z.ZodError
         ? 'The settled row is too large or invalid for automatic delivery.'

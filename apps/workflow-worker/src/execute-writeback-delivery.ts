@@ -18,7 +18,6 @@ import {
   type SqliteWritebackExecution,
 } from '@byok-grid/db';
 import {
-  writebackDeliveryInputSchema,
   writebackPayloadSchema,
   type WritebackDeliveryInput,
 } from '@byok-grid/domain';
@@ -30,27 +29,9 @@ import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { z } from 'zod';
 import { workflowMasterKeys } from './master-keys';
 import { workflowDb } from './database';
-import { workflowHatchet } from './hatchet';
 
-const maximumRetries = 3;
+export const MAXIMUM_WRITEBACK_RETRIES = 3;
 const maximumResponseBytes = 64 * 1_024;
-export const executeSqliteWritebackDeliveryTask = workflowHatchet.task({
-  name: 'execute-sqlite-writeback-delivery',
-  retries: maximumRetries,
-  backoff: { factor: 2, maxSeconds: 300 },
-  executionTimeout: '2m',
-  idempotency: {
-    expression: 'input.deliveryId',
-    fallbackTtlMs: 7 * 86_400_000,
-    strategy: 'status',
-  },
-  inputValidator: writebackDeliveryInputSchema,
-  fn: (input, context) =>
-    executeSqliteWritebackDelivery(
-      writebackDeliveryInputSchema.parse(input),
-      context.retryCount()
-    ),
-});
 
 export async function executeSqliteWritebackDelivery(
   input: WritebackDeliveryInput,
@@ -95,7 +76,8 @@ export async function executeSqliteWritebackDelivery(
     }
   } catch (error) {
     const failure = classifyFailure(error);
-    const retrying = failure.retryable && retryCount < maximumRetries;
+    const retrying =
+      failure.retryable && retryCount < MAXIMUM_WRITEBACK_RETRIES;
     await setSqliteWritebackDeliveryWorkerFailure(workflowDb, {
       ...input,
       errorCode: failure.code,

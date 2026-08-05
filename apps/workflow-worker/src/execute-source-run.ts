@@ -24,7 +24,6 @@ import {
   normalizeHubSpotContactsSourceResponse,
   normalizeHttpJsonSourceResponse,
   SourceResponseError,
-  sourceRunInputSchema,
   type SourceRunInput,
 } from '@byok-grid/domain';
 import {
@@ -37,27 +36,9 @@ import { NonRetryableError } from '@hatchet-dev/typescript-sdk/v1';
 import { z } from 'zod';
 import { workflowMasterKeys } from './master-keys';
 import { workflowDb } from './database';
-import { workflowHatchet } from './hatchet';
 
-const maximumRetries = 2;
+export const MAXIMUM_SOURCE_RUN_RETRIES = 2;
 const maximumSourceResponseBytes = 5 * 1_048_576;
-export const executeSqliteSourceRunTask = workflowHatchet.task({
-  name: 'execute-sqlite-source-run',
-  retries: maximumRetries,
-  backoff: { factor: 2, maxSeconds: 60 },
-  executionTimeout: '30m',
-  idempotency: {
-    expression: 'input.sourceRunId',
-    fallbackTtlMs: 86_400_000,
-    strategy: 'status',
-  },
-  inputValidator: sourceRunInputSchema,
-  fn: (input, context) =>
-    executeSqliteSourceRun(
-      sourceRunInputSchema.parse(input),
-      context.retryCount()
-    ),
-});
 
 export async function executeSqliteSourceRun(
   input: SourceRunInput,
@@ -139,7 +120,8 @@ export async function executeSqliteSourceRun(
     }
   } catch (error) {
     const failure = classifySourceFailure(error);
-    const retrying = failure.retryable && retryCount < maximumRetries;
+    const retrying =
+      failure.retryable && retryCount < MAXIMUM_SOURCE_RUN_RETRIES;
     await setSqliteSourceRunWorkerFailure(workflowDb, {
       errorCode: failure.code,
       errorMessage: failure.message,

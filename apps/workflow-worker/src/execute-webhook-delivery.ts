@@ -16,7 +16,6 @@ import {
   workspaceKeys,
 } from '@byok-grid/db';
 import {
-  webhookDeliveryInputSchema,
   webhookDestinationRequestSchema,
   webhookPayloadSchema,
   type WebhookDeliveryInput,
@@ -30,26 +29,8 @@ import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { workflowMasterKeys } from './master-keys';
 import { workflowDb } from './database';
-import { workflowHatchet } from './hatchet';
 
 export const MAXIMUM_WEBHOOK_RETRIES = 4;
-export const executeSqliteWebhookDeliveryTask = workflowHatchet.task({
-  name: 'execute-sqlite-webhook-delivery',
-  retries: MAXIMUM_WEBHOOK_RETRIES,
-  backoff: { factor: 2, maxSeconds: 300 },
-  executionTimeout: '2m',
-  idempotency: {
-    expression: 'input.deliveryId',
-    fallbackTtlMs: 7 * 86_400_000,
-    strategy: 'status',
-  },
-  inputValidator: webhookDeliveryInputSchema,
-  fn: (input, context) =>
-    executeSqliteWebhookDelivery(
-      webhookDeliveryInputSchema.parse(input),
-      context.retryCount()
-    ),
-});
 
 export async function executeSqliteWebhookDelivery(
   input: WebhookDeliveryInput,

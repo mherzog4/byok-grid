@@ -56,10 +56,13 @@ export const workflowWorkerConfig = z
       (value) => (value === '' ? undefined : value),
       z.url().optional()
     ),
-    HATCHET_CLIENT_API_URL: z.url(),
-    HATCHET_CLIENT_HOST_PORT: z.string().min(1),
+    HATCHET_CLIENT_API_URL: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z.url().optional()
+    ),
+    HATCHET_CLIENT_HOST_PORT: optionalSecret,
     HATCHET_CLIENT_TLS_STRATEGY: z.enum(['none', 'tls']).default('none'),
-    HATCHET_CLIENT_TOKEN: z.string().min(1),
+    HATCHET_CLIENT_TOKEN: optionalSecret,
     HATCHET_CLIENT_WORKER_HEALTHCHECK_ENABLED: z
       .enum(['true', 'false'])
       .default('true'),
@@ -82,6 +85,7 @@ export const workflowWorkerConfig = z
       .min(5)
       .max(300)
       .default(30),
+    WORKFLOW_EXECUTION_DRIVER: z.enum(['local', 'hatchet']).default('local'),
     WORKFLOW_DISPATCH_POLL_MS: z.coerce
       .number()
       .int()
@@ -90,6 +94,22 @@ export const workflowWorkerConfig = z
       .default(1_000),
   })
   .superRefine((value, context) => {
+    if (value.WORKFLOW_EXECUTION_DRIVER === 'hatchet') {
+      for (const field of [
+        'HATCHET_CLIENT_API_URL',
+        'HATCHET_CLIENT_HOST_PORT',
+        'HATCHET_CLIENT_TOKEN',
+      ] as const) {
+        if (!value[field]) {
+          context.addIssue({
+            code: 'custom',
+            message: `${field} is required when the Hatchet execution driver is enabled.`,
+            path: [field],
+          });
+        }
+      }
+    }
+
     if (
       value.BYOK_GRID_METRICS_ENABLED === 'true' &&
       value.BYOK_GRID_METRICS_PORT ===

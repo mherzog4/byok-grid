@@ -5,6 +5,7 @@ metadata:
   labels:
     {{- include "byok-grid.labels" . | nindent 4 }}
 data:
+  WORKFLOW_EXECUTION_DRIVER: 'hatchet'
   BYOK_GRID_PUBLIC_URL: {{ .Values.app.publicUrl | quote }}
   BYOK_GRID_MASTER_KEY_ID: {{ .Values.worker.masterKeyId | default "v1" | quote }}
   HATCHET_CLIENT_API_URL: {{ .Values.worker.hatchet.apiUrl | quote }}

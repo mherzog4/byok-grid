@@ -23,7 +23,6 @@ import {
   workspaceKeys,
 } from '@byok-grid/db';
 import {
-  cellRunInputSchema,
   httpWaterfallRunPlanSchema,
   MAXIMUM_CELL_RUN_ATTEMPTS,
   type CellRunInput,
@@ -39,24 +38,9 @@ import { z } from 'zod';
 import { workflowWorkerConfig } from './config';
 import { workflowMasterKeys } from './master-keys';
 import { workflowDb } from './database';
-import { workflowHatchet } from './hatchet';
 import { executeWaterfallPlan } from './waterfall';
 
 export const MAXIMUM_SQLITE_CELL_RUN_RETRIES = MAXIMUM_CELL_RUN_ATTEMPTS - 1;
-export const executeSqliteCellRunTask = workflowHatchet.task({
-  name: 'execute-sqlite-cell-run',
-  retries: MAXIMUM_SQLITE_CELL_RUN_RETRIES,
-  backoff: { factor: 2, maxSeconds: 60 },
-  executionTimeout: '2m',
-  idempotency: {
-    expression: 'input.runId',
-    fallbackTtlMs: 86_400_000,
-    strategy: 'status',
-  },
-  inputValidator: cellRunInputSchema,
-  fn: (input, context) =>
-    executeSqliteCellRun(cellRunInputSchema.parse(input), context.retryCount()),
-});
 
 export async function executeSqliteCellRun(
   input: CellRunInput,

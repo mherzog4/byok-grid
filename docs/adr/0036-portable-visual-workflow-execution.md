@@ -5,6 +5,11 @@
 - Supersedes: none
 - Extends: ADR 0035
 
+Implementation update (2026-08-04): the portability boundary is now exercised
+in production code. SQLite-native outbox execution is the default driver;
+Hatchet remains an optional scheduling adapter that invokes the same task
+handlers.
+
 ## Context
 
 BYOK Grid needs a node-based workflow editor without making its public workflow
@@ -45,10 +50,11 @@ conditional, expiring claim before executing a step. Completion, route
 activation, downstream readiness or skipping, and overall-run completion occur
 in one immediate SQLite transaction.
 
-Hatchet receives identifiers and schedules the generic workflow runner. It does
-not receive credentials, mutable graph definitions, or authoritative node
-state. A future scheduler can replace Hatchet without changing stored workflow
-definitions or run history.
+The default local driver claims the SQLite outbox and invokes the generic task
+handlers directly. The optional Hatchet adapter receives identifiers and
+schedules those same handlers. It does not receive credentials, mutable graph
+definitions, or authoritative node state. Either transport can be selected
+without changing stored workflow definitions or run history.
 
 Outbound webhook nodes snapshot one delivery per input row in SQLite. Their
 delivery identifiers are derived deterministically from the run, step,

@@ -99,9 +99,8 @@ release. It currently includes:
   anti-framing, MIME-sniffing, browser-capability, and framework-identification
   suppression headers;
 - a Node.js workflow worker that resolves credentials just in time, records run
-  provenance, and dispatches identifier-only
-  outbox events through Hatchet while keeping definitions, row batches, step
-  outputs, and terminal state in SQLite;
+  provenance, and executes identifier-only SQLite outbox events locally by
+  default, with Hatchet available as an optional scheduling adapter;
 - non-root, multi-stage web and worker images with an opt-in migration-ordered
   Compose evaluation profile;
 - a vendor-neutral Helm release with least-privilege runtime identities,
@@ -134,7 +133,9 @@ format supports richer editors later.
 - **SQLite or libSQL** is the sole source of truth for workspaces, cells,
   credentials, workflow graphs, and execution state. A local file is the
   zero-configuration default.
-- **Hatchet** is an optional durable scheduler for background execution. Its
+- **SQLite-native execution** is the default workflow driver. It consumes the
+  durable outbox and run ledgers without another service.
+- **Hatchet** is an optional scheduling adapter for advanced deployments. Its
   internal PostgreSQL database belongs to Hatchet and is not application data.
 - **TypeScript workers** decrypt credentials just in time and execute trusted
   connectors outside the web request lifecycle.
@@ -164,7 +165,8 @@ format supports richer editors later.
 - **CSV imports** stream into tenant-scoped SQLite staging, then apply in
   restart-safe worker batches; Airbyte is not required for file ingestion.
 - **Scheduled sources** are claimed with compare-and-swap leases, executed by
-  Hatchet, and upsert remote records through stable source-owned identities.
+  the selected workflow driver, and upsert remote records through stable
+  source-owned identities.
   Cursor sources commit each page and its encrypted next cursor atomically, so
   a retry resumes after the last durable page. Missing records are preserved by
   default; an opt-in mode archives them only after the complete snapshot and
@@ -175,9 +177,11 @@ format supports richer editors later.
   never infer contact deletion.
 - **Push ingestion** gives optional user-owned ELT adapters a stable HTTP
   destination; Next.js stages accepted batches under token-scoped SQLite
-  capabilities, while Hatchet applies rows, formulas, and automations asynchronously.
+  capabilities, while the workflow worker applies rows, formulas, and
+  automations asynchronously.
 - **Outbound webhooks** snapshot one row transactionally, sign the exact body,
-  and retry through Hatchet without placing credentials in workflow history.
+  and retry through the workflow worker without placing credentials in
+  workflow history.
 - **HubSpot writebacks** snapshot mapped scalar values transactionally and use
   a fixed-host connector to update one contact with a workspace-owned token.
   Optional settled-row triggers share the saved-view filter language, ignore
@@ -353,21 +357,19 @@ with no database or product secrets. Run `npm run dev:marketing` and open
 <http://localhost:3001>. Its Vercel setup and isolation boundary are documented
 in [`docs/MARKETING_SITE.md`](docs/MARKETING_SITE.md).
 
-To evaluate the built web and workflow-worker images, start infrastructure,
-copy Hatchet's local token into `.env`, and then run `npm run self-host:up`.
+To evaluate the built web and workflow-worker images, run
+`npm run self-host:up`. No scheduler service or token is required by the
+default SQLite-native execution driver.
 Compose persists the authoritative SQLite file in its own named volume. See
 [the self-hosting guide](docs/SELF_HOSTING.md) for the image commands and
 production requirements.
 
-The web application does not need Docker, PostgreSQL, Airbyte, ClickHouse, or
-Hatchet for grid authoring or visual workflow authoring.
-`npm run infra:up` starts local Hatchet and Hatchet's private PostgreSQL
-dependency. BYOK Grid never reads or writes that database. The local Hatchet
-image has authentication disabled and must never be used in production.
+The local application does not need Docker, PostgreSQL, Airbyte, ClickHouse, or
+Hatchet for grid authoring or workflow execution.
 
-To execute published visual workflows locally, stop the web-only dev process,
-run `npm run infra:up`, copy Hatchet's development token into `.env`, and run
-`npm run dev:workflows`. This starts the Next.js app and the SQLite-only Node
+To execute published visual workflows locally, stop the web-only dev process
+and run `npm run dev:workflows`. This starts the Next.js app and the
+SQLite-native Node
 workflow worker. Table triggers, filters, table writes, and signed outbound
 webhook nodes execute from SQLite-owned plans and run ledgers. Connector
 enrichment nodes expand into deterministic per-cell runs, including signed
@@ -375,6 +377,9 @@ community connectors when the sandbox runner is configured. Scheduled HTTP and
 HubSpot sources use the same worker, with SQLite-owned checkpoints and encrypted
 page cursors. `npm run dev:all` additionally starts optional workspace
 development processes; `npm run dev:workflows` is the focused contributor path.
+To exercise the optional Hatchet adapter, set
+`WORKFLOW_EXECUTION_DRIVER=hatchet`, run `npm run infra:up`, configure the
+development token, and start the same worker command.
 
 ## Verification
 
@@ -410,7 +415,7 @@ TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:55432/byok_grid \
 ```
 
 The legacy public-network tests remain separately opt-in. The SQLite web smoke
-test needs the local Next.js app and Hatchet worker to be running and exercises
+test needs the local Next.js app and workflow worker to be running and exercises
 local-owner and personal-workspace provisioning, the built app, draft workflow
 editing, publication, and durable run creation:
 
