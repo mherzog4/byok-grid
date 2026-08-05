@@ -420,11 +420,9 @@ for (const nativeVerifierContract of [
 }
 
 if (
-  !productionEvidenceLibrary.includes(
-    'BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED'
-  )
+  !productionEvidenceLibrary.includes('BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED')
 ) {
-  fail('Stable promotion must require native multi-architecture evidence.');
+  fail('Stable promotion must require published multi-architecture evidence.');
 }
 if (
   rootPackage.scripts?.['release:verify-protection'] !==

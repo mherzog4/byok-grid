@@ -2,9 +2,10 @@
 
 This drill proves that a named prior Helm revision can become healthy behind
 the canonical HTTPS ingress and that the exact digest-pinned release candidate
-can then be restored. Run it during the candidate observation window after the
-reference deployment, public ingress, external-secret provenance, and
-NetworkPolicy gates pass.
+can then be restored. Run it during a controlled deployment change window after
+the public ingress, external-secret provenance, and NetworkPolicy gates pass.
+It certifies that deployment's Kubernetes rollback path; it is not a universal
+stable-tag requirement for the default SQLite application.
 
 The command changes the live release twice. It first rolls back to the declared
 prior revision and then rolls forward by asking Helm to restore the original

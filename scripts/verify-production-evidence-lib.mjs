@@ -4,17 +4,13 @@ export const PRODUCTION_EVIDENCE_MARKER =
   'BYOK_GRID_PRODUCTION_EVIDENCE_VERIFIED';
 
 export const REQUIRED_PRODUCTION_EVIDENCE_IDS = Object.freeze([
-  'authenticated-worker-drain',
   'candidate-source-equivalence',
   'code-security',
   'multi-architecture-smoke',
-  'observation-window',
-  'production-capacity',
-  'public-ingress-and-proxy',
-  'reference-deployment',
   'release-assets',
   'release-tag-protection',
-  'remote-libsql-recovery',
+  'single-node-runtime',
+  'sqlite-backup-restore',
 ]);
 
 export const OPTIONAL_PRODUCTION_ADAPTERS = Object.freeze([
@@ -28,26 +24,16 @@ const OPTIONAL_ADAPTER_EVIDENCE = Object.freeze({
 });
 
 const EXPECTED_MARKERS = Object.freeze({
-  'authenticated-worker-drain': ['BYOK_GRID_KUBERNETES_WORKER_DRAIN_VERIFIED'],
-  'multi-architecture-smoke': [
-    'BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED',
-    'BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED',
-  ],
-  'production-capacity': ['BYOK_GRID_PRODUCTION_CAPACITY_VERIFIED'],
-  'public-ingress-and-proxy': ['BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED'],
-  'reference-deployment': [
-    'BYOK_GRID_KUBERNETES_EXTERNAL_SECRET_PROVENANCE_VERIFIED',
-    'BYOK_GRID_KUBERNETES_NETWORK_POLICY_ENFORCEMENT_VERIFIED',
-    'BYOK_GRID_KUBERNETES_RUNTIME_VERIFIED',
-  ],
+  'multi-architecture-smoke': ['BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED'],
   'release-assets': [
     'BYOK_GRID_PUBLISHED_RELEASE_VERIFIED',
     'BYOK_GRID_RELEASE_BUNDLE_VERIFIED',
   ],
   'release-tag-protection': ['BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED'],
-  'remote-libsql-recovery': [
-    'BYOK_GRID_REMOTE_LIBSQL_DRILL_PREPARED',
-    'BYOK_GRID_REMOTE_LIBSQL_RESTORE_VERIFIED',
+  'single-node-runtime': [
+    'BYOK_GRID_DRAIN_DRILL_PASSED',
+    'BYOK_GRID_DRAIN_SIGNAL_COMPLETE',
+    'BYOK_GRID_WEB_DRAIN_DRILL_PASSED',
   ],
 });
 
@@ -58,7 +44,6 @@ const PRERELEASE_VERSION_PATTERN =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-((?:0|[1-9]\d*|[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|[A-Za-z-][0-9A-Za-z-]*))*)$/u;
 const OPERATOR_PATTERN = /^github:[a-z\d](?:[a-z\d-]{0,37}[a-z\d])?$/u;
 const MAX_EVIDENCE_BYTES = 131_072;
-const MINIMUM_OBSERVATION_MS = 24 * 60 * 60 * 1_000;
 const CLOCK_SKEW_MS = 5 * 60 * 1_000;
 
 export class ProductionEvidenceError extends Error {
@@ -73,14 +58,12 @@ export function verifyProductionEvidence(value, options = {}) {
     'acceptance',
     'candidate',
     'evidence',
-    'observationWindow',
     'releaseVersion',
-    'rollback',
     'schemaVersion',
     'supportedOptionalAdapters',
   ]);
-  if (root.schemaVersion !== 1) {
-    fail('The production evidence schemaVersion must be 1.');
+  if (root.schemaVersion !== 2) {
+    fail('The production evidence schemaVersion must be 2.');
   }
 
   const releaseVersion = stableVersion(root.releaseVersion, 'releaseVersion');
@@ -113,56 +96,6 @@ export function verifyProductionEvidence(value, options = {}) {
   sha256(candidate.digestManifestSha256, 'candidate.digestManifestSha256');
 
   const now = dateOption(options.now ?? new Date(), 'verification clock');
-  const observation = exactObject(root.observationWindow, 'observationWindow', [
-    'endedAt',
-    'startedAt',
-    'unresolvedBlockers',
-  ]);
-  const observationStartedAt = timestamp(
-    observation.startedAt,
-    'observationWindow.startedAt'
-  );
-  const observationEndedAt = timestamp(
-    observation.endedAt,
-    'observationWindow.endedAt'
-  );
-  if (
-    observationEndedAt.getTime() - observationStartedAt.getTime() <
-    MINIMUM_OBSERVATION_MS
-  ) {
-    fail('The candidate observation window must be at least 24 hours.');
-  }
-  if (observation.unresolvedBlockers !== 0) {
-    fail(
-      'The candidate observation window must have zero unresolved blockers.'
-    );
-  }
-  notFuture(observationEndedAt, now, 'observationWindow.endedAt');
-
-  const rollback = exactObject(root.rollback, 'rollback', [
-    'artifactSha256',
-    'markers',
-    'reference',
-    'testedAt',
-  ]);
-  const rollbackTestedAt = timestamp(rollback.testedAt, 'rollback.testedAt');
-  sha256(rollback.artifactSha256, 'rollback.artifactSha256');
-  if (
-    !sameArray(stringArray(rollback.markers, 'rollback.markers'), [
-      'BYOK_GRID_KUBERNETES_ROLLBACK_VERIFIED',
-    ])
-  ) {
-    fail('Rollback evidence must carry the exact Kubernetes rollback marker.');
-  }
-  httpsReference(rollback.reference, 'rollback.reference');
-  if (
-    rollbackTestedAt < observationStartedAt ||
-    rollbackTestedAt > observationEndedAt
-  ) {
-    fail('Rollback evidence must be tested during the candidate window.');
-  }
-  notFuture(rollbackTestedAt, now, 'rollback.testedAt');
-
   const acceptance = exactObject(root.acceptance, 'acceptance', [
     'acceptedAt',
     'operatorId',
@@ -176,9 +109,6 @@ export function verifyProductionEvidence(value, options = {}) {
   }
   const acceptedAt = timestamp(acceptance.acceptedAt, 'acceptance.acceptedAt');
   httpsReference(acceptance.reference, 'acceptance.reference');
-  if (acceptedAt < observationEndedAt || acceptedAt < rollbackTestedAt) {
-    fail('Operator acceptance must follow observation and rollback evidence.');
-  }
   notFuture(acceptedAt, now, 'acceptance.acceptedAt');
 
   const supportedOptionalAdapters = stringArray(
@@ -227,19 +157,14 @@ export function verifyProductionEvidence(value, options = {}) {
     sha256(record.artifactSha256, 'evidence.artifactSha256');
     httpsReference(record.reference, 'evidence.reference');
     const verifiedAt = timestamp(record.verifiedAt, 'evidence.verifiedAt');
+    notFuture(verifiedAt, now, 'evidence.verifiedAt');
     if (verifiedAt > acceptedAt) {
       fail('Evidence cannot be verified after operator acceptance.');
     }
-    notFuture(verifiedAt, now, 'evidence.verifiedAt');
     const markers = stringArray(record.markers, 'evidence.markers');
     const expectedMarkers = EXPECTED_MARKERS[record.id] ?? [];
     if (!sameArray(markers, expectedMarkers)) {
       fail('A production evidence record has incorrect structured markers.');
-    }
-    if (record.id === 'observation-window' && verifiedAt < observationEndedAt) {
-      fail(
-        'Observation-window evidence must be verified after the window ends.'
-      );
     }
   }
   evidenceIds.sort();
@@ -251,9 +176,6 @@ export function verifyProductionEvidence(value, options = {}) {
     candidateCommit,
     candidateVersion,
     evidenceCount: expectedIds.length,
-    observationHours:
-      (observationEndedAt.getTime() - observationStartedAt.getTime()) /
-      (60 * 60 * 1_000),
     operatorId: acceptance.operatorId,
     releaseVersion,
     supportedOptionalAdapters,

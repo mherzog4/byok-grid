@@ -22,31 +22,21 @@ const CANDIDATE_COMMIT = 'b'.repeat(40);
 const DIGEST = 'c'.repeat(64);
 const NOW = new Date('2026-08-05T00:00:00.000Z');
 const EXPECTED_MARKERS = {
-  'authenticated-worker-drain': ['BYOK_GRID_KUBERNETES_WORKER_DRAIN_VERIFIED'],
-  'multi-architecture-smoke': [
-    'BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED',
-    'BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED',
-  ],
-  'production-capacity': ['BYOK_GRID_PRODUCTION_CAPACITY_VERIFIED'],
-  'public-ingress-and-proxy': ['BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED'],
-  'reference-deployment': [
-    'BYOK_GRID_KUBERNETES_EXTERNAL_SECRET_PROVENANCE_VERIFIED',
-    'BYOK_GRID_KUBERNETES_NETWORK_POLICY_ENFORCEMENT_VERIFIED',
-    'BYOK_GRID_KUBERNETES_RUNTIME_VERIFIED',
-  ],
+  'multi-architecture-smoke': ['BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED'],
   'release-assets': [
     'BYOK_GRID_PUBLISHED_RELEASE_VERIFIED',
     'BYOK_GRID_RELEASE_BUNDLE_VERIFIED',
   ],
   'release-tag-protection': ['BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED'],
-  'remote-libsql-recovery': [
-    'BYOK_GRID_REMOTE_LIBSQL_DRILL_PREPARED',
-    'BYOK_GRID_REMOTE_LIBSQL_RESTORE_VERIFIED',
+  'single-node-runtime': [
+    'BYOK_GRID_DRAIN_DRILL_PASSED',
+    'BYOK_GRID_DRAIN_SIGNAL_COMPLETE',
+    'BYOK_GRID_WEB_DRAIN_DRILL_PASSED',
   ],
 };
 
 describe('production evidence verifier', () => {
-  it('accepts the exact stable promotion evidence contract', () => {
+  it('accepts the default single-node stable evidence contract', () => {
     const verified = verifyProductionEvidence(manifest(), {
       expectedCandidateCommit: CANDIDATE_COMMIT,
       expectedReleaseVersion: '0.1.0',
@@ -54,9 +44,8 @@ describe('production evidence verifier', () => {
     });
     assert.deepEqual(verified, {
       candidateCommit: CANDIDATE_COMMIT,
-      candidateVersion: '0.1.0-rc.1',
+      candidateVersion: '0.1.0-rc.3',
       evidenceCount: REQUIRED_PRODUCTION_EVIDENCE_IDS.length,
-      observationHours: 24,
       operatorId: 'github:release-operator',
       releaseVersion: '0.1.0',
       supportedOptionalAdapters: [],
@@ -93,6 +82,13 @@ describe('production evidence verifier', () => {
   });
 
   it('rejects missing, duplicate, and unexpected evidence identities', () => {
+    const legacySchema = manifest();
+    legacySchema.schemaVersion = 1;
+    assert.throws(
+      () => verifyProductionEvidence(legacySchema, { now: NOW }),
+      /schemaVersion must be 2/u
+    );
+
     const missing = manifest();
     missing.evidence.pop();
     assert.throws(
@@ -108,103 +104,77 @@ describe('production evidence verifier', () => {
     );
 
     const unexpected = manifest();
-    unexpected.debug = true;
+    unexpected.observationWindow = {};
     assert.throws(
       () => verifyProductionEvidence(unexpected, { now: NOW }),
       /missing or unexpected fields/u
     );
   });
 
-  it('binds drill-backed gates to their exact structured markers', () => {
-    const missingMarker = manifest();
-    findEvidence(missingMarker, 'production-capacity').markers = [];
+  it('binds shipped-runtime gates to exact structured markers', () => {
+    const incompleteRuntime = manifest();
+    findEvidence(incompleteRuntime, 'single-node-runtime').markers.pop();
     assert.throws(
-      () => verifyProductionEvidence(missingMarker, { now: NOW }),
+      () => verifyProductionEvidence(incompleteRuntime, { now: NOW }),
       /incorrect structured markers/u
     );
 
-    const incompleteNativeSmoke = manifest();
-    findEvidence(incompleteNativeSmoke, 'multi-architecture-smoke').markers = [
+    const expandedArchitectureClaim = manifest();
+    findEvidence(
+      expandedArchitectureClaim,
+      'multi-architecture-smoke'
+    ).markers = [
+      'BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED',
       'BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED',
     ];
     assert.throws(
-      () => verifyProductionEvidence(incompleteNativeSmoke, { now: NOW }),
+      () => verifyProductionEvidence(expandedArchitectureClaim, { now: NOW }),
       /incorrect structured markers/u
     );
 
-    const invalidIngressProof = manifest();
-    findEvidence(invalidIngressProof, 'public-ingress-and-proxy').markers = [
-      'BYOK_GRID_UNKNOWN_INGRESS_MARKER',
-    ];
-    assert.throws(
-      () => verifyProductionEvidence(invalidIngressProof, { now: NOW }),
-      /incorrect structured markers/u
-    );
-
-    const inventedMarker = manifest();
-    findEvidence(inventedMarker, 'release-assets').markers = ['PASSED'];
-    assert.throws(
-      () => verifyProductionEvidence(inventedMarker, { now: NOW }),
-      /incorrect structured markers/u
-    );
-
-    const incompleteReleaseVerification = manifest();
-    findEvidence(incompleteReleaseVerification, 'release-assets').markers = [
+    const incompleteRelease = manifest();
+    findEvidence(incompleteRelease, 'release-assets').markers = [
       'BYOK_GRID_RELEASE_BUNDLE_VERIFIED',
     ];
     assert.throws(
-      () =>
-        verifyProductionEvidence(incompleteReleaseVerification, { now: NOW }),
+      () => verifyProductionEvidence(incompleteRelease, { now: NOW }),
       /incorrect structured markers/u
     );
 
-    const missingReleaseProtection = manifest();
-    findEvidence(missingReleaseProtection, 'release-tag-protection').markers =
-      [];
+    const missingProtection = manifest();
+    findEvidence(missingProtection, 'release-tag-protection').markers = [];
     assert.throws(
-      () => verifyProductionEvidence(missingReleaseProtection, { now: NOW }),
+      () => verifyProductionEvidence(missingProtection, { now: NOW }),
       /incorrect structured markers/u
     );
 
-    const missingRollbackMarker = manifest();
-    missingRollbackMarker.rollback.markers = [];
+    const inventedBackupMarker = manifest();
+    findEvidence(inventedBackupMarker, 'sqlite-backup-restore').markers = [
+      'PASSED',
+    ];
     assert.throws(
-      () => verifyProductionEvidence(missingRollbackMarker, { now: NOW }),
-      /exact Kubernetes rollback marker/u
+      () => verifyProductionEvidence(inventedBackupMarker, { now: NOW }),
+      /incorrect structured markers/u
     );
   });
 
-  it('requires a completed 24-hour blocker-free observation window', () => {
-    const short = manifest();
-    short.observationWindow.endedAt = '2026-08-01T23:59:59.999Z';
-    assert.throws(
-      () => verifyProductionEvidence(short, { now: NOW }),
-      /at least 24 hours/u
-    );
-
-    const blocked = manifest();
-    blocked.observationWindow.unresolvedBlockers = 1;
-    assert.throws(
-      () => verifyProductionEvidence(blocked, { now: NOW }),
-      /zero unresolved blockers/u
-    );
-
+  it('requires operator acceptance after all retained evidence', () => {
     const earlyAcceptance = manifest();
-    earlyAcceptance.acceptance.acceptedAt = '2026-08-01T23:00:00.000Z';
+    earlyAcceptance.acceptance.acceptedAt = '2026-08-03T23:59:59.999Z';
     assert.throws(
       () => verifyProductionEvidence(earlyAcceptance, { now: NOW }),
-      /must follow observation/u
+      /after operator acceptance/u
     );
 
-    const lateRollback = manifest();
-    lateRollback.rollback.testedAt = '2026-08-02T00:30:00.000Z';
+    const futureAcceptance = manifest();
+    futureAcceptance.acceptance.acceptedAt = '2026-08-06T00:00:00.000Z';
     assert.throws(
-      () => verifyProductionEvidence(lateRollback, { now: NOW }),
-      /during the candidate window/u
+      () => verifyProductionEvidence(futureAcceptance, { now: NOW }),
+      /cannot be in the future/u
     );
   });
 
-  it('binds the promoted prerelease, release version, and candidate commit', () => {
+  it('binds the promoted prerelease, stable version, and candidate commit', () => {
     const wrongCandidate = manifest();
     wrongCandidate.candidate.version = '0.2.0-rc.1';
     assert.throws(
@@ -232,8 +202,8 @@ describe('production evidence verifier', () => {
 
   it('rejects unsafe references, noncanonical timestamps, and future claims', () => {
     const credentialUrl = manifest();
-    credentialUrl.rollback.reference =
-      'https://operator:secret@example.com/evidence/rollback';
+    credentialUrl.evidence[0].reference =
+      'https://operator:secret@example.com/evidence/runtime';
     assert.throws(
       () => verifyProductionEvidence(credentialUrl, { now: NOW }),
       /canonical HTTPS URL/u
@@ -248,14 +218,14 @@ describe('production evidence verifier', () => {
     );
 
     const noncanonicalTime = manifest();
-    noncanonicalTime.rollback.testedAt = '2026-08-01T12:00:00Z';
+    noncanonicalTime.evidence[0].verifiedAt = '2026-08-04T00:00:00Z';
     assert.throws(
       () => verifyProductionEvidence(noncanonicalTime, { now: NOW }),
       /canonical UTC timestamp/u
     );
 
     const future = manifest();
-    future.acceptance.acceptedAt = '2026-08-06T00:00:00.000Z';
+    future.evidence[0].verifiedAt = '2026-08-06T00:00:00.000Z';
     assert.throws(
       () => verifyProductionEvidence(future, { now: NOW }),
       /cannot be in the future/u
@@ -330,7 +300,6 @@ describe('production evidence verifier', () => {
         candidateCommit: CANDIDATE_COMMIT,
         evidenceCount: REQUIRED_PRODUCTION_EVIDENCE_IDS.length,
         marker: PRODUCTION_EVIDENCE_MARKER,
-        observationHours: 24,
         releaseVersion: '0.1.0',
         supportedOptionalAdapters: [],
       });
@@ -349,7 +318,7 @@ describe('production evidence verifier', () => {
     );
   });
 
-  it('is a mandatory stable-only branch of release verification', () => {
+  it('remains a mandatory stable-only branch of release verification', () => {
     const source = readFileSync('scripts/verify-release-version.mjs', 'utf8');
     assert.match(source, /if \(expectedPrerelease === 'false'\)/u);
     assert.match(source, /verifyStableProductionEvidence\(requestedVersion\)/u);
@@ -364,28 +333,20 @@ describe('production evidence verifier', () => {
   });
 
   it('allows only evidence and release metadata after the observed candidate', () => {
-    assert.doesNotThrow(() =>
-      assertStablePromotionPaths(
-        [
-          'SECURITY.md',
-          'deploy/helm/byok-grid/Chart.yaml',
-          'docs/PRODUCTION_READINESS.md',
-          'docs/evidence/0.1.0-production.json',
-          'docs/releases/v0.1.0.md',
-          'package-lock.json',
-          'package.json',
-        ],
-        '0.1.0'
-      )
-    );
+    const exactPaths = [
+      'SECURITY.md',
+      'deploy/helm/byok-grid/Chart.yaml',
+      'docs/PRODUCTION_READINESS.md',
+      'docs/evidence/0.1.0-production.json',
+      'docs/releases/v0.1.0.md',
+      'package-lock.json',
+      'package.json',
+    ];
+    assert.doesNotThrow(() => assertStablePromotionPaths(exactPaths, '0.1.0'));
     assert.throws(
       () =>
         assertStablePromotionPaths(
-          [
-            'apps/web/src/app/page.tsx',
-            'docs/evidence/0.1.0-production.json',
-            'docs/releases/v0.1.0.md',
-          ],
+          [...exactPaths, 'apps/web/src/app/page.tsx'],
           '0.1.0'
         ),
       /outside the release-only allowlist/u
@@ -397,14 +358,7 @@ describe('production evidence verifier', () => {
     assert.throws(
       () =>
         assertStablePromotionPaths(
-          [
-            'SECURITY.md',
-            'deploy/helm/byok-grid/Chart.yaml',
-            'docs/PRODUCTION_READINESS.md',
-            'docs/evidence/0.1.0-production.json',
-            'package-lock.json',
-            'package.json',
-          ],
+          exactPaths.filter((path) => path !== 'docs/releases/v0.1.0.md'),
           '0.1.0'
         ),
       /must add its version-bound release notes/u
@@ -412,13 +366,7 @@ describe('production evidence verifier', () => {
     assert.throws(
       () =>
         assertStablePromotionPaths(
-          [
-            'deploy/helm/byok-grid/Chart.yaml',
-            'docs/evidence/0.1.0-production.json',
-            'docs/releases/v0.1.0.md',
-            'package-lock.json',
-            'package.json',
-          ],
+          exactPaths.filter((path) => path !== 'SECURITY.md'),
           '0.1.0'
         ),
       /exact release-only file set/u
@@ -429,29 +377,18 @@ describe('production evidence verifier', () => {
 function manifest() {
   return {
     acceptance: {
-      acceptedAt: '2026-08-02T01:00:00.000Z',
+      acceptedAt: '2026-08-04T01:00:00.000Z',
       operatorId: 'github:release-operator',
       reference: 'https://example.com/evidence/operator-acceptance',
     },
     candidate: {
       commit: CANDIDATE_COMMIT,
       digestManifestSha256: DIGEST,
-      version: '0.1.0-rc.1',
+      version: '0.1.0-rc.3',
     },
     evidence: REQUIRED_PRODUCTION_EVIDENCE_IDS.map((id) => evidence(id)),
-    observationWindow: {
-      endedAt: '2026-08-02T00:00:00.000Z',
-      startedAt: '2026-08-01T00:00:00.000Z',
-      unresolvedBlockers: 0,
-    },
     releaseVersion: '0.1.0',
-    rollback: {
-      artifactSha256: DIGEST,
-      markers: ['BYOK_GRID_KUBERNETES_ROLLBACK_VERIFIED'],
-      reference: 'https://example.com/evidence/rollback',
-      testedAt: '2026-08-01T12:00:00.000Z',
-    },
-    schemaVersion: 1,
+    schemaVersion: 2,
     supportedOptionalAdapters: [],
   };
 }
@@ -460,12 +397,9 @@ function evidence(id) {
   return {
     artifactSha256: DIGEST,
     id,
-    markers: EXPECTED_MARKERS[id] ?? [],
+    markers: [...(EXPECTED_MARKERS[id] ?? [])],
     reference: `https://example.com/evidence/${id}`,
-    verifiedAt:
-      id === 'observation-window'
-        ? '2026-08-02T00:00:00.000Z'
-        : '2026-08-01T12:00:00.000Z',
+    verifiedAt: '2026-08-04T00:00:00.000Z',
   };
 }
 
