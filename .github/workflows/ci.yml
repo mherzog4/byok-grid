@@ -15,7 +15,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
@@ -124,13 +124,55 @@ jobs:
           docker build --target airbyte-destination --tag byok-grid-airbyte-destination:ci .
           docker build --target analytics-projector --tag byok-grid-analytics-projector:ci .
 
-      - name: Assert SQLite-only Node runtime images
+      - name: Set up Trivy
+        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.6
+        with:
+          version: v0.70.0
+          cache: true
+
+      - name: Scan production container targets
+        env:
+          TRIVY_NO_PROGRESS: 'true'
+        run: |
+          set -euo pipefail
+          images=(
+            byok-grid-web:ci
+            byok-grid-workflow-worker:ci
+            byok-grid-migration:ci
+            byok-grid-maintenance:ci
+            byok-grid-connector-runner:ci
+            byok-grid-airbyte-destination:ci
+            byok-grid-analytics-projector:ci
+          )
+          for image in "${images[@]}"; do
+            trivy image \
+              --exit-code 1 \
+              --exit-on-eol 1 \
+              --ignore-unfixed \
+              --pkg-types os,library \
+              --severity HIGH,CRITICAL \
+              "$image"
+          done
+
+      - name: Assert minimal SQLite-only Node runtime images
         run: |
           set -euo pipefail
           maintenance_volume="byok-grid-ci-maintenance-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           trap 'docker volume rm --force "$maintenance_volume" >/dev/null' EXIT
+          images=(
+            byok-grid-web:ci
+            byok-grid-workflow-worker:ci
+            byok-grid-migration:ci
+            byok-grid-maintenance:ci
+            byok-grid-airbyte-destination:ci
+            byok-grid-analytics-projector:ci
+          )
+          for image in "${images[@]}"; do
+            docker run --rm --entrypoint sh "$image" -c 'test ! -e /usr/local/bin/npm && test ! -e /usr/local/bin/npx && test ! -e /usr/local/lib/node_modules/npm'
+          done
           docker run --rm --entrypoint node byok-grid-workflow-worker:ci -e "let leaked=false; try { require.resolve('postgres'); leaked=true } catch {} if (leaked) process.exit(1)"
           docker run --rm --entrypoint node byok-grid-analytics-projector:ci -e "let leaked=false; try { require.resolve('postgres'); leaked=true } catch {} if (leaked) process.exit(1)"
+          docker run --rm --entrypoint node byok-grid-workflow-worker:ci -e "const { existsSync } = require('node:fs'); if (['/app/node_modules/drizzle-kit', '/app/node_modules/@esbuild-kit/core-utils', '/app/node_modules/@esbuild-kit/esm-loader'].some(existsSync)) process.exit(1)"
           docker run --rm --entrypoint node byok-grid-workflow-worker:ci --import tsx --input-type=module -e "await import('./packages/connectors/src/sandbox-schema.ts')"
           docker run --rm --entrypoint node byok-grid-workflow-worker:ci --import tsx --input-type=module -e "await import('./packages/db/src/sqlite/operational-metrics.ts'); await import('./apps/workflow-worker/src/operational-metrics.ts')"
           docker run --rm --entrypoint node byok-grid-workflow-worker:ci -e "require.resolve('prom-client')"

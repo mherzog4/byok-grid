@@ -82,7 +82,7 @@ the collector with a different output path:
 
 ```text
 npm run release:collect-native-smoke -- \
-  --version 0.1.0-rc.1 \
+  --version 0.1.0-rc.2 \
   --candidate <40-character-candidate-commit> \
   --digest-manifest /path/to/IMAGE_DIGESTS.txt \
   --output native-amd64.json
@@ -126,7 +126,7 @@ verify their canonical records against the attested release manifest:
 
 ```text
 npm run release:verify-native-smoke -- \
-  --version 0.1.0-rc.1 \
+  --version 0.1.0-rc.2 \
   --candidate <40-character-candidate-commit> \
   --digest-manifest /path/to/IMAGE_DIGESTS.txt \
   --release-smoke /path/to/IMAGE_SMOKE.jsonl \

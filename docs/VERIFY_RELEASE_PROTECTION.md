@@ -29,12 +29,12 @@ once with mode `0600` and refuses to replace an existing path:
 
 ```text
 npm run release:verify-protection -- \
-  --version 0.1.0-rc.1 \
+  --version 0.1.0-rc.2 \
   --candidate REPLACE_WITH_40_CHARACTER_CANDIDATE_SHA \
   --digest-manifest /path/to/downloaded-release/IMAGE_DIGESTS.txt \
   --owner mherzog4 \
   --repository mherzog4/byok-grid \
-  --output /private/evidence/v0.1.0-rc.1-release-protection.json
+  --output /private/evidence/v0.1.0-rc.2-release-protection.json
 ```
 
 ## Fail-closed checks

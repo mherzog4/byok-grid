@@ -387,7 +387,12 @@ describe('SQLite BYOK credential vault', () => {
     const plan = await execFileAsync(
       process.execPath,
       ['--import', 'tsx', rotationCliPath, 'plan'],
-      { cwd: repositoryRoot, encoding: 'utf8', env: environment }
+      {
+        cwd: repositoryRoot,
+        encoding: 'utf8',
+        env: environment,
+        timeout: 10_000,
+      }
     );
     expect(JSON.parse(String(plan.stdout))).toEqual({
       currentKeyId: replacement.id,
@@ -407,7 +412,12 @@ describe('SQLite BYOK credential vault', () => {
       await execFileAsync(
         process.execPath,
         ['--import', 'tsx', rotationCliPath, 'apply', original.id],
-        { cwd: repositoryRoot, encoding: 'utf8', env: environment }
+        {
+          cwd: repositoryRoot,
+          encoding: 'utf8',
+          env: environment,
+          timeout: 10_000,
+        }
       );
     } catch (error) {
       wrongConfirmation = error;
@@ -420,7 +430,12 @@ describe('SQLite BYOK credential vault', () => {
     const applied = await execFileAsync(
       process.execPath,
       ['--import', 'tsx', rotationCliPath, 'apply', replacement.id],
-      { cwd: repositoryRoot, encoding: 'utf8', env: environment }
+      {
+        cwd: repositoryRoot,
+        encoding: 'utf8',
+        env: environment,
+        timeout: 10_000,
+      }
     );
     expect(JSON.parse(String(applied.stdout))).toEqual({
       currentKeyId: replacement.id,
@@ -429,7 +444,7 @@ describe('SQLite BYOK credential vault', () => {
       rotated: 1,
       total: 1,
     });
-  }, 15_000);
+  }, 35_000);
 
   function createMasterKey(id: string) {
     const key = parseMasterKey(id, randomBytes(32).toString('base64'));

@@ -194,11 +194,48 @@ if (releaseWorkflow.includes('smoke_output=')) {
 }
 
 if (
-  !/FROM \$\{NODE_IMAGE\} AS worker-runtime[\s\S]*?ENV TSX_DISABLE_CACHE=1/u.test(
+  !/FROM node-runtime AS worker-runtime[\s\S]*?ENV TSX_DISABLE_CACHE=1/u.test(
     dockerfile
   )
 ) {
   fail('The TypeScript worker images must not require a writable cache path.');
+}
+
+const packageManager = rootPackage.packageManager?.match(
+  /^npm@(\d+\.\d+\.\d+)$/
+)?.[1];
+const dockerNpmVersion = dockerfile.match(
+  /^ARG NPM_VERSION=(\d+\.\d+\.\d+)$/m
+)?.[1];
+if (!packageManager || dockerNpmVersion !== packageManager) {
+  fail('The Docker builder npm version must match packageManager exactly.');
+}
+
+for (const runtimeContract of [
+  'FROM ${NODE_IMAGE} AS node-runtime',
+  'rm -rf /usr/local/lib/node_modules/npm',
+  'rm -f /usr/local/bin/npm /usr/local/bin/npx',
+  'FROM node-runtime AS airbyte-destination',
+  'FROM node-runtime AS web',
+  'FROM node-runtime AS worker-runtime',
+]) {
+  if (!dockerfile.includes(runtimeContract)) {
+    fail(
+      'Every production Node image must inherit the npm-free runtime stage.'
+    );
+  }
+}
+
+for (const workerDependencyContract of [
+  'npm uninstall postgres drizzle-kit --workspace=@byok-grid/db',
+  'test ! -e /app/node_modules/postgres',
+  'test ! -e /app/node_modules/drizzle-kit',
+  'test ! -e /app/node_modules/@esbuild-kit/core-utils',
+  'test ! -e /app/node_modules/@esbuild-kit/esm-loader',
+]) {
+  if (!dockerfile.includes(workerDependencyContract)) {
+    fail('Worker runtime images must exclude development-only database tools.');
+  }
 }
 
 if (releaseWorkflow.includes('type=raw,value=${{ env.VERSION }}')) {
