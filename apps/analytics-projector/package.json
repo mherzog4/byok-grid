@@ -14,7 +14,7 @@
   "dependencies": {
     "@byok-grid/db": "*",
     "@byok-grid/domain": "*",
-    "tsx": "4.23.1",
+    "tsx": "4.23.4",
     "zod": "4.4.3"
   }
 }
