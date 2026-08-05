@@ -4,7 +4,7 @@ This ledger separates repository evidence from environment-specific evidence.
 Passing the local and CI gates makes a release candidate reproducible; it does
 not by itself prove that a particular deployment is production-ready.
 
-Last repository evidence review: 2026-08-04. Target version: `0.1.0-rc.1`.
+Last repository evidence review: 2026-08-04. Target version: `0.1.0-rc.2`.
 
 ## Repository and local-runtime evidence
 
@@ -122,7 +122,9 @@ working tree:
   retrying dependency initialization, signal-cancelled ClickHouse transport,
   lease-safe shutdown, real child-process `SIGTERM`, bounded Helm probes and
   grace period, invalid topology rejection, and production-image health proof;
-- local builds of the web, worker, migration, and maintenance image targets;
+- local builds of all seven production image targets plus a pre-tag CI scan
+  that fails on fixable High/Critical OS or library vulnerabilities and
+  end-of-life base operating systems;
 - release metadata, Helm chart, connector SDK package, and checksum dry run,
   with the standalone SDK inventory check isolated from and independent of the
   operator's global npm cache;
@@ -254,7 +256,7 @@ remains blocked until all seven tags and digests are anonymously readable.
 
 ## Release-candidate gates still requiring external evidence
 
-Do not describe `0.1.0-rc.1` as a stable production release until each item has
+Do not describe `0.1.0-rc.2` as a stable production release until each item has
 dated evidence linked from a release issue or runbook record:
 
 - run the tag workflow in this public repository and independently verify its

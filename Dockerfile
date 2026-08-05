@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
 
-ARG NODE_IMAGE=node:24.14.0-slim@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8
+ARG NODE_IMAGE=node:24.19.0-slim@sha256:cd84903a12dbd26b46f1f3b8144a2568c41c5d37ddd0c7a80a34c7a19786b35f
 ARG RUST_IMAGE=rust:1.94.0-slim-bookworm@sha256:a86cada82e36ebd7a9bffed7548792c55a952fdb20718eea9278a936bcb76e62
 ARG DEBIAN_IMAGE=debian:bookworm-slim@sha256:7b140f374b289a7c2befc338f42ebe6441b7ea838a042bbd5acbfca6ec875818
 
@@ -26,7 +26,7 @@ ENTRYPOINT ["/usr/local/bin/connector-runner"]
 FROM ${NODE_IMAGE} AS dependencies
 WORKDIR /app
 
-ARG NPM_VERSION=11.17.0
+ARG NPM_VERSION=12.0.2
 
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/package.json
@@ -44,6 +44,12 @@ RUN --mount=type=cache,target=/root/.npm \
   npm install --global npm@${NPM_VERSION} --no-audit --no-fund && \
   npm ci --strict-allow-scripts --no-audit --no-fund
 
+# Production entrypoints execute Node directly. Keep npm available to builders,
+# but remove its global dependency tree from every Node runtime image.
+FROM ${NODE_IMAGE} AS node-runtime
+RUN rm -rf /usr/local/lib/node_modules/npm && \
+  rm -f /usr/local/bin/npm /usr/local/bin/npx
+
 FROM dependencies AS sdk-builder
 COPY tsconfig.base.json ./
 COPY packages/connector-sdk/tsconfig.json packages/connector-sdk/tsconfig.json
@@ -59,7 +65,7 @@ COPY packages/airbyte-destination/tsconfig.build.json packages/airbyte-destinati
 COPY packages/airbyte-destination/src packages/airbyte-destination/src
 RUN npm run build --workspace=@byok-grid/airbyte-destination
 
-FROM ${NODE_IMAGE} AS airbyte-destination
+FROM node-runtime AS airbyte-destination
 WORKDIR /airbyte
 
 ENV NODE_ENV=production
@@ -88,7 +94,7 @@ RUN npm run db:sqlite:migrate --workspace=@byok-grid/db
 RUN --mount=type=cache,target=/app/apps/web/.next/cache \
   npm run build --workspace=@byok-grid/web
 
-FROM ${NODE_IMAGE} AS web
+FROM node-runtime AS web
 WORKDIR /app
 
 ENV HOSTNAME=0.0.0.0
@@ -110,12 +116,16 @@ CMD ["node", "apps/web/server.js"]
 
 FROM dependencies AS worker-dependencies
 RUN npm prune --omit=dev
-# Drizzle declares postgres as an optional peer, so npm can retain the legacy
-# compatibility driver's dev dependency after pruning. Remove that one package
-# explicitly while preserving libSQL's optional platform binary.
-RUN npm uninstall postgres --workspace=@byok-grid/db --ignore-scripts --no-audit --no-fund
+# Optional peers can retain development-only database tooling after pruning.
+# Remove the legacy PostgreSQL driver and Drizzle's schema generator explicitly,
+# then fail the build if their runtime trees survive.
+RUN npm uninstall postgres drizzle-kit --workspace=@byok-grid/db --ignore-scripts --no-audit --no-fund && \
+  test ! -e /app/node_modules/postgres && \
+  test ! -e /app/node_modules/drizzle-kit && \
+  test ! -e /app/node_modules/@esbuild-kit/core-utils && \
+  test ! -e /app/node_modules/@esbuild-kit/esm-loader
 
-FROM ${NODE_IMAGE} AS worker-runtime
+FROM node-runtime AS worker-runtime
 WORKDIR /app
 
 ENV NODE_ENV=production

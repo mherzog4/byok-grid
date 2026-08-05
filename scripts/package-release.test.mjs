@@ -37,6 +37,9 @@ const releaseImages = [
   ['analytics-projector', 'byok-grid-analytics-projector'],
 ].map(([target, image]) => ({ target, image }));
 const releaseConfig = { schemaVersion: 1, images: releaseImages };
+const sourceVersion = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8')
+).version;
 
 test('collects exactly one immutable digest for every release target', () => {
   withFixture(({ digests }) => {
@@ -309,7 +312,7 @@ test(
         [
           'scripts/package-release.mjs',
           '--version',
-          '0.1.0-rc.1',
+          sourceVersion,
           '--digests-dir',
           digests,
           '--smoke-dir',
@@ -326,7 +329,7 @@ test(
         [
           'scripts/verify-release-bundle.mjs',
           '--version',
-          '0.1.0-rc.1',
+          sourceVersion,
           '--directory',
           output,
         ],
@@ -341,7 +344,10 @@ test(
         JSON.parse(verification.stdout).marker,
         RELEASE_BUNDLE_MARKER
       );
-      assert.equal(existsSync(join(output, 'byok-grid-0.1.0-rc.1.tgz')), true);
+      assert.equal(
+        existsSync(join(output, `byok-grid-${sourceVersion}.tgz`)),
+        true
+      );
       assert.equal(
         readdirSync(output).filter((name) => name.endsWith('.tgz')).length,
         2
@@ -358,7 +364,7 @@ test(
         [
           'scripts/package-release.mjs',
           '--version',
-          '0.1.0-rc.1',
+          sourceVersion,
           '--digests-dir',
           digests,
           '--smoke-dir',

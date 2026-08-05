@@ -23,7 +23,7 @@ directory containing only the six downloaded release assets:
 
 ```text
 npm run release:verify-bundle -- \
-  --version 0.1.0-rc.1 \
+  --version 0.1.0-rc.2 \
   --directory /path/to/downloaded-release
 ```
 
@@ -76,7 +76,7 @@ identity proof; digest references remain the deployment authority.
 Verify a downloaded chart or SDK package against the repository identity:
 
 ```text
-gh attestation verify byok-grid-0.1.0-rc.1.tgz \
+gh attestation verify byok-grid-0.1.0-rc.2.tgz \
   --repo mherzog4/byok-grid
 ```
 
@@ -104,7 +104,7 @@ passes. It sets the five chart-owned repositories and digests and clears any
 tag values so Helm cannot render an ambiguous image reference:
 
 ```text
-helm template byok-grid ./byok-grid-0.1.0-rc.1.tgz \
+helm template byok-grid ./byok-grid-0.1.0-rc.2.tgz \
   --namespace byok-grid \
   --values values.production.yaml \
   --values values.digests.yaml

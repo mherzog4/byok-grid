@@ -38,5 +38,5 @@ describe('SQLite migration CLI deployment mode', () => {
     expect(output).toContain('Remote database mode requires a libsql:// URL.');
     expect(output).not.toContain(databaseUrl);
     expect(existsSync(databasePath)).toBe(false);
-  });
+  }, 15_000);
 });

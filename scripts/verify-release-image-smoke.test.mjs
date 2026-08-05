@@ -281,7 +281,7 @@ describe('multi-architecture release image smoke', () => {
     const dockerfile = readFileSync('Dockerfile', 'utf8');
     assert.match(
       dockerfile,
-      /FROM \$\{NODE_IMAGE\} AS worker-runtime[\s\S]*?ENV TSX_DISABLE_CACHE=1/u
+      /FROM \$\{NODE_IMAGE\} AS node-runtime[\s\S]*?rm -rf \/usr\/local\/lib\/node_modules\/npm[\s\S]*?FROM node-runtime AS worker-runtime[\s\S]*?ENV TSX_DISABLE_CACHE=1/u
     );
   });
 });

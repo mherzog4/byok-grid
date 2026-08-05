@@ -10,6 +10,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import { createChecksumManifest, packageRelease } from './package-release.mjs';
 import {
@@ -28,6 +29,9 @@ const releaseImages = [
   ['analytics-projector', 'byok-grid-analytics-projector'],
 ].map(([target, image]) => ({ target, image }));
 const releaseConfig = { schemaVersion: 1, images: releaseImages };
+const verifyReleaseBundleCli = fileURLToPath(
+  new URL('./verify-release-bundle.mjs', import.meta.url)
+);
 
 test('verifies the exact release bundle and semantic manifests', async () => {
   await withBundle(async ({ output, root }) => {
@@ -143,7 +147,7 @@ test('rejects unbounded version input before filesystem access', async () => {
 
 test('exposes one safe machine-readable CLI result', async () => {
   await withBundle(async ({ output, root }) => {
-    const success = runCli(output);
+    const success = runCli(output, root);
     assert.equal(success.status, 0, success.stderr);
     assert.equal(success.stderr, '');
     assert.deepEqual(JSON.parse(success.stdout), {
@@ -155,7 +159,7 @@ test('exposes one safe machine-readable CLI result', async () => {
     });
 
     writeFileSync(join(output, 'operator-secret-artifact'), 'secret', 'utf8');
-    const failure = runCli(output);
+    const failure = runCli(output, root);
     assert.equal(failure.status, 1);
     assert.equal(failure.stdout, '');
     assert.match(failure.stderr, /exact expected asset set/u);
@@ -259,16 +263,10 @@ function rewriteChecksums(output) {
   );
 }
 
-function runCli(output) {
+function runCli(output, root) {
   return spawnSync(
     process.execPath,
-    [
-      'scripts/verify-release-bundle.mjs',
-      '--version',
-      '0.1.0-rc.1',
-      '--directory',
-      output,
-    ],
-    { encoding: 'utf8' }
+    [verifyReleaseBundleCli, '--version', '0.1.0-rc.1', '--directory', output],
+    { cwd: root, encoding: 'utf8' }
   );
 }
