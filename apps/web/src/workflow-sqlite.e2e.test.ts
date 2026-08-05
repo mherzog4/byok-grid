@@ -1,10 +1,7 @@
 import { createClient, type Client } from '@libsql/client';
 import { SQLITE_BUSY_TIMEOUT_MS } from '@byok-grid/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  MAXIMUM_API_JSON_BODY_BYTES,
-  MAXIMUM_AUTH_REQUEST_BODY_BYTES,
-} from './lib/request-body';
+import { MAXIMUM_API_JSON_BODY_BYTES } from './lib/request-body';
 
 const runE2e = process.env.RUN_SQLITE_WEB_E2E === '1';
 const verifyWorkerExecution = process.env.VERIFY_WORKFLOW_EXECUTION === '1';
@@ -16,14 +13,9 @@ const appUrl = process.env.TEST_APP_URL ?? 'http://127.0.0.1:3000';
 const requestOrigin = process.env.TEST_APP_ORIGIN ?? appUrl;
 
 describe.skipIf(!runE2e || !databaseUrl)(
-  'SQLite auth and visual workflow HTTP end-to-end',
+  'SQLite local workspace and visual workflow HTTP end-to-end',
   () => {
     let client: Client | undefined;
-    const email =
-      process.env.WORKFLOW_DRILL_EMAIL ??
-      `workflow-sqlite-${crypto.randomUUID()}@example.test`;
-    const password = `workflow-${crypto.randomUUID()}-${crypto.randomUUID()}`;
-    let userId: string | undefined;
     let workspaceId: string | undefined;
 
     beforeAll(async () => {
@@ -44,24 +36,14 @@ describe.skipIf(!runE2e || !databaseUrl)(
           sql: 'delete from workspaces where id = ?',
         });
       }
-      if (userId) {
-        await client!.execute({
-          args: [userId],
-          sql: 'delete from users where id = ?',
-        });
-      }
       client?.close();
     });
 
     it('authors SQLite grid data, publishes a graph, and queues its run', async () => {
-      const crossOriginSignup = await fetch(
+      const crossOriginAccountRequest = await fetch(
         `${appUrl}/api/auth/sign-up/email`,
         {
-          body: JSON.stringify({
-            email,
-            name: 'Cross-origin attempt',
-            password,
-          }),
+          body: '{}',
           headers: {
             'content-type': 'application/json',
             origin: 'https://attacker.example',
@@ -70,56 +52,46 @@ describe.skipIf(!runE2e || !databaseUrl)(
           method: 'POST',
         }
       );
-      expect(crossOriginSignup.status).toBe(403);
-      expect(crossOriginSignup.headers.get('cache-control')).toBe('no-store');
-      const rejectionNonce = expectSecurityHeaders(crossOriginSignup.headers);
-      await expect(crossOriginSignup.json()).resolves.toEqual({
+      expect(crossOriginAccountRequest.status).toBe(403);
+      expect(crossOriginAccountRequest.headers.get('cache-control')).toBe(
+        'no-store'
+      );
+      const rejectionNonce = expectSecurityHeaders(
+        crossOriginAccountRequest.headers
+      );
+      await expect(crossOriginAccountRequest.json()).resolves.toEqual({
         error: 'Cross-origin API mutations are not allowed.',
       });
 
-      const oversizedSignup = await fetch(`${appUrl}/api/auth/sign-up/email`, {
-        body: JSON.stringify({
-          email,
-          name: 'x'.repeat(MAXIMUM_AUTH_REQUEST_BODY_BYTES),
-          password,
-        }),
-        headers: {
-          'content-type': 'application/json',
-          origin: requestOrigin,
-        },
-        method: 'POST',
-      });
-      expect(oversizedSignup.status, await oversizedSignup.clone().text()).toBe(
-        413
+      const retiredAccountEndpoint = await fetch(
+        `${appUrl}/api/auth/sign-up/email`,
+        {
+          body: '{}',
+          headers: {
+            'content-type': 'application/json',
+            origin: requestOrigin,
+          },
+          method: 'POST',
+        }
       );
-      await expect(oversizedSignup.json()).resolves.toEqual({
-        error: 'The request body exceeds 64 KiB.',
+      expect(retiredAccountEndpoint.status).toBe(404);
+      await expect(retiredAccountEndpoint.json()).resolves.toEqual({
+        error: 'Not found.',
       });
 
-      const signup = await fetch(`${appUrl}/api/auth/sign-up/email`, {
-        body: JSON.stringify({
-          email,
-          name: 'SQLite Workflow E2E',
-          password,
-        }),
-        headers: {
-          'content-type': 'application/json',
-          origin: requestOrigin,
-        },
-        method: 'POST',
-      });
-      expect(signup.status, await signup.clone().text()).toBe(200);
-      const cookie = signup.headers
-        .getSetCookie()
-        .map((value) => value.split(';', 1)[0])
-        .join('; ');
-      expect(cookie).not.toBe('');
+      const app = await fetch(`${appUrl}/app`);
+      expect(app.status).toBe(200);
+      const appNonce = expectSecurityHeaders(app.headers);
+      expect(appNonce).not.toBe(rejectionNonce);
+      const appHtml = await app.text();
+      expectRenderedScriptNonces(appHtml, appNonce);
+      expect(appHtml).toContain('Engineer the row journey');
+      expect(appHtml).toContain('Add row');
+      expect(appHtml).toContain('Local workspace');
 
-      const user = await one('select id from users where email = ?', email);
-      userId = String(user.id);
       const membership = await one(
         'select workspace_id from workspace_members where user_id = ?',
-        userId
+        'local-owner'
       );
       workspaceId = String(membership.workspace_id);
       const table = await one(
@@ -133,15 +105,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
       );
       const columnId = String(column.id);
 
-      const app = await fetch(`${appUrl}/app`, { headers: { cookie } });
-      expect(app.status).toBe(200);
-      const appNonce = expectSecurityHeaders(app.headers);
-      expect(appNonce).not.toBe(rejectionNonce);
-      const appHtml = await app.text();
-      expectRenderedScriptNonces(appHtml, appNonce);
-      expect(appHtml).toContain('Engineer the row journey');
-      expect(appHtml).toContain('Add row');
-
       const tableCollectionUrl = `${appUrl}/api/workspaces/${workspaceId}/tables`;
       const crossOriginTableResponse = await fetch(tableCollectionUrl, {
         body: JSON.stringify({
@@ -151,7 +114,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
         }),
         headers: {
           'content-type': 'application/json',
-          cookie,
           origin: 'https://attacker.example',
         },
         method: 'POST',
@@ -169,7 +131,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
         }),
         headers: {
           'content-type': 'application/json',
-          cookie,
           origin: requestOrigin,
         },
         method: 'POST',
@@ -187,7 +148,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
         }),
         headers: {
           'content-type': 'application/json',
-          cookie,
           origin: requestOrigin,
         },
         method: 'POST',
@@ -202,7 +162,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
           body: JSON.stringify({ name: 'Qualified prospects' }),
           headers: {
             'content-type': 'application/json',
-            cookie,
             origin: requestOrigin,
           },
           method: 'PATCH',
@@ -223,7 +182,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
           }),
           headers: {
             'content-type': 'application/json',
-            cookie,
             origin: requestOrigin,
           },
           method: 'POST',
@@ -232,7 +190,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
       expect(columnResponse.status).toBe(201);
 
       const rowResponse = await fetch(`${tableCollectionUrl}/${tableId}/rows`, {
-        headers: { cookie, origin: requestOrigin },
+        headers: { origin: requestOrigin },
         method: 'POST',
       });
       expect(rowResponse.status).toBe(201);
@@ -245,7 +203,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
         }),
         headers: {
           'content-type': 'application/json',
-          cookie,
           origin: requestOrigin,
         },
         method: 'PUT',
@@ -263,7 +220,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
         }),
         headers: {
           'content-type': 'application/json',
-          cookie,
           origin: requestOrigin,
         },
         method: 'PUT',
@@ -272,7 +228,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
 
       const storedRowResponse = await fetch(
         `${tableCollectionUrl}/${tableId}/rows/${row.id}`,
-        { headers: { cookie } }
+        { headers: { origin: requestOrigin } }
       );
       expect(storedRowResponse.status).toBe(200);
       const storedRow = (await storedRowResponse.json()) as {
@@ -300,7 +256,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
         }),
         headers: {
           'content-type': 'application/json',
-          cookie,
           origin: requestOrigin,
         },
         method: 'POST',
@@ -368,7 +323,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
         }),
         headers: {
           'content-type': 'application/json',
-          cookie,
           origin: requestOrigin,
         },
         method: 'PATCH',
@@ -387,7 +341,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
           }),
           headers: {
             'content-type': 'application/json',
-            cookie,
             origin: requestOrigin,
           },
           method: 'POST',
@@ -404,7 +357,6 @@ describe.skipIf(!runE2e || !databaseUrl)(
         body: JSON.stringify({ input: { source: 'e2e' } }),
         headers: {
           'content-type': 'application/json',
-          cookie,
           origin: requestOrigin,
         },
         method: 'POST',
@@ -417,7 +369,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
       expect(run.status).toBe('queued');
 
       if (drainDrillRows !== null) {
-        await waitForRunningStep(runCollectionUrl, cookie, run.id);
+        await waitForRunningStep(runCollectionUrl, run.id);
         console.log(
           JSON.stringify({
             marker: 'BYOK_GRID_DRAIN_DRILL_IN_FLIGHT',
@@ -427,9 +379,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
         );
       }
 
-      const runHistoryResponse = await fetch(runCollectionUrl, {
-        headers: { cookie },
-      });
+      const runHistoryResponse = await fetch(runCollectionUrl);
       expect(runHistoryResponse.status).toBe(200);
       const runHistory = (await runHistoryResponse.json()) as Array<{
         id: string;
@@ -463,11 +413,7 @@ describe.skipIf(!runE2e || !databaseUrl)(
       }
 
       if (verifyWorkerExecution) {
-        const terminalRun = await waitForTerminalRun(
-          runCollectionUrl,
-          cookie,
-          run.id
-        );
+        const terminalRun = await waitForTerminalRun(runCollectionUrl, run.id);
         expect(terminalRun.status).toBe('succeeded');
         expect(terminalRun.steps.map((step) => step.status)).toHaveLength(
           executionNodeIds.length
@@ -525,16 +471,10 @@ describe.skipIf(!runE2e || !databaseUrl)(
       }
     }
 
-    async function waitForRunningStep(
-      runCollectionUrl: string,
-      cookie: string,
-      runId: string
-    ) {
+    async function waitForRunningStep(runCollectionUrl: string, runId: string) {
       const deadline = Date.now() + 20_000;
       while (Date.now() < deadline) {
-        const response = await fetch(runCollectionUrl, {
-          headers: { cookie },
-        });
+        const response = await fetch(runCollectionUrl);
         expect(response.status).toBe(200);
         const runs = (await response.json()) as Array<{
           id: string;
@@ -559,16 +499,10 @@ describe.skipIf(!runE2e || !databaseUrl)(
       );
     }
 
-    async function waitForTerminalRun(
-      runCollectionUrl: string,
-      cookie: string,
-      runId: string
-    ) {
+    async function waitForTerminalRun(runCollectionUrl: string, runId: string) {
       const deadline = Date.now() + (drainDrillRows === null ? 20_000 : 90_000);
       while (Date.now() < deadline) {
-        const response = await fetch(runCollectionUrl, {
-          headers: { cookie },
-        });
+        const response = await fetch(runCollectionUrl);
         expect(response.status).toBe(200);
         const runs = (await response.json()) as Array<{
           id: string;

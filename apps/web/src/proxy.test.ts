@@ -16,7 +16,7 @@ describe('Next.js application proxy', () => {
   });
 
   it('wires the canonical runtime origin into mutation enforcement', async () => {
-    vi.stubEnv('BETTER_AUTH_URL', 'https://grid.example.com');
+    vi.stubEnv('BYOK_GRID_PUBLIC_URL', 'https://grid.example.com');
     const response = proxy(
       new NextRequest('https://internal-web:3000/api/workspaces/example', {
         headers: { origin: 'https://attacker.example' },
@@ -33,7 +33,7 @@ describe('Next.js application proxy', () => {
   });
 
   it('also protects the exact API root', () => {
-    vi.stubEnv('BETTER_AUTH_URL', 'https://grid.example.com');
+    vi.stubEnv('BYOK_GRID_PUBLIC_URL', 'https://grid.example.com');
     const response = proxy(
       new NextRequest('https://internal-web:3000/api', {
         headers: { origin: 'https://attacker.example' },
@@ -46,7 +46,7 @@ describe('Next.js application proxy', () => {
   });
 
   it('continues same-origin requests to the matched route', () => {
-    vi.stubEnv('BETTER_AUTH_URL', 'https://grid.example.com');
+    vi.stubEnv('BYOK_GRID_PUBLIC_URL', 'https://grid.example.com');
     const response = proxy(
       new NextRequest('https://internal-web:3000/api/workspaces/example', {
         headers: { origin: 'https://grid.example.com' },
@@ -63,28 +63,8 @@ describe('Next.js application proxy', () => {
     ).toBe(requestId);
   });
 
-  it('keeps raw session enumeration server-only', async () => {
-    vi.stubEnv('BETTER_AUTH_URL', 'https://grid.example.com');
-    for (const path of [
-      '/api/auth/list-sessions?ignored=true',
-      '/api/auth/list-sessions/',
-    ]) {
-      const response = proxy(
-        new NextRequest(`https://internal-web:3000${path}`, {
-          headers: { cookie: 'better-auth.session_token=credential' },
-        })
-      );
-
-      expect(response.status).toBe(404);
-      expect(response.headers.get('cache-control')).toBe('no-store');
-      expectScriptNoncePolicy(response.headers);
-      expectRequestId(response.headers);
-      await expect(response.json()).resolves.toEqual({ error: 'Not found.' });
-    }
-  });
-
   it('replaces client-supplied correlation identifiers', () => {
-    vi.stubEnv('BETTER_AUTH_URL', 'https://grid.example.com');
+    vi.stubEnv('BYOK_GRID_PUBLIC_URL', 'https://grid.example.com');
     const response = proxy(
       new NextRequest('https://internal-web:3000/app', {
         headers: {
@@ -105,13 +85,25 @@ describe('Next.js application proxy', () => {
   });
 
   it('applies a fresh nonce policy to page responses', () => {
-    vi.stubEnv('BETTER_AUTH_URL', 'https://grid.example.com');
+    vi.stubEnv('BYOK_GRID_PUBLIC_URL', 'https://grid.example.com');
     const first = proxy(new NextRequest('https://internal-web:3000/app'));
     const second = proxy(new NextRequest('https://internal-web:3000/app'));
 
     const firstNonce = expectScriptNoncePolicy(first.headers);
     const secondNonce = expectScriptNoncePolicy(second.headers);
     expect(secondNonce).not.toBe(firstNonce);
+  });
+
+  it('uses the request origin when a local clone omits a public URL', () => {
+    const response = proxy(
+      new NextRequest('http://localhost:3000/api/workspaces/example', {
+        headers: { origin: 'http://localhost:3000' },
+        method: 'POST',
+      })
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-middleware-next')).toBe('1');
   });
 });
 

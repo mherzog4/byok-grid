@@ -86,8 +86,6 @@ COPY . .
 # throwaway migrated SQLite database. All deployment configuration remains
 # runtime-only, allowing one attested image digest to serve any operator origin.
 ENV SQLITE_DATABASE_URL=file:/tmp/byok-grid-build.sqlite
-ENV BETTER_AUTH_SECRET=build-only-placeholder-not-for-runtime
-ENV BETTER_AUTH_URL=http://localhost:3000
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run db:sqlite:migrate --workspace=@byok-grid/db

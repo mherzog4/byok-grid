@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { openSqliteDatabase, type SqliteDatabaseHandle } from './client';
 import { migrateSqliteDatabase } from './migrate';
 import {
+  ensureSqliteLocalUser,
   ensureSqlitePersonalWorkspace,
   listSqliteUserWorkspaces,
 } from './workspaces';
@@ -61,6 +62,30 @@ describe('SQLite workspaces', () => {
     expect(starter.rows.map((row) => [row[0], row[1]])).toEqual([
       ['Companies', 'Company'],
       ['Companies', 'Domain'],
+    ]);
+  });
+
+  it('idempotently provisions the deterministic local owner', async () => {
+    const localOwner = {
+      email: 'local-owner@byok-grid.invalid',
+      id: 'local-owner',
+      name: 'Local owner',
+    };
+
+    await ensureSqliteLocalUser(handle.db, localOwner);
+    await ensureSqliteLocalUser(handle.db, localOwner);
+
+    const stored = await handle.client.execute({
+      args: [localOwner.id],
+      sql: 'select id, email, name, email_verified from users where id = ?',
+    });
+    expect(stored.rows).toEqual([
+      {
+        email: localOwner.email,
+        email_verified: 1,
+        id: localOwner.id,
+        name: localOwner.name,
+      },
     ]);
   });
 

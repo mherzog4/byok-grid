@@ -15,7 +15,6 @@ export const REQUIRED_PRODUCTION_EVIDENCE_IDS = Object.freeze([
   'release-assets',
   'release-tag-protection',
   'remote-libsql-recovery',
-  'smtp-delivery',
 ]);
 
 export const OPTIONAL_PRODUCTION_ADAPTERS = Object.freeze([
@@ -35,10 +34,7 @@ const EXPECTED_MARKERS = Object.freeze({
     'BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED',
   ],
   'production-capacity': ['BYOK_GRID_PRODUCTION_CAPACITY_VERIFIED'],
-  'public-ingress-and-proxy': [
-    'BYOK_GRID_INGRESS_BOUNDARY_VERIFIED',
-    'BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED',
-  ],
+  'public-ingress-and-proxy': ['BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED'],
   'reference-deployment': [
     'BYOK_GRID_KUBERNETES_EXTERNAL_SECRET_PROVENANCE_VERIFIED',
     'BYOK_GRID_KUBERNETES_NETWORK_POLICY_ENFORCEMENT_VERIFIED',
@@ -53,7 +49,6 @@ const EXPECTED_MARKERS = Object.freeze({
     'BYOK_GRID_REMOTE_LIBSQL_DRILL_PREPARED',
     'BYOK_GRID_REMOTE_LIBSQL_RESTORE_VERIFIED',
   ],
-  'smtp-delivery': ['BYOK_GRID_SMTP_DELIVERY_AUTHENTICATION_VERIFIED'],
 });
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/u;

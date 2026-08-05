@@ -57,7 +57,7 @@ Use this production recovery sequence:
 2. Restore to a new path on the same class of durable storage.
 3. Start an isolated web/worker deployment against the restored file with
    outbound provider egress disabled.
-4. Verify sign-in, workspace/table counts, recent workflow history, credential
+4. Verify local workspace access, workspace/table counts, recent workflow history, credential
    decryption with the separately restored master key, and `/api/health`.
 5. Point `SQLITE_DATABASE_URL` at the restored file and start one migration job
    before application processes.

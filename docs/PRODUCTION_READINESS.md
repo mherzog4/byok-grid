@@ -17,50 +17,20 @@ working tree:
   permissions, job timeouts, concurrency, and privileged-trigger rejection;
 - formatting, linting, TypeScript checks, unit and SQLite integration tests;
 - production Next.js build and compiled standalone application E2E covering
-  signup, personal workspace provisioning, authenticated grid operations,
-  workflow publication, and durable run creation;
-- fail-closed public registration with disabled and secret-backed allowlist
-  modes, loopback-only open signup, startup validation, Better Auth hook-level
-  enforcement, UI reflection, temporary SQLite integration coverage, and a
-  four-process compiled-standalone HTTP drill;
-- bounded database-backed sessions with a hard seven-day public default,
-  configurable 15-minute-to-30-day expiry, explicit sliding refresh,
-  cache-free immediate revocation, token-safe other-session controls, SQLite
-  integration coverage, and compiled-standalone HTTP evidence that revokes the
-  older session while preserving the current one;
-- provider-neutral SMTP authentication email with fail-closed configuration,
-  non-loopback TLS enforcement, header-safe messages, one-hour verified-email
-  and single-use reset links, outage-safe enumeration-neutral reset responses,
-  a bounded anti-enumeration response-time floor, session revocation after
-  reset, SQLite integration coverage, private reset-page headers, and a
-  compiled-standalone drill using real SMTP protocol delivery;
-- a dependency-free production SMTP evidence verifier that reads bounded raw
-  verification and recovery messages from one controlled inbox without
-  emitting their addresses, bodies, links, or Message-IDs; requires recent,
-  distinct deliveries with one trusted `Authentication-Results` authority;
-  cross-checks the actual DKIM signature and application automation header;
-  proves aligned SPF, DKIM, and DMARC pass results against live DNS; rejects
-  missing DKIM keys, non-enforcing DMARC, and permissive unmatched-sender SPF;
-  and binds the sanitized record to the candidate commit and raw-message
-  digests;
-- fail-closed authentication client identity that ignores forwarded IP headers
-  by default, validated opt-in trusted proxy CIDRs, right-to-left proxy-chain
-  resolution, database-backed integration coverage against spoofed left hops,
-  Helm/Compose configuration, compiled startup rejection for trust-all ranges,
-  and HTTP evidence that rotating forged client addresses cannot escape the
-  shared bucket;
-- bounded incremental reads across Better Auth POST requests and every product
-  Route Handler, with declared and observed 64-KiB/five-MiB enforcement,
-  compressed-body rejection, transport-specific responses, and source contracts
-  that reject future direct `request.json()` use or an unwrapped auth handler;
-- a Next.js Proxy same-origin contract for every unsafe API request, preserving
-  headless Bearer clients while rejecting cross-site browser metadata and
-  provenance-free cookie mutations; fixed-origin Better Auth proxy trust plus
-  a fresh nonce CSP per application response, production `strict-dynamic`
+  deterministic local-owner and personal-workspace provisioning, grid
+  operations, workflow publication, and durable run creation without accounts,
+  sessions, or email delivery;
+- bounded incremental reads across every product Route Handler, with declared
+  and observed five-MiB enforcement, compressed-body rejection,
+  transport-specific responses, and source contracts that reject future direct
+  `request.json()` use;
+- a Next.js Proxy same-origin contract for every unsafe API request, rejecting
+  cross-site browser metadata; optional canonical-origin configuration plus a
+  fresh nonce CSP per application response, production `strict-dynamic`
   scripts without `unsafe-inline` or `unsafe-eval`, exact rendered-script nonce
   matching, nonce uniqueness across responses, HSTS, no-referrer, anti-framing,
-  MIME-sniffing, browser-capability, and invitation no-store header contracts
-  without framework identification;
+  MIME-sniffing, browser-capability, and no-store header contracts without
+  framework identification;
 - server-generated request correlation that replaces caller-supplied public and
   private IDs, reaches proxy-level rejections and compiled application
   responses, and joins generic 500 responses to one bounded structured log
@@ -157,13 +127,6 @@ working tree:
   redirect rejection, unique request correlation, ingress-preserved security
   headers, and distinct response-bound CSP script nonces, reused by the
   compiled-standalone drill without treating loopback as ingress evidence;
-- an explicitly confirmed ingress client drill that distinguishes
-  application-generated and edge-generated rate limits, performs no account or
-  tenant mutation, hashes the client-network and shared-challenge identities,
-  and combines exactly two synchronized independent-network records with
-  candidate-bound public health, hashed proxy chain/configuration evidence,
-  direct-origin denial, and one 24-hour evidence window before emitting the
-  stable ingress-boundary marker;
 - a fail-closed, isolated-database remote libSQL drill that requires
   authentication and current migrations, rejects application data, kills a
   committed writer, observes the challenge from a second process, and compares
@@ -286,19 +249,9 @@ dated evidence linked from a release issue or runbook record:
   `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` record from the canonical ingress and
   an in-window `BYOK_GRID_KUBERNETES_ROLLBACK_VERIFIED` record from
   [`KUBERNETES_ROLLBACK_DRILL.md`](KUBERNETES_ROLLBACK_DRILL.md);
-- capture the production ingress `X-Forwarded-For` chain, prove the proxy
-  overwrites or predictably appends it, deny direct web access, configure only
-  the observed proxy IP/CIDR boundary, and exercise both application and edge
-  rate limits from two real client networks using
-  [`INGRESS_BOUNDARY_DRILL.md`](INGRESS_BOUNDARY_DRILL.md); retain both
-  `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` and
-  `BYOK_GRID_INGRESS_BOUNDARY_VERIFIED`;
-- exercise the chosen authenticated SMTP service over TLS, prove verification
-  and recovery delivery to controlled inboxes, configure and validate SPF,
-  DKIM, and DMARC alignment, and monitor deferrals, rejections, bounces,
-  complaints, and authentication failures; retain the exact marker from
-  [`SMTP_PRODUCTION_DRILL.md`](SMTP_PRODUCTION_DRILL.md) plus the provider
-  monitoring evidence;
+- place every non-loopback deployment behind an operator-controlled VPN,
+  identity-aware proxy, or equivalent ingress boundary; deny direct web access
+  and retain `BYOK_GRID_PUBLIC_DEPLOYMENT_VERIFIED` from the canonical origin;
 - independently repeat the digest-bound image smoke on native `linux/amd64` and
   native `linux/arm64` hosts, retaining the two host records and the combined
   `BYOK_GRID_NATIVE_MULTI_ARCH_IMAGE_SMOKE_VERIFIED` record with the release

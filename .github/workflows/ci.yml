@@ -32,8 +32,6 @@ jobs:
           --health-retries 10
 
     env:
-      BETTER_AUTH_SECRET: ci-only-secret-not-for-production-123456
-      BETTER_AUTH_URL: http://localhost:3000
       BYOK_GRID_MASTER_KEY: Y2ktb25seS1ub3QtYS1wcm9kLWtleS0xMjM0NTY3ODk=
       BYOK_GRID_MASTER_KEY_ID: ci-v1
       HATCHET_CLIENT_TOKEN: ci-compose-validation-only

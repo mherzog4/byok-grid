@@ -4,31 +4,9 @@ fullnameOverride: ''
 imagePullSecrets: []
 
 app:
-  # Runtime canonical origin used for authentication callbacks, cookies, and
-  # unsafe API mutation checks. Do not include a path.
+  # Optional canonical origin used for unsafe API mutation checks behind a
+  # reverse proxy. Do not include a path.
   publicUrl: https://byok-grid.example.com
-  auth:
-    # Empty means a shared fail-closed authentication rate-limit bucket. Add
-    # only proxy addresses present in a sanitized X-Forwarded-For chain.
-    trustedProxyCidrs: []
-  # Public deployments fail closed. Use allowlist with the corresponding
-  # Secret value for controlled account provisioning.
-  signupMode: disabled
-  email:
-    mode: disabled
-    smtp:
-      fromEmail: ''
-      fromName: BYOK Grid
-      host: ''
-      port: 587
-      requireTls: true
-      secure: false
-  session:
-    # Public releases use a hard expiry unless an operator explicitly enables
-    # sliding refresh after reviewing the stolen-cookie lifetime tradeoff.
-    expiresInSeconds: 604800
-    refreshEnabled: false
-    updateAgeSeconds: 86400
 
 secrets:
   # Production operators should provision this Secret from their secret manager.
@@ -37,10 +15,6 @@ secrets:
   values:
     sqliteDatabaseUrl: ''
     sqliteAuthToken: ''
-    betterAuthSecret: ''
-    signupAllowedEmails: ''
-    smtpUser: ''
-    smtpPassword: ''
     masterKey: ''
     additionalMasterKeys: ''
     hatchetClientToken: ''
@@ -49,10 +23,6 @@ secrets:
   keys:
     sqliteDatabaseUrl: sqlite-database-url
     sqliteAuthToken: sqlite-auth-token
-    betterAuthSecret: better-auth-secret
-    signupAllowedEmails: signup-allowed-emails
-    smtpUser: smtp-user
-    smtpPassword: smtp-password
     masterKey: byok-grid-master-key
     additionalMasterKeys: byok-grid-additional-master-keys
     hatchetClientToken: hatchet-client-token

@@ -24,7 +24,6 @@ const environment = {
   BYOK_GRID_DRILL_APP_ORIGIN: 'https://preproduction.example.com',
   BYOK_GRID_DRILL_DATABASE_AUTH_TOKEN: 'secret-auth-token',
   BYOK_GRID_DRILL_DATABASE_URL: 'libsql://preproduction-db.example.com',
-  BYOK_GRID_DRILL_EMAIL: 'release-drill@example.com',
   BYOK_GRID_DRILL_KUBECTL_CONTEXT: 'preproduction-cluster',
   BYOK_GRID_DRILL_NAMESPACE: 'byok-grid-drill',
   BYOK_GRID_DRILL_WORKER_DEPLOYMENT: 'byok-grid-worker',
@@ -58,7 +57,6 @@ describe('authenticated Kubernetes workflow drain drill', () => {
       databaseAuthToken: 'secret-auth-token',
       databaseUrl: 'libsql://preproduction-db.example.com',
       deployment: 'byok-grid-worker',
-      email: 'release-drill@example.com',
       namespace: 'byok-grid-drill',
       timeoutMs: 120_000,
     });

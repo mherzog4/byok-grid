@@ -55,14 +55,12 @@ The target key set must exactly match the active deployment. With default chart
 key names, the production base is:
 
 ```text
-better-auth-secret,byok-grid-master-key,hatchet-client-token,sqlite-auth-token,sqlite-database-url
+byok-grid-master-key,hatchet-client-token,sqlite-auth-token,sqlite-database-url
 ```
 
 Add, in lexical order, only keys used by enabled configuration:
 
 - `byok-grid-additional-master-keys` during an overlapped key rotation;
-- `signup-allowed-emails` for allowlist signup;
-- both `smtp-password` and `smtp-user` for authenticated SMTP;
 - `connector-runner-shared-secret` for the optional connector runner; and
 - `clickhouse-password` for the optional analytics projector.
 

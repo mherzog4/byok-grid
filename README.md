@@ -9,10 +9,8 @@ workflows with credentials supplied by each workspace.
 This is a release-candidate hardening build, not yet a stable production
 release. It currently includes:
 
-- email/password authentication, optional provider-neutral SMTP verification
-  and one-hour single-use recovery, bounded database-backed sessions with
-  reset/revocation controls, and fail-closed public account provisioning with
-  disabled or email-allowlisted signup;
+- a fork-first, single-user local workspace that opens directly without signup,
+  sign-in, sessions, email delivery, or an account service;
 - a React Flow node editor with typed ports, structurally safe incomplete
   drafts, strict publish validation, immutable graph versions, deterministic
   compiled plans, and revision-conflict protection;
@@ -20,11 +18,8 @@ release. It currently includes:
   fencing, named filter branches, idempotent write-table effects, and a recent
   run inspector;
 - personal workspace and starter-table provisioning;
-- multi-workspace switching, hashed seven-day invitation links, and centralized
-  owner/admin/member authorization;
-- SQLite-backed authentication, workspaces, collaboration, typed grid data,
-  credentials, workflow definitions, immutable published versions, and run
-  ledgers;
+- SQLite-backed workspaces, typed grid data, credentials, workflow definitions,
+  immutable published versions, and run ledgers;
 - an editable, typed sparse-cell grid with optimistic concurrency;
 - bounded multi-table workspaces with table selection, atomic table-plus-first-
   column creation, table renaming, and typed input-column authoring;
@@ -46,7 +41,7 @@ release. It currently includes:
 - an optional publisher-signed, digest-pinned Wasmtime community-connector
   runner with no guest imports, bounded fuel/memory, authenticated RPC, and
   worker-mediated HTTPS effects;
-- authenticated community-connector transparency with frozen registry/artifact
+- auditable community-connector transparency with frozen registry/artifact
   provenance, workspace-scoped publisher/connector/version/artifact emergency
   blocks, execution-time enforcement, and retained lift history;
 - strict draft-2020-12 community credential/input/output validation and
@@ -96,7 +91,7 @@ release. It currently includes:
   execution provenance, and creator-or-manager cancellation that discards late
   provider results;
 - DNS-pinned worker egress that rejects private and reserved networks;
-- bounded streaming request reads for Better Auth, every product JSON mutation,
+- bounded streaming request reads for every product JSON mutation,
   push-ingestion batch, and CSV import, with declared and observed byte
   enforcement;
 - a canonical same-origin boundary for browser API mutations plus a fresh
@@ -135,7 +130,7 @@ format supports richer editors later.
 
 ## Architecture
 
-- **Next.js** owns the product UI and authenticated control-plane API.
+- **Next.js** owns the product UI and local single-user control-plane API.
 - **SQLite or libSQL** is the sole source of truth for workspaces, cells,
   credentials, workflow graphs, and execution state. A local file is the
   zero-configuration default.
@@ -153,12 +148,9 @@ format supports richer editors later.
 - **Connector trust operations** freeze artifact identity into columns and runs,
   expose signed provenance to workspace managers, and enforce online emergency
   blocks both before queueing and immediately before execution.
-- **Workspace collaboration** uses centralized role policy and single-use
-  hashed invitations; credential management is limited to owners and admins.
-- **Tenant isolation** is enforced by centralized authorization followed by
-  workspace-scoped repository queries. SQLite has no row-level-security
-  facility, so repository boundaries and adversarial authorization tests are
-  part of the security contract.
+- **Local ownership** uses one deterministic internal owner and workspace-scoped
+  repository queries. This preserves foreign keys and data boundaries without
+  introducing accounts or sessions.
 - **Typed formula ASTs** execute deterministic dependency chains inside the
   same SQLite write transaction as the triggering edit.
 - **Table and schema authoring** creates each table with its first input column
@@ -237,8 +229,6 @@ and [operator guide](docs/CLICKHOUSE_ANALYTICS.md) for delivery semantics,
 deduplication, event schemas, and the opt-in Compose profile.
 The practical registry, credential-form, schema, ABI, and review contract is in
 [the community connector authoring guide](docs/COMMUNITY_CONNECTORS.md).
-See [the collaboration ADR](docs/adr/0006-workspace-collaboration.md) for roles,
-invitation tokens, and multi-workspace selection.
 See [the historical row-level security ADR](docs/adr/0007-database-enforced-tenant-isolation.md)
 for the superseded PostgreSQL boundary and the threat model carried forward by
 SQLite workspace-scoped repositories.
@@ -311,15 +301,9 @@ durable workflow-completion evidence.
 See [the Kubernetes rollback drill](docs/KUBERNETES_ROLLBACK_DRILL.md) for a
 controlled rollback to a named digest-pinned Helm revision and restoration of
 the exact candidate with live workload and public-ingress verification.
-See [the production ingress boundary drill](docs/INGRESS_BOUNDARY_DRILL.md) for
-layer-distinguishable application and edge rate limits, two-network public
-probes, hashed proxy-chain evidence, and direct-origin denial.
 See [the production capacity drill](docs/PRODUCTION_CAPACITY_DRILL.md) for a
 declared HTTPS, remote-libSQL, and workflow concurrency envelope with
 operator-owned latency and contention thresholds.
-See [the production SMTP drill](docs/SMTP_PRODUCTION_DRILL.md) for bounded
-controlled-inbox verification/recovery evidence and live SPF, DKIM, and DMARC
-authentication checks that do not expose message bodies or account links.
 See [the stable production evidence contract](docs/PRODUCTION_EVIDENCE.md) for
 the versioned external-gate manifest, candidate-source binding, observation
 window, rollback proof, and named operator acceptance required by stable tags.
@@ -352,17 +336,22 @@ authoritative-store-versus-ClickHouse boundary.
 Prerequisites: Node.js 24 or newer and npm 11 or newer. Docker is needed only
 for Hatchet, container evaluation, and optional services.
 
-1. Copy `.env.example` to `.env`. Generate separate values for
-   `BYOK_GRID_MASTER_KEY` and `BETTER_AUTH_SECRET` with
+1. Copy `.env.example` to `.env`. Generate `BYOK_GRID_MASTER_KEY` with
    `openssl rand -base64 32`.
 2. Run `npm install`.
 3. Run `npm run db:migrate`. This creates the local `data/` directory and
    applies the SQLite schema explicitly.
 4. Run `npm run dev`.
 
-Open the app at <http://localhost:3000>. The repository-root `.env` file is
+Open <http://localhost:3000>; it redirects directly to the local workspace.
+There is no signup or sign-in flow. The repository-root `.env` file is
 loaded by the web app, worker, and migration tools regardless of the directory
 from which their workspace command runs.
+
+The public marketing website is an independent, static-first Next.js workspace
+with no database or product secrets. Run `npm run dev:marketing` and open
+<http://localhost:3001>. Its Vercel setup and isolation boundary are documented
+in [`docs/MARKETING_SITE.md`](docs/MARKETING_SITE.md).
 
 To evaluate the built web and workflow-worker images, start infrastructure,
 copy Hatchet's local token into `.env`, and then run `npm run self-host:up`.
@@ -371,7 +360,7 @@ Compose persists the authoritative SQLite file in its own named volume. See
 production requirements.
 
 The web application does not need Docker, PostgreSQL, Airbyte, ClickHouse, or
-Hatchet for authentication, grid authoring, or visual workflow authoring.
+Hatchet for grid authoring or visual workflow authoring.
 `npm run infra:up` starts local Hatchet and Hatchet's private PostgreSQL
 dependency. BYOK Grid never reads or writes that database. The local Hatchet
 image has authentication disabled and must never be used in production.
@@ -397,7 +386,6 @@ npm run typecheck
 npm test
 npm run test:connector-runner
 npm run build
-npm run drill:signup-policy
 npm run helm:verify
 npm run release:verify-version
 npm run pack:connector-sdk
@@ -423,8 +411,8 @@ TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:55432/byok_grid \
 
 The legacy public-network tests remain separately opt-in. The SQLite web smoke
 test needs the local Next.js app and Hatchet worker to be running and exercises
-sign-up, personal-workspace provisioning,
-the built app, draft workflow editing, publication, and durable run creation:
+local-owner and personal-workspace provisioning, the built app, draft workflow
+editing, publication, and durable run creation:
 
 ```text
 RUN_SQLITE_WEB_E2E=1 TEST_APP_URL=http://127.0.0.1:3000 \

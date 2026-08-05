@@ -604,7 +604,7 @@ function sortedSecretKeys(value) {
   }
   const keys = value.split(',');
   if (
-    keys.length < 5 ||
+    keys.length < 4 ||
     keys.length > 32 ||
     new Set(keys).size !== keys.length ||
     !sameArray([...keys].sort(), keys) ||

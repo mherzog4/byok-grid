@@ -6,6 +6,7 @@ import {
   CAPACITY_DRILL_MARKER,
   CAPACITY_WORKER_OBSERVATION_SCRIPT,
   ProductionCapacityDrillError,
+  assertCapacityCleanupState,
   cleanupCapacityFixture,
   compareCapacityWorkerObservations,
   createCapacityFixture,
@@ -122,7 +123,7 @@ try {
   );
 
   await cleanupCapacityFixture(client, fixture);
-  await assertRemoteDrillPreconditions(client);
+  await assertCapacityCleanupState(client);
   fixture = undefined;
   cleanupVerified = true;
 
@@ -151,7 +152,7 @@ try {
   if (client && fixture) {
     try {
       await cleanupCapacityFixture(client, fixture);
-      await assertRemoteDrillPreconditions(client);
+      await assertCapacityCleanupState(client);
       cleanupVerified = true;
     } catch {
       process.stderr.write(

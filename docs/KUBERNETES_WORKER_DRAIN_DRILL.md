@@ -26,19 +26,10 @@ with Node.js, npm, and kubectl installed. The drill refuses to run unless:
 - Hatchet health is `HEALTHY` with registered actions; and
 - queued/running workflows, active steps, and dispatch backlog are all zero.
 
-Use a dedicated signup email permitted by the candidate's registration policy.
-It must not already have an account. The fixture generates a random password,
-creates its own user and workspace through the public HTTPS application, and
-deletes both directly through the isolated remote database during test cleanup.
-Do not point the command at a shared staging or production tenant database.
-
-Disable authentication email delivery in this disposable worker-drill release
-and configure allowlist registration for only the dedicated drill email. The
-fixture needs the ephemeral signup to create an authenticated session
-immediately; a production setting that requires email verification correctly
-prevents that. Exercise the real SMTP verification and recovery path through
-its separate release gate, then restore the production SMTP configuration after
-this worker-specific drill.
+The fixture opens `/app` to provision the deterministic local owner and its
+workspace, creates the isolated workflow through the ordinary API, and removes
+the workspace data directly through the isolated remote database during test
+cleanup. Do not point the command at a shared staging or production database.
 
 The Hatchet token stays inside the deployed Secret. The libSQL token is passed
 only through the drill process environment and its child test process; neither
@@ -54,7 +45,6 @@ BYOK_GRID_KUBERNETES_DRAIN_CONFIRM=isolated-preproduction-environment
 BYOK_GRID_DRILL_APP_ORIGIN=https://candidate.example.com
 BYOK_GRID_DRILL_DATABASE_URL=libsql://candidate-database.example.com
 BYOK_GRID_DRILL_DATABASE_AUTH_TOKEN=<least-privilege-isolated-database-token>
-BYOK_GRID_DRILL_EMAIL=release-drill@example.com
 BYOK_GRID_DRILL_KUBECTL_CONTEXT=<exact-preproduction-context>
 BYOK_GRID_DRILL_NAMESPACE=<isolated-namespace>
 BYOK_GRID_DRILL_WORKER_DEPLOYMENT=<helm-release>-worker

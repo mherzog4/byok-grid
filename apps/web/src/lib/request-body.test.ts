@@ -1,12 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import {
-  cloneRequestWithBoundedBody,
-  MAXIMUM_API_JSON_BODY_BYTES,
-  MAXIMUM_AUTH_REQUEST_BODY_BYTES,
-  readApiJsonBody,
-} from './request-body';
+import { MAXIMUM_API_JSON_BODY_BYTES, readApiJsonBody } from './request-body';
 
 describe('bounded API JSON bodies', () => {
   it('parses JSON at the exact UTF-8 byte boundary', async () => {
@@ -95,26 +90,6 @@ describe('bounded API JSON bodies', () => {
     ).resolves.toEqual({});
   });
 
-  it('replays accepted raw bytes and headers for dependency-owned handlers', async () => {
-    const body = 'email=person%40example.test&password=correct-horse';
-    const request = new Request('https://grid.test/api/auth/sign-in/email', {
-      body,
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      method: 'POST',
-    });
-
-    const cloned = await cloneRequestWithBoundedBody(
-      request,
-      MAXIMUM_AUTH_REQUEST_BODY_BYTES
-    );
-    expect(cloned).toBeInstanceOf(Request);
-    if (!(cloned instanceof Request)) return;
-    expect(cloned.headers.get('content-type')).toBe(
-      'application/x-www-form-urlencoded'
-    );
-    await expect(cloned.text()).resolves.toBe(body);
-  });
-
   it('rejects compressed bodies before parsing', async () => {
     const result = await readApiJsonBody(
       jsonRequest('{}', { 'content-encoding': 'gzip' })
@@ -150,21 +125,8 @@ describe('bounded API JSON bodies', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('bounds the dependency-owned Better Auth POST handler', async () => {
-    const source = await readFile(
-      resolve('src/app/api/auth/[...all]/route.ts'),
-      'utf8'
-    );
-    expect(source).toContain('MAXIMUM_AUTH_REQUEST_BODY_BYTES');
-    expect(source).toContain('cloneRequestWithBoundedBody');
-    expect(source).toMatch(/boundedRequest\s+instanceof\s+Response/u);
-    expect(source).toContain('handlers.POST(boundedRequest)');
-    expect(source).not.toContain('handlers.POST(request)');
-  });
-
-  it('retains the production API and authentication ceilings', () => {
+  it('retains the production API ceiling', () => {
     expect(MAXIMUM_API_JSON_BODY_BYTES).toBe(5 * 1_048_576);
-    expect(MAXIMUM_AUTH_REQUEST_BODY_BYTES).toBe(64 * 1_024);
   });
 });
 

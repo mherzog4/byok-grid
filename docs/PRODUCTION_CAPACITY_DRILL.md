@@ -21,14 +21,14 @@ to the declared row count, and runs these phases:
 4. update distinct existing cells through optimistic API writes;
 5. enqueue concurrent two-node workflows through the API; and
 6. wait for every workflow to copy its bounded source batch into an isolated
-   destination table through authenticated Hatchet workers.
+   destination table through healthy Hatchet workers.
 
 Each HTTP phase requires every request to return the expected status and shape.
 There is no permitted error percentage. The evidence records count, elapsed
 time, throughput, maximum, p50, p95, and p99 latency. Workflow completion is
 measured from each enqueue start through durable terminal success.
 
-Before and after the workload, every worker must be authenticated, healthy,
+Before and after the workload, every worker must be registered, healthy,
 idle, and on the same pod UID without a restart. The drill records deltas from
 the worker processes' SQLite acquisition retry and exhaustion counters. Any
 exhaustion fails; retries must remain at or below the declared threshold.
@@ -38,7 +38,7 @@ runs must reach durable success within 120 seconds.
 ## Safety boundary
 
 Run from a trusted Unix-like operator host with Node.js, npm, and kubectl. Use a
-fresh namespace and a newly migrated, authenticated remote libSQL database with
+fresh namespace and a newly migrated remote libSQL database with
 no application rows. The command refuses to begin unless:
 
 - `BYOK_GRID_CAPACITY_DRILL_CONFIRM` exactly names the isolated capacity
@@ -49,23 +49,21 @@ no application rows. The command refuses to begin unless:
 - the active kubectl context matches the explicitly named context;
 - the web and worker deployments are stable at the declared replica counts;
 - both measured container images use immutable `sha256` digests;
-- every selected worker pod is running, ready, authenticated, and idle;
+- every selected worker pod is running, ready, registered, and idle;
 - the database has exactly the current migration ledger; and
 - every application table is empty and no recovery-drill probe exists.
 
-Disable authentication email delivery in this disposable release and allowlist
-only the dedicated drill email so signup immediately creates a session. Test
-the production SMTP path separately. Disable horizontal autoscaling, or pin its
-minimum and maximum to the declared replica counts, for the complete observation
-window. No other process, scheduled source, operator, or test may use the
-database while the capacity drill runs.
+The fixture opens `/app` once to provision the deterministic local owner. Disable
+horizontal autoscaling, or pin its minimum and maximum to the declared replica
+counts, for the complete observation window. No other process, scheduled source,
+operator, or test may use the database while the capacity drill runs.
 
-On completion or ordinary failure, the drill deletes its workspace, user,
-session/account rows, workflow data, and isolated authentication rate-limit
-rows. It then re-runs the exact empty-database precondition. If exact cleanup
-cannot be proved, it emits `BYOK_GRID_PRODUCTION_CAPACITY_CLEANUP_REQUIRED` with
-the run ID. Discard the isolated database rather than improvising cleanup in a
-shared environment.
+On completion or ordinary failure, the drill deletes its workspace, workflow
+data, and rate-limit rows while preserving exactly the deterministic local
+owner. It then verifies that every other application table is empty. If exact
+cleanup cannot be proved, it emits
+`BYOK_GRID_PRODUCTION_CAPACITY_CLEANUP_REQUIRED` with the run ID. Discard the
+isolated database rather than improvising cleanup in a shared environment.
 
 ## Declare the envelope
 
@@ -78,7 +76,6 @@ BYOK_GRID_CAPACITY_DRILL_CONFIRM=isolated-preproduction-capacity-environment
 BYOK_GRID_CAPACITY_APP_ORIGIN=https://capacity.example.com
 BYOK_GRID_CAPACITY_DATABASE_URL=libsql://capacity-db.example.com
 BYOK_GRID_CAPACITY_DATABASE_AUTH_TOKEN=<isolated-database-token>
-BYOK_GRID_CAPACITY_EMAIL=capacity-drill@example.com
 BYOK_GRID_CAPACITY_KUBECTL_CONTEXT=<exact-capacity-context>
 BYOK_GRID_CAPACITY_NAMESPACE=<isolated-namespace>
 BYOK_GRID_CAPACITY_WEB_DEPLOYMENT=<helm-release>-web

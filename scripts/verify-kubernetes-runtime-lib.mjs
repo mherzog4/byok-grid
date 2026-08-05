@@ -41,11 +41,7 @@ const WORKLOADS = Object.freeze({
     container: 'web',
     database: true,
     minimumReplicas: 2,
-    requiredSecretEnvironment: [
-      'BETTER_AUTH_SECRET',
-      'BYOK_GRID_MASTER_KEY',
-      'SQLITE_DATABASE_URL',
-    ],
+    requiredSecretEnvironment: ['BYOK_GRID_MASTER_KEY', 'SQLITE_DATABASE_URL'],
     target: 'web',
   },
   worker: {
@@ -61,15 +57,11 @@ const WORKLOADS = Object.freeze({
   },
 });
 const SENSITIVE_ENVIRONMENT = new Set([
-  'BETTER_AUTH_SECRET',
   'BYOK_GRID_ADDITIONAL_MASTER_KEYS',
   'BYOK_GRID_MASTER_KEY',
-  'BYOK_GRID_SIGNUP_ALLOWED_EMAILS',
   'CLICKHOUSE_PASSWORD',
   'CONNECTOR_RUNNER_SHARED_SECRET',
   'HATCHET_CLIENT_TOKEN',
-  'SMTP_PASSWORD',
-  'SMTP_USER',
   'SQLITE_AUTH_TOKEN',
   'SQLITE_DATABASE_URL',
 ]);

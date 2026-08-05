@@ -49,7 +49,7 @@ try {
   const status = response.status;
   if (status < 200 || status >= 500) {
     throw new Error(
-      `The completed in-flight authentication request returned unexpected status ${status}.`
+      `The completed in-flight readiness request returned unexpected status ${status}.`
     );
   }
   if (
@@ -93,14 +93,12 @@ async function startRuntime() {
 
   const port = await availablePort();
   const localUrl = `http://127.0.0.1:${port}`;
-  const publicUrl = 'https://web-drain.example.test';
   const environment = {
     ...process.env,
-    BETTER_AUTH_SECRET: 'drill-only-auth-secret-with-32-characters',
-    BETTER_AUTH_URL: publicUrl,
     BYOK_GRID_MASTER_KEY: Buffer.alloc(32, 11).toString('base64'),
     BYOK_GRID_MASTER_KEY_ID: 'drill-v1',
-    BYOK_GRID_SIGNUP_MODE: 'disabled',
+    BYOK_GRID_PUBLIC_URL: 'https://web-drain.example.test',
+    BYOK_GRID_WEB_DRAIN_DRILL: '1',
     HOSTNAME: '127.0.0.1',
     NODE_ENV: 'production',
     PORT: String(port),
@@ -137,7 +135,6 @@ async function startRuntime() {
     child,
     localUrl,
     port,
-    publicUrl,
     waitForExit: (timeoutMilliseconds) =>
       Promise.race([
         exited,
@@ -158,24 +155,12 @@ async function startRuntime() {
 
 async function startDelayedRequest(input) {
   const controller = new AbortController();
-  const body = JSON.stringify({
-    email: 'missing@example.test',
-    redirectTo: '/reset-password',
-  });
   let settled = false;
   const startedAt = performance.now();
-  const pendingResponse = fetch(
-    `${input.localUrl}/api/auth/request-password-reset`,
-    {
-      body,
-      headers: {
-        'content-type': 'application/json',
-        origin: input.publicUrl,
-      },
-      method: 'POST',
-      signal: controller.signal,
-    }
-  ).finally(() => {
+  const pendingResponse = fetch(`${input.localUrl}/api/health`, {
+    headers: { 'x-byok-grid-drain-probe': '1' },
+    signal: controller.signal,
+  }).finally(() => {
     settled = true;
   });
   // Prevent an early request failure from becoming unhandled while the drill
@@ -186,7 +171,7 @@ async function startDelayedRequest(input) {
   if (settled) {
     controller.abort();
     throw new Error(
-      'The password-recovery request did not enter its response-time floor.'
+      'The readiness request did not enter the drain-probe delay.'
     );
   }
 
@@ -199,7 +184,7 @@ async function startDelayedRequest(input) {
           const elapsedMilliseconds = performance.now() - startedAt;
           if (elapsedMilliseconds < 450) {
             throw new Error(
-              `The password-recovery response completed in ${Math.round(elapsedMilliseconds)}ms, below its expected timing floor.`
+              `The readiness response completed in ${Math.round(elapsedMilliseconds)}ms, below its expected drain-probe delay.`
             );
           }
           return response;

@@ -49,7 +49,7 @@ test('verifies public health, security headers, correlation, and CSP nonces', as
         requestId
       );
     }
-    if (url.pathname === '/sign-in') {
+    if (url.pathname === '/app') {
       pageIndex += 1;
       return htmlResponse(encodedNonce(`nonce-${pageIndex}`), requestId);
     }
@@ -190,7 +190,7 @@ function createFetchFixture(overrides = {}) {
         )
       );
     }
-    if (pathname === '/sign-in') {
+    if (pathname === '/app') {
       pageIndex += 1;
       if (pageIndex === 1 && overrides.firstPage) return overrides.firstPage;
       if (pageIndex === 2 && overrides.secondPage) return overrides.secondPage;

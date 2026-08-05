@@ -182,6 +182,7 @@ for (const smokeContract of [
   '--pids-limit=64',
   '--image-smoke',
   'scripts/verify-release-image-smoke.mjs',
+  'docker image rm --force "$IMAGE@${{ steps.build.outputs.digest }}"',
   'release-smoke-${{ matrix.target }}',
 ]) {
   if (!releaseWorkflow.includes(smokeContract)) {

@@ -36,6 +36,7 @@ import {
   workspaces,
   writebackDeliveries,
   writebackDestinations,
+  users,
 } from './schema';
 
 export class SqliteWorkspacePurgeAccessError extends Error {}
@@ -87,6 +88,38 @@ export interface SqliteWorkspaceSummary {
   name: string;
   role: 'admin' | 'member' | 'owner';
   slug: string;
+}
+
+export interface SqliteLocalUser {
+  email: string;
+  id: string;
+  name: string;
+}
+
+export async function ensureSqliteLocalUser(
+  db: SqliteDatabase,
+  user: Readonly<SqliteLocalUser>
+): Promise<void> {
+  await withSqliteWriteTransaction(db, async (tx) => {
+    await tx
+      .insert(users)
+      .values({
+        email: user.email,
+        emailVerified: true,
+        id: user.id,
+        name: user.name,
+      })
+      .onConflictDoNothing();
+
+    const [stored] = await tx
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.id, user.id))
+      .limit(1);
+    if (!stored) {
+      throw new Error('The local workspace owner could not be provisioned.');
+    }
+  });
 }
 
 export async function listSqliteUserWorkspaces(

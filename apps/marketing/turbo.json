@@ -1,0 +1,9 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "env": ["NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    }
+  }
+}
