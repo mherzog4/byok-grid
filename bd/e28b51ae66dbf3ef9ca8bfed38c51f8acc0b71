@@ -1,0 +1,43 @@
+scripts/verify-production-evidence-lib.mjs
+  s_28ae7db8033464::t_a493b371df72ba 12-13,27,33-36,65-66
+  s_28ae7db8033464::t_62acd40ac9e1c3 160
+docs/PRODUCTION_EVIDENCE.md
+  s_28ae7db8033464::t_43022b876cf3cf 3-8,12-13,17-19,21,23-30,40-60,62,66-79,82-85,90-101,119-122
+docs/VERIFY_RELEASE.md
+  s_28ae7db8033464::t_2fe3dd9d79e251 94-97,99-100
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_41249ece316754 7-9,168-172,231,233-234,236-274,279-283
+docs/adr/0063-default-topology-stable-release.md
+  s_28ae7db8033464::t_43022b876cf3cf 1-50
+docs/PRODUCTION_CAPACITY_DRILL.md
+  s_28ae7db8033464::t_2fe3dd9d79e251 156-158
+scripts/verify-production-evidence.test.mjs
+  s_28ae7db8033464::t_94204a825e00f0 85-91,123-127,131,345
+  s_28ae7db8033464::t_62acd40ac9e1c3 400
+  s_28ae7db8033464::t_6f552ce965b334 25,31-34,39,47,107,114-116,118,122,135-137,140,144-145,147,151-153,156,161,163,166,169-170,172-173,177,205-206,221,228,321,336-344,349,361,369,380,387,391,402
+docs/KUBERNETES_ROLLBACK_DRILL.md
+  s_28ae7db8033464::t_2fe3dd9d79e251 5-6,8
+  s_28ae7db8033464::t_94204a825e00f0 7
+docs/RELEASING.md
+  s_28ae7db8033464::t_1265d3c0b527fd 106-121,138-145,187-190,195-196,200-203
+docs/evidence/production-release.template.json
+  s_28ae7db8033464::t_9654a101ca6d9d 30,53,55-57,59-66,71
+scripts/verify-release-version.mjs
+  s_28ae7db8033464::t_678ed7d6a39d10 423,425
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "bde28b51ae66dbf3ef9ca8bfed38c51f8acc0b71",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
