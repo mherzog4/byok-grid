@@ -1,0 +1,73 @@
+{
+  "acceptance": {
+    "acceptedAt": "2026-08-05T14:51:36.000Z",
+    "operatorId": "github:mherzog4",
+    "reference": "https://api.github.com/repos/mherzog4/byok-grid/issues/comments/5193345161"
+  },
+  "candidate": {
+    "commit": "2ec8bc6f232602ed3f3a78a3bb84bd748a13c7a5",
+    "digestManifestSha256": "27398eccf55e7b73a908b40ecfb73706cee158c6276f9a3e2d2b6e34d320ac69",
+    "version": "0.1.0-rc.3"
+  },
+  "evidence": [
+    {
+      "artifactSha256": "ecbd47f50a2b5162183c06e8c72099f5717755620698e62150f203fe2f2ba4ac",
+      "id": "candidate-source-equivalence",
+      "markers": [],
+      "reference": "https://api.github.com/repos/mherzog4/byok-grid/issues/comments/5193341104",
+      "verifiedAt": "2026-08-05T14:50:58.343Z"
+    },
+    {
+      "artifactSha256": "cba74e030a352e06d2b8b003654eca2fc29dbbbff5c916a30145176bfcf1ed32",
+      "id": "code-security",
+      "markers": [],
+      "reference": "https://api.github.com/repos/mherzog4/byok-grid/issues/comments/5192746895",
+      "verifiedAt": "2026-08-05T14:01:15.364Z"
+    },
+    {
+      "artifactSha256": "a6ca3cb92f0ff5f55bd2bbbd483d2b7cf60daf943b659dac75255ee31ed6c9e9",
+      "id": "multi-architecture-smoke",
+      "markers": ["BYOK_GRID_RELEASE_IMAGE_SMOKE_VERIFIED"],
+      "reference": "https://github.com/mherzog4/byok-grid/releases/download/v0.1.0-rc.3/IMAGE_SMOKE.jsonl",
+      "verifiedAt": "2026-08-05T13:21:55.000Z"
+    },
+    {
+      "artifactSha256": "b44296530fa5063d5aa806e193e61cf13750ea6c2898bc43df5a4e51cd46d26d",
+      "id": "release-assets",
+      "markers": [
+        "BYOK_GRID_PUBLISHED_RELEASE_VERIFIED",
+        "BYOK_GRID_RELEASE_BUNDLE_VERIFIED"
+      ],
+      "reference": "https://api.github.com/repos/mherzog4/byok-grid/issues/comments/5192753414",
+      "verifiedAt": "2026-08-05T13:21:55.000Z"
+    },
+    {
+      "artifactSha256": "88441451af02752c1eda4c1e13dcdcd34a0637b965926793c9a27f01d7a144f4",
+      "id": "release-tag-protection",
+      "markers": ["BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED"],
+      "reference": "https://api.github.com/repos/mherzog4/byok-grid/issues/comments/5192756653",
+      "verifiedAt": "2026-08-05T13:21:55.000Z"
+    },
+    {
+      "artifactSha256": "e217a1f22be1d4d9d75be51c3b75b39da690b63e7ee44f281ddbd542b1592da5",
+      "id": "single-node-runtime",
+      "markers": [
+        "BYOK_GRID_DRAIN_DRILL_PASSED",
+        "BYOK_GRID_DRAIN_SIGNAL_COMPLETE",
+        "BYOK_GRID_WEB_DRAIN_DRILL_PASSED"
+      ],
+      "reference": "https://api.github.com/repos/mherzog4/byok-grid/issues/comments/5192728854",
+      "verifiedAt": "2026-08-05T13:59:50.936Z"
+    },
+    {
+      "artifactSha256": "d57f1c8e144dad44d07e2c727579dde2d917d6c6307ed1e2fce1a038b55d6845",
+      "id": "sqlite-backup-restore",
+      "markers": [],
+      "reference": "https://api.github.com/repos/mherzog4/byok-grid/issues/comments/5192734476",
+      "verifiedAt": "2026-08-05T13:58:38.339Z"
+    }
+  ],
+  "releaseVersion": "0.1.0",
+  "schemaVersion": 2,
+  "supportedOptionalAdapters": []
+}

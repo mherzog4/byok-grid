@@ -2,8 +2,11 @@
 
 ## Supported versions
 
-BYOK Grid has not published a stable release. Security fixes currently target
-the latest commit only.
+Security fixes target the latest published stable release. While `0.1` is the
+newest stable line, that means the latest `0.1.x` release. Prereleases and older
+releases are not supported. Maintenance is best effort: the project does not
+promise a response-time SLA or backports to older releases. Operators and
+downstream forks should upgrade to the newest stable release.
 
 ## Reporting a vulnerability
 
@@ -178,10 +181,6 @@ and account-specific discounts
 can change actual cost. Operators should set conservative limits and enforce
 provider-side project budgets independently.
 
-Client-rendered forms declare a native `POST` fallback. If a user submits before
-React hydration finishes, credential and invitation fields therefore stay out
-of the URL and browser history.
-
 Scheduled HTTP source URLs are stored as non-secret configuration. URL
 user-info, fragments, and common secret-bearing query parameters are rejected;
 provider secrets must use an encrypted HTTP credential. Source fetches reuse
@@ -212,7 +211,7 @@ executable query text.
 
 Push-ingestion bearer tokens are 256-bit random values shown once and stored
 only as SHA-256 digests. They are table-scoped machine credentials, separate
-from browser sessions and the encrypted provider vault. The SQLite repository
+from browser operations and the encrypted provider vault. The SQLite repository
 binds the digest to the matching active endpoint, table, staged batch rows, and
 outbox request in one transaction. Requests are
 limited to five MiB, 1,000 flat records, 100 fields, and 256 KiB per normalized
@@ -300,15 +299,14 @@ to columns that already exist, preventing cycles. Any future dependency editor
 must preserve cycle rejection and must not permit automatic actions to depend
 on their own output, directly or transitively.
 
-Table and input-column creation require authenticated workspace membership and
-run through the same workspace-scoped SQLite repositories as row edits. The database service
+Table and input-column creation run through the same workspace-scoped SQLite
+repositories as row edits. The database service
 serializes schema namespaces before checking the 100-table and 256-column
 limits, preventing concurrent requests from racing past those ceilings. Table
-selection is resolved only from the authenticated workspace's accessible table
-list.
+selection is resolved only from the deterministic local workspace's table list.
 
-Table and column removal is implemented as owner/admin-only archival, never as
-a cascading delete. The database service recomputes dependency, active
+Table and column removal is implemented as confirmation-gated archival, never
+as a cascading delete. The database service recomputes dependency, active
 integration, and in-flight-work blockers while holding the schema namespace
 lock; exact-name confirmation is not trusted as the only guard. Archived rows,
 cells, configurations, mappings, runs, and immutable IDs remain stored. Every
@@ -328,7 +326,7 @@ selection snapshot and exact ordered row IDs. The server recomputes that digest
 inside the creation transaction, so a same-count row swap, sort change, or view
 edit requires a new preview. Batch history retains the view definition even if
 the shared view is later renamed or deleted; it contains workspace-sensitive
-filter values and must remain under the batch table's workspace authorization policy.
+filter values and must remain under the batch table's workspace scope.
 
 Manual cell edits are limited to 256 KiB of UTF-8 value data in the shared
 domain schema and revalidated by the database service. Browser `maxLength` is
@@ -338,7 +336,7 @@ Invalid drafts never enter row-settlement or automatic-enrichment state.
 
 Formula source is parsed into the bounded shared expression tree; it is never
 passed to JavaScript, SQL, a template engine, or an external evaluator. The
-browser preview is not trusted. The authenticated database service resolves
+browser preview is not trusted. The database service resolves
 column names inside the requested table, recompiles references to immutable
 IDs, enforces source/tree limits and type rules, and persists explicit
 dependency edges before any row is recomputed. Timestamp literals require an
@@ -355,15 +353,9 @@ oversized records, and configured upload limits. CSV exports quote every field
 and neutralize values that spreadsheet applications could interpret as
 formulas. Import errors must never log or return record contents.
 
-Workspace invitations are bearer credentials. Only a domain-separated hash is
-stored; the raw token is returned once, expires after seven days, and is bound
-to the invited email during single-use transactional acceptance. Deployments
-must preserve the global no-referrer policy and avoid logging invite URLs at
-the reverse proxy, CDN, analytics, or tracing layer.
-
-Workspace roles are enforced by centralized application policy, workspace-
-scoped repositories, composite foreign keys, immediate write transactions, and
-adversarial isolation tests. SQLite does not provide row-level security, so an
-omitted workspace predicate is a security bug. Treat a stolen SQLite file or
-libSQL credential as a full product-data compromise, and keep Hatchet's private
-database credentials entirely outside BYOK Grid runtimes.
+Workspace IDs remain mandatory data-isolation keys inside repositories,
+composite foreign keys, immediate write transactions, and adversarial scoping
+tests. They are not an account or authorization boundary. SQLite does not
+provide row-level security, so treat a stolen SQLite file or libSQL credential
+as a full product-data compromise, and keep Hatchet's private database
+credentials entirely outside BYOK Grid runtimes.

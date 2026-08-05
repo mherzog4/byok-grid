@@ -4,9 +4,9 @@ This ledger separates repository evidence from environment-specific evidence.
 Passing the local and CI gates makes a release candidate reproducible; it does
 not by itself prove that a particular deployment is production-ready.
 
-Last repository evidence review: 2026-08-05. Target candidate:
-`0.1.0-rc.3`, containing the SQLite-native default topology and schema-v2
-stable evidence contract.
+Last repository evidence review: 2026-08-05. Stable promotion target: `0.1.0`
+from signed candidate `0.1.0-rc.3`, containing the SQLite-native default
+topology and schema-v2 stable evidence contract.
 
 ## Repository and local-runtime evidence
 
@@ -229,10 +229,10 @@ attestation, checksums, and release-file attestation. Version tags are created
 from digests only after the complete image matrix passes, and the GitHub Release
 remains blocked until all seven tags and digests are anonymously readable.
 
-## Stable-release evidence still required
+## Stable-release evidence assembled
 
-Do not describe the current candidate as a stable production release until the
-next candidate has dated evidence for the shipped default product:
+The signed `v0.1.0-rc.3` candidate now has dated evidence for the shipped
+default product:
 
 - a passing public tag workflow and independent verification of all seven
   digest-pinned images, chart, SDK package, checksums, SBOMs, provenance, and
@@ -250,8 +250,25 @@ next candidate has dated evidence for the shipped default product:
 - `BYOK_GRID_RELEASE_TAG_PROTECTION_VERIFIED` for the signed tag, immutable
   GitHub Release, protected version tags, exact GHCR digest identities, and
   anonymous public image access; and
-- named owner acceptance after all evidence, plus the stable supported-version
-  policy in `SECURITY.md`.
+- the stable supported-version policy in `SECURITY.md`.
+
+The immutable prerelease is
+[`v0.1.0-rc.3`](https://github.com/mherzog4/byok-grid/releases/tag/v0.1.0-rc.3),
+and its complete release workflow is
+[`31004784878`](https://github.com/mherzog4/byok-grid/actions/runs/31004784878).
+The independently retained evidence records are linked from
+[`issue #6`](https://github.com/mherzog4/byok-grid/issues/6). The candidate
+digest manifest has SHA-256
+`27398eccf55e7b73a908b40ecfb73706cee158c6276f9a3e2d2b6e34d320ac69`.
+
+## Stable-promotion decision still required
+
+The metadata-only candidate-to-stable diff must be retained by hash and receive
+named owner acceptance after every evidence record. The stable promotion commit
+must then pass protected pull-request checks and the schema-v2 evidence and
+version verifiers. Creating `v0.1.0` remains a separate immutable action that
+requires explicit owner authorization after the promotion commit reaches
+protected `main`.
 
 ## Deployment-specific evidence
 
