@@ -20,10 +20,26 @@ const EXPECTED_FILES = Object.freeze([
 ]);
 
 export function verifyConnectorSdkPackResult(value, expected) {
-  if (!Array.isArray(value) || value.length !== 1) {
+  let rawRecord;
+  if (Array.isArray(value)) {
+    if (value.length !== 1) {
+      throw new Error('npm pack must return exactly one package record.');
+    }
+    [rawRecord] = value;
+  } else if (value !== null && typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries.length !== 1) {
+      throw new Error('npm pack must return exactly one package record.');
+    }
+    const [[packageName, record]] = entries;
+    if (packageName !== expected.name) {
+      throw new Error('npm pack returned an unexpected package identity.');
+    }
+    rawRecord = record;
+  } else {
     throw new Error('npm pack must return exactly one package record.');
   }
-  const record = object(value[0], 'npm pack record');
+  const record = object(rawRecord, 'npm pack record');
   if (
     record.name !== expected.name ||
     record.version !== expected.version ||

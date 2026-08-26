@@ -4,10 +4,11 @@ This ledger separates repository evidence from environment-specific evidence.
 Passing the local and CI gates makes a release candidate reproducible; it does
 not by itself prove that a particular deployment is production-ready.
 
-Last repository evidence review: 2026-08-05. Target candidate:
-`0.1.0-rc.4`, containing the SQLite-native default topology, schema-v2 stable
-evidence contract, and full-history CI checkout required to verify promotion
-ancestry.
+Last repository evidence review: 2026-08-26. Target candidate:
+`0.1.0-rc.5`, containing the SQLite-native default topology, schema-v2 stable
+evidence contract, full-history CI checkout required to verify promotion
+ancestry, the patched `nanoid` transitive runtime dependency, and connector SDK
+package verification compatible with the declared npm 12 toolchain.
 
 ## Repository and local-runtime evidence
 
