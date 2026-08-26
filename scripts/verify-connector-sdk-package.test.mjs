@@ -34,6 +34,32 @@ describe('connector SDK package verifier', () => {
     );
   });
 
+  it('accepts the npm 12 workspace-keyed package record', () => {
+    const keyed = { '@byok-grid/connector-sdk': packResult()[0] };
+    assert.deepEqual(
+      verifyConnectorSdkPackResult(keyed, {
+        name: '@byok-grid/connector-sdk',
+        version: '0.2.0',
+      }),
+      {
+        files: 7,
+        marker: CONNECTOR_SDK_PACKAGE_MARKER,
+        name: '@byok-grid/connector-sdk',
+        version: '0.2.0',
+      }
+    );
+
+    keyed['unexpected-package'] = packResult()[0];
+    assert.throws(
+      () =>
+        verifyConnectorSdkPackResult(keyed, {
+          name: '@byok-grid/connector-sdk',
+          version: '0.2.0',
+        }),
+      /exactly one package record/u
+    );
+  });
+
   it('uses and removes a private npm cache on success', () => {
     let cache;
     const result = verifyConnectorSdkPackage({
