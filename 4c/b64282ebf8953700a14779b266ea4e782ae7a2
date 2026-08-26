@@ -1,0 +1,33 @@
+scripts/verify-connector-sdk-package.mjs
+  s_28ae7db8033464::t_caddc712b62c6d 23-39,42
+package.json
+  s_28ae7db8033464::t_80fd35cab372d2 3
+deploy/helm/byok-grid/Chart.yaml
+  s_28ae7db8033464::t_80fd35cab372d2 5-6
+docs/releases/v0.1.0-rc.5.md
+  s_28ae7db8033464::t_80fd35cab372d2 1-15,20-29,32-84
+  s_28ae7db8033464::t_2d6151545fe69b 16-19,30-31
+docs/PRODUCTION_READINESS.md
+  s_28ae7db8033464::t_2d6151545fe69b 10-11
+  s_28ae7db8033464::t_80fd35cab372d2 7-9
+scripts/verify-connector-sdk-package.test.mjs
+  s_28ae7db8033464::t_18a65aa96fcc4a 37-62
+package-lock.json
+  s_28ae7db8033464::t_edc762b8858f5b 3,9,8080-8082
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "4cb64282ebf8953700a14779b266ea4e782ae7a2",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
