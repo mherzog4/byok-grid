@@ -1,0 +1,20 @@
+{
+  "assetAttestationsVerified": 6,
+  "bundle": {
+    "assets": 6,
+    "images": 7,
+    "marker": "BYOK_GRID_RELEASE_BUNDLE_VERIFIED",
+    "smokeRecords": 14
+  },
+  "imageAttestationsVerified": 7,
+  "publishedRelease": {
+    "assets": 6,
+    "immutable": true,
+    "marker": "BYOK_GRID_PUBLISHED_RELEASE_VERIFIED",
+    "prerelease": true
+  },
+  "release": "https://github.com/mherzog4/byok-grid/releases/tag/v0.1.0-rc.5",
+  "releaseRun": "https://github.com/mherzog4/byok-grid/actions/runs/32991173826",
+  "verifiedAt": "2026-08-28T18:09:27.000Z",
+  "version": "0.1.0-rc.5"
+}

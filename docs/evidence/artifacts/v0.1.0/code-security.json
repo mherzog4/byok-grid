@@ -1,0 +1,12 @@
+{
+  "candidate": "ab8ea6ace5f362bdca3054973f1052baeef5ed3f",
+  "checkedAt": "2026-08-28T18:09:27.000Z",
+  "codeScanningOpenAlerts": 0,
+  "dependabotOpenAlerts": 0,
+  "dependencyReviewConclusion": "success",
+  "pullRequest": "https://github.com/mherzog4/byok-grid/pull/42",
+  "requiredCiRun": "https://github.com/mherzog4/byok-grid/actions/runs/32989119549",
+  "requiredSecurityRun": "https://github.com/mherzog4/byok-grid/actions/runs/32989119434",
+  "secretScanningOpenAlerts": 0,
+  "version": "0.1.0-rc.5"
+}

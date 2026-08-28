@@ -1,0 +1,22 @@
+{
+  "candidate": "ab8ea6ace5f362bdca3054973f1052baeef5ed3f",
+  "markers": [
+    "BYOK_GRID_DRAIN_DRILL_PASSED",
+    "BYOK_GRID_DRAIN_SIGNAL_COMPLETE",
+    "BYOK_GRID_WEB_DRAIN_DRILL_PASSED"
+  ],
+  "verifiedAt": "2026-08-28T18:09:27.000Z",
+  "version": "0.1.0-rc.5",
+  "webDrain": {
+    "exitCode": 143,
+    "listenerCloseMilliseconds": 2,
+    "newConnectionsRejectedBeforeCompletion": true,
+    "responseStatus": 200
+  },
+  "workflowDrain": {
+    "drainMilliseconds": 2048,
+    "rows": 500,
+    "steps": 100,
+    "workerRestartedHealthy": true
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "backup": {
+    "migrationCount": 9,
+    "sha256": "e57c10cd47e3c9aea69f8e13200f230db1ceab913178f5bef3cb80e49a84d09b",
+    "sizeBytes": 929792,
+    "verifiedAt": "2026-08-26T16:35:34.489Z"
+  },
+  "candidate": "ab8ea6ace5f362bdca3054973f1052baeef5ed3f",
+  "digestEquality": true,
+  "independentVerification": {
+    "sha256": "e57c10cd47e3c9aea69f8e13200f230db1ceab913178f5bef3cb80e49a84d09b",
+    "verifiedAt": "2026-08-26T16:35:35.462Z"
+  },
+  "liveWebAvailable": true,
+  "restore": {
+    "migrationCount": 9,
+    "sha256": "e57c10cd47e3c9aea69f8e13200f230db1ceab913178f5bef3cb80e49a84d09b",
+    "sizeBytes": 929792,
+    "verifiedAt": "2026-08-26T16:35:36.542Z"
+  },
+  "version": "0.1.0-rc.5"
+}
