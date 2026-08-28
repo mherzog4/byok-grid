@@ -1,0 +1,27 @@
+docs/evidence/artifacts/v0.1.0/single-node-runtime.json
+  s_28ae7db8033464::t_dc68b5dc0983ca 1-22
+docs/evidence/artifacts/v0.1.0/release-tag-protection.json
+  s_28ae7db8033464::t_dc68b5dc0983ca 1
+docs/evidence/artifacts/v0.1.0/code-security.json
+  s_28ae7db8033464::t_dc68b5dc0983ca 1-12
+docs/evidence/artifacts/v0.1.0/release-assets.json
+  s_28ae7db8033464::t_dc68b5dc0983ca 1-20
+docs/evidence/artifacts/v0.1.0/sqlite-backup-restore.json
+  s_28ae7db8033464::t_dc68b5dc0983ca 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e76027314da01ee1b6074c7c769c2a365c806d8a",
+  "prompts": {},
+  "sessions": {
+    "s_28ae7db8033464": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb9bb-1e64-7981-92e1-7d5fe269be20",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mherzog4 <matthewherzog4@gmail.com>"
+    }
+  }
+}
